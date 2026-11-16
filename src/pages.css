@@ -4963,3 +4963,7 @@ html.printing-bp.bp-dark,html.printing-bp.bp-dark body{background:#0E1613!import
 .sg-src.strategy{background:var(--petrol,#0F4433);color:#fff}
 @media (max-width:760px){.sgf .sg-ck{grid-template-columns:1fr}}
 .sgf-l{align-items:flex-start;text-align:start}.sg-lock .linkbtn{font-size:11.5px;padding:0}
+/* مسار المذكرة: الخطوات التي لم تتم بعد باهتة قليلًا */
+.wf-s:not(.done):not(.cur){opacity:.6;filter:saturate(.5);transition:opacity .2s,filter .2s}
+.wf-s:not(.done):not(.cur):hover,.wf-s:not(.done):not(.cur):focus-within{opacity:1;filter:none}
+@media print{.wf-s:not(.done):not(.cur){opacity:1;filter:none}}
