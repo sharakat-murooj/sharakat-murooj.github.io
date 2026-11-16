@@ -46,7 +46,7 @@ function formLibPdf(x) {
   window.addEventListener('afterprint', done);
   setTimeout(() => window.print(), 350);
 }
-function formLibWord(x) { FORM_BLANK = true; try { wordFormBlank(x.kind, FORM_BLANK_REC(), x.k); } finally { FORM_BLANK = false; } }
+function formLibWord(x) { const h = formBlankHTML(x.kind, x.k); wordFromDocHTML(h, x.F.title, `${x.F.short || x.F.title} — نموذج فارغ.doc`).catch((e) => { console.warn(e); FORM_BLANK = true; try { wordFormBlank(x.kind, FORM_BLANK_REC(), x.k); } finally { FORM_BLANK = false; } }); }
 function wordFormBlank(kind, rec, key) {
   /* يعيد استخدام wordForm مع تفريغ القيم */
   const keep = window.download;

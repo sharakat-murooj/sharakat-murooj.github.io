@@ -544,6 +544,12 @@ function printForm(kind, rec, key, evalIdx = null) {
   setTimeout(() => window.print(), 350);
 }
 function wordForm(kind, rec, key, evalIdx = null) {
+  if (typeof wordFromDocHTML === 'function') {
+    return wordFromDocHTML(formDocHTML(kind, rec, key, evalIdx), FORMS[key].title, `${FORMS[key].short || FORMS[key].title} — ${fRecInfo(kind, rec).name || 'نموذج'}.doc`).catch((e) => { console.warn(e); wordFormLegacy(kind, rec, key, evalIdx); });
+  }
+  return wordFormLegacy(kind, rec, key, evalIdx);
+}
+function wordFormLegacy(kind, rec, key, evalIdx = null) {
   if (key !== 'mou' && !FORMS[key].letter && typeof wordDocHTML === 'function') {
     const html = wordDocWrap(FORMS[key].title, wordDocHTML(kind, rec, key, evalIdx));
     download(`${FORMS[key].short || FORMS[key].title} — ${fRecInfo(kind, rec).name || 'نموذج'}.doc`, new Blob(['\ufeff' + html], { type: 'application/msword' }));
