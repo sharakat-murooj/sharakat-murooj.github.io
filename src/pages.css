@@ -4967,3 +4967,18 @@ html.printing-bp.bp-dark,html.printing-bp.bp-dark body{background:#0E1613!import
 .wf-s:not(.done):not(.cur){opacity:.6;filter:saturate(.5);transition:opacity .2s,filter .2s}
 .wf-s:not(.done):not(.cur):hover,.wf-s:not(.done):not(.cur):focus-within{opacity:1;filter:none}
 @media print{.wf-s:not(.done):not(.cur){opacity:1;filter:none}}
+/* ===== مكتبة النماذج ===== */
+.fl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.fl-card{background:var(--paper,#fff);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;transition:.2s}
+.fl-card:hover{border-color:var(--petrol-3);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.fl-top{display:flex;align-items:center;justify-content:space-between}
+.fl-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--petrol-3,#2F7A5E) 12%,transparent);color:var(--petrol-3,#2F7A5E)}.fl-ic .ic{width:20px;height:20px}
+.fl-no{font-family:ui-monospace,monospace;font-size:11.5px;font-weight:700;color:var(--gold-ink,#8A5E10);background:var(--sand,#F5EDDB);border-radius:6px;padding:2px 8px;direction:ltr}
+.fl-card h3{margin:2px 0 0;font-size:15px;line-height:1.55}
+.fl-meta{margin:0;font-size:12.5px;color:var(--muted);flex:1}
+.fl-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.fl-prev{background:#fff;border-radius:10px;padding:10px;max-height:70vh;overflow:auto}
+.fd-blank{display:inline-block;min-width:160px;border-bottom:1px dotted #9AA9A3;height:1.2em;vertical-align:bottom}
+.fx-blankrow td{height:30px}
+.fx-box{display:inline-block;width:12px;height:12px;border:1.2px solid #9AA9A3;border-radius:3px;vertical-align:middle}
+.fx-sg-t{margin:0 0 8px;font-size:13px}.fx-sgt td,.fx-sgt th{font-size:12px}
