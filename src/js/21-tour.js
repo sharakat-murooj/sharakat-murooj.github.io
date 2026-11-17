@@ -120,7 +120,7 @@ function tourSteps() {
   S.push({ key: 'end', title: 'الخلاصة', route: null, parts: [{ sel: null, h: 'منظومة واحدة لدورة الشراكة كاملة' }] });
   /* ترتيب الاستخدام: الواجهة، ثم العمل اليومي، ثم الشراكة ومسارها، ثم المقترحات، ثم العرض والتقارير، ثم الإدارة */
   const ORDER = ['intro', 'home', 'search', 'dash', 'dashalt', 'actions', 'tasks', 'register', 'detail', 'process', 'partners', 'share', 'proposals', 'reports', 'marketing', 'stories', 'media', 'gallery', 'content', 'settings', 'end'];
-  return S.sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key));
+  return S.filter((s) => !App.share || typeof palRouteOk !== 'function' || palRouteOk(s.route || '#/')).sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key));
 }
 function startTour() {
   if (App.tour) return;

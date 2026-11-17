@@ -7711,7 +7711,7 @@ html.ob-show #obBody>.ob-mosaic .orb-n.up small{bottom:1.8cqw}
 .share-bar .sb-ic{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(230,199,134,.18);color:#E6C786}.share-bar .sb-ic .ic{width:14px;height:14px}
 .share-bar b{color:#fff}.share-bar .sb-exp{color:#A8C6BB;font-size:11.5px}
 .share-bar .sb-end{border:0;background:#E6C786;color:#0B2B25;font:inherit;font-weight:800;font-size:12px;padding:5px 14px;border-radius:999px;cursor:pointer}
-html.share-mode .design-switch,html.share-mode #dsw,html.share-mode .bo-find,html.share-mode .bo-new,html.share-mode .tour-top,html.share-mode .rolebox,html.share-mode .rnw-fab{display:none!important}
+html.share-mode .design-switch,html.share-mode #dsw,html.share-mode .bo-new,html.share-mode .rolebox,html.share-mode .rnw-fab{display:none!important}
 .share-screen{position:fixed;inset:0;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 30%,#164A3F,#0A2A24 70%);z-index:9999}
 .ss-card{max-width:440px;text-align:center;color:#E7F0EC;display:flex;flex-direction:column;align-items:center;gap:12px}
 .ss-card img{height:58px;filter:brightness(0) invert(1);opacity:.92;margin-bottom:10px}
@@ -7735,7 +7735,7 @@ html.share-mode .design-switch,html.share-mode #dsw,html.share-mode .bo-find,htm
 #shkSplash.fx-pulse .sp-logo{filter:drop-shadow(0 0 16px rgba(240,215,155,.6))}
 @keyframes spLogoGlow{0%{filter:drop-shadow(0 0 0 rgba(240,215,155,0))}35%{filter:drop-shadow(0 0 22px rgba(240,215,155,.75))}100%{filter:drop-shadow(0 0 6px rgba(240,215,155,.25))}}
 #shkSplash.fx-pulse .sp-stats span{box-shadow:0 0 0 1px rgba(230,199,134,.35),0 0 24px -6px rgba(230,199,134,.5);transition:box-shadow .8s}
-html.share-mode [data-palette]{display:none!important}
+
 /* الملف الشامل: «الشراكة في سطور» */
 .dossier .dsx-bridge{display:grid;grid-template-columns:150px 1fr 150px;align-items:center;gap:10px;margin:6px 0 18px;padding:18px 16px;border-radius:14px;background:linear-gradient(135deg,#0F4433,#145440 60%,#0F4433);color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}
 .dossier .dsx-party{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
@@ -24131,7 +24131,7 @@ function tourSteps() {
   S.push({ key: 'end', title: 'الخلاصة', route: null, parts: [{ sel: null, h: 'منظومة واحدة لدورة الشراكة كاملة' }] });
   /* ترتيب الاستخدام: الواجهة، ثم العمل اليومي، ثم الشراكة ومسارها، ثم المقترحات، ثم العرض والتقارير، ثم الإدارة */
   const ORDER = ['intro', 'home', 'search', 'dash', 'dashalt', 'actions', 'tasks', 'register', 'detail', 'process', 'partners', 'share', 'proposals', 'reports', 'marketing', 'stories', 'media', 'gallery', 'content', 'settings', 'end'];
-  return S.sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key));
+  return S.filter((s) => !App.share || typeof palRouteOk !== 'function' || palRouteOk(s.route || '#/')).sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key));
 }
 function startTour() {
   if (App.tour) return;
@@ -31445,6 +31445,23 @@ function palResults(q) {
   return G;
 }
 
+/* رابط الاطلاع: تُحذف النتائج التي تقود إلى أقسام غير مشمولة، والإجراءات التي تتطلب حسابًا */
+function palRouteOk(h) {
+  if (!App.share) return true;
+  const p = String(h || '').replace(/^#/, '').split('?')[0] || '/';
+  const d = ROUTES.find((r) => r.re.test(p));
+  return !!d && shareRouteOk(d.name);
+}
+function palShareFilter(G) {
+  if (!App.share) return G;
+  const KEEP = ['تبديل الوضع النهاري والليلي', 'استعراض المنصة'];
+  return G.map((g) => ({ ...g, items: g.items.filter((it) => {
+    if (it.href) return palRouteOk(it.href);
+    const m = it.run && /(?:go\(|location\.hash\s*=\s*)['"`](#\/[^'"`?]*)/.exec(String(it.run));
+    if (m) return palRouteOk(m[1]);
+    return KEEP.includes(it.t);
+  }) })).filter((g) => g.items.length);
+}
 function openPalette(initial = '') {
   if ($('#pal')) { $('#palQ').focus(); return; }
   const prevFocus = document.activeElement;
@@ -31458,7 +31475,7 @@ function openPalette(initial = '') {
   const q = $('#palQ', w), res = $('#palRes', w);
   let flat = [], sel = 0;
   const draw = () => {
-    const G = palResults(q.value.trim());
+    const G = palShareFilter(palResults(q.value.trim()));
     flat = G.flatMap((g) => g.items);
     sel = Math.min(sel, Math.max(0, flat.length - 1));
     let k = 0;
@@ -31489,7 +31506,7 @@ document.addEventListener('keydown', (e) => {
 
 /* —— 99-app.js —— */
 /* ===== هيكل التطبيق والتنقل ===== */
-function applyTheme() { const d = D.settings && D.settings.design; document.documentElement.dataset.theme = d === 'board' ? (D.settings.boardTheme || 'light') : (D.settings && D.settings.theme) || 'light'; }
+function applyTheme() { const d = typeof design === 'function' ? design() : D.settings && D.settings.design; document.documentElement.dataset.theme = d === 'board' ? (D.settings.boardTheme || 'light') : (D.settings && D.settings.theme) || 'light'; }
 
 function navGroups() {
   const props = visibleProposals();
@@ -31532,7 +31549,7 @@ function renderShell() {
   const demo = showDemo() ? `<button class="demo-ribbon" data-demo title="البيانات التجريبية">${icon('info')}<span class="dr-t">يتضمن بيانات تجريبية</span></button>` : '';
   const search = (ph) => `<div class="gsearch"><input id="gq" type="search" placeholder="${ph}" aria-label="بحث عام" autocomplete="off">${icon('search')}</div>`;
   if (dz === 'board') {
-    $('#topbar').innerHTML = App.share ? boardTopbarHTML('', '', '') : boardTopbarHTML(tourBtn, demo, roleBox);
+    $('#topbar').innerHTML = App.share ? boardTopbarHTML(tourBtn, '', '') : boardTopbarHTML(tourBtn, demo, roleBox);
   } else {
     $('#topbar').innerHTML = `<button class="icon-btn menu-btn" data-menu aria-label="القائمة">${icon('menu')}</button>
     <div class="crumbs" id="crumbs"></div>
@@ -31612,7 +31629,7 @@ function bindShell(app) {
       if (design() === 'board') D.settings.boardTheme = (D.settings.boardTheme || 'light') === 'dark' ? 'light' : 'dark';
       else D.settings.theme = D.settings.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.classList.add('theme-anim'); applyTheme(); setTimeout(() => document.documentElement.classList.remove('theme-anim'), 450);
-      await Repo.saveSettings(); renderShell(); if (App.route && ['dashboard', 'home'].includes(App.route.name)) route(); return;
+      if (!App.share) await Repo.saveSettings(); renderShell(); if (App.route && ['dashboard', 'home'].includes(App.route.name)) route(); return;
     }
     if (e.target.closest('[data-palette]')) { openPalette(); return; }
     if (e.target.closest('[data-menu]')) { app.classList.toggle('nav-open'); return; }
@@ -31622,7 +31639,7 @@ function bindShell(app) {
     if (e.target.closest('[data-cloudbtn]')) { cloudTick().then(() => toast(cloudStateText(), Cloud.state === 'ok' ? '' : 'err')); return; }
     if (e.target.closest('[data-demo]')) return demoDialog();
     if (e.target.closest('[data-present-exit]')) return togglePresent();
-    if (e.target.closest('.topbar [data-tourmenu]')) return toggleTourMenu();
+    if (e.target.closest('.topbar [data-tourmenu]')) return App.share ? startTour() : toggleTourMenu();
   });
   document.addEventListener('mousedown', (e) => { if (app.classList.contains('nav-open') && !e.target.closest('.side') && !e.target.closest('[data-menu]')) app.classList.remove('nav-open'); if (!e.target.closest('.st-dd, .cm-dd')) $$('.st-dd.open, .cm-dd.open').forEach((x) => x.classList.remove('open')); });
   // البحث العام

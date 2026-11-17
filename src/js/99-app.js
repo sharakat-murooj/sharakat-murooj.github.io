@@ -1,5 +1,5 @@
 /* ===== هيكل التطبيق والتنقل ===== */
-function applyTheme() { const d = D.settings && D.settings.design; document.documentElement.dataset.theme = d === 'board' ? (D.settings.boardTheme || 'light') : (D.settings && D.settings.theme) || 'light'; }
+function applyTheme() { const d = typeof design === 'function' ? design() : D.settings && D.settings.design; document.documentElement.dataset.theme = d === 'board' ? (D.settings.boardTheme || 'light') : (D.settings && D.settings.theme) || 'light'; }
 
 function navGroups() {
   const props = visibleProposals();
@@ -42,7 +42,7 @@ function renderShell() {
   const demo = showDemo() ? `<button class="demo-ribbon" data-demo title="البيانات التجريبية">${icon('info')}<span class="dr-t">يتضمن بيانات تجريبية</span></button>` : '';
   const search = (ph) => `<div class="gsearch"><input id="gq" type="search" placeholder="${ph}" aria-label="بحث عام" autocomplete="off">${icon('search')}</div>`;
   if (dz === 'board') {
-    $('#topbar').innerHTML = App.share ? boardTopbarHTML('', '', '') : boardTopbarHTML(tourBtn, demo, roleBox);
+    $('#topbar').innerHTML = App.share ? boardTopbarHTML(tourBtn, '', '') : boardTopbarHTML(tourBtn, demo, roleBox);
   } else {
     $('#topbar').innerHTML = `<button class="icon-btn menu-btn" data-menu aria-label="القائمة">${icon('menu')}</button>
     <div class="crumbs" id="crumbs"></div>
@@ -122,7 +122,7 @@ function bindShell(app) {
       if (design() === 'board') D.settings.boardTheme = (D.settings.boardTheme || 'light') === 'dark' ? 'light' : 'dark';
       else D.settings.theme = D.settings.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.classList.add('theme-anim'); applyTheme(); setTimeout(() => document.documentElement.classList.remove('theme-anim'), 450);
-      await Repo.saveSettings(); renderShell(); if (App.route && ['dashboard', 'home'].includes(App.route.name)) route(); return;
+      if (!App.share) await Repo.saveSettings(); renderShell(); if (App.route && ['dashboard', 'home'].includes(App.route.name)) route(); return;
     }
     if (e.target.closest('[data-palette]')) { openPalette(); return; }
     if (e.target.closest('[data-menu]')) { app.classList.toggle('nav-open'); return; }
@@ -132,7 +132,7 @@ function bindShell(app) {
     if (e.target.closest('[data-cloudbtn]')) { cloudTick().then(() => toast(cloudStateText(), Cloud.state === 'ok' ? '' : 'err')); return; }
     if (e.target.closest('[data-demo]')) return demoDialog();
     if (e.target.closest('[data-present-exit]')) return togglePresent();
-    if (e.target.closest('.topbar [data-tourmenu]')) return toggleTourMenu();
+    if (e.target.closest('.topbar [data-tourmenu]')) return App.share ? startTour() : toggleTourMenu();
   });
   document.addEventListener('mousedown', (e) => { if (app.classList.contains('nav-open') && !e.target.closest('.side') && !e.target.closest('[data-menu]')) app.classList.remove('nav-open'); if (!e.target.closest('.st-dd, .cm-dd')) $$('.st-dd.open, .cm-dd.open').forEach((x) => x.classList.remove('open')); });
   // البحث العام

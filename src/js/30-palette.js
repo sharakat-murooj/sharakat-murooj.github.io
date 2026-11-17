@@ -63,6 +63,23 @@ function palResults(q) {
   return G;
 }
 
+/* رابط الاطلاع: تُحذف النتائج التي تقود إلى أقسام غير مشمولة، والإجراءات التي تتطلب حسابًا */
+function palRouteOk(h) {
+  if (!App.share) return true;
+  const p = String(h || '').replace(/^#/, '').split('?')[0] || '/';
+  const d = ROUTES.find((r) => r.re.test(p));
+  return !!d && shareRouteOk(d.name);
+}
+function palShareFilter(G) {
+  if (!App.share) return G;
+  const KEEP = ['تبديل الوضع النهاري والليلي', 'استعراض المنصة'];
+  return G.map((g) => ({ ...g, items: g.items.filter((it) => {
+    if (it.href) return palRouteOk(it.href);
+    const m = it.run && /(?:go\(|location\.hash\s*=\s*)['"`](#\/[^'"`?]*)/.exec(String(it.run));
+    if (m) return palRouteOk(m[1]);
+    return KEEP.includes(it.t);
+  }) })).filter((g) => g.items.length);
+}
 function openPalette(initial = '') {
   if ($('#pal')) { $('#palQ').focus(); return; }
   const prevFocus = document.activeElement;
@@ -76,7 +93,7 @@ function openPalette(initial = '') {
   const q = $('#palQ', w), res = $('#palRes', w);
   let flat = [], sel = 0;
   const draw = () => {
-    const G = palResults(q.value.trim());
+    const G = palShareFilter(palResults(q.value.trim()));
     flat = G.flatMap((g) => g.items);
     sel = Math.min(sel, Math.max(0, flat.length - 1));
     let k = 0;
