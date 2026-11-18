@@ -153,14 +153,7 @@ function renderStrategy(el) {
     const list = base(), S = stratSummary(list), pct = S.total ? Math.round(S.linked.length / S.total * 100) : 0;
     const maxG = Math.max(1, ...S.goals.map((g) => g.ps.length));
     const kpi = (v, l, s, tone = '') => `<div class="sg-k ${tone}"><b>${v}</b><span>${l}</span>${s ? `<small>${s}</small>` : ''}</div>`;
-    const mapView = `<div class="sg-goals">${S.goals.map((g) => `<section class="sg-g ${g.ps.length ? '' : 'gap'}">
-        <header><span class="sg-code">${esc(g.k)}</span><h3>${esc(g.t)}</h3><div class="sg-n"><b>${g.ps.length}</b><small>${g.ps.length === 1 ? 'شراكة' : 'شراكات'}</small></div></header>
-        <div class="sg-bar"><i style="width:${(g.ps.length / maxG * 100).toFixed(1)}%"></i></div>
-        ${g.inits.length ? `<ul class="sg-inits">${g.inits.map((i) => `<li class="${i.ps.length ? '' : 'gap'}"><span class="sg-it"><em>${esc(i.c.split('.')[1] || '')}</em>${esc(i.t)}</span><span class="sg-ps">${i.ps.length ? i.ps.slice(0, 5).map(stratChip).join('') + (i.ps.length > 5 ? `<span class="sg-more">+${i.ps.length - 5}</span>` : '') : '<span class="sg-gap">فجوة: لا توجد شراكة</span>'}</span></li>`).join('')}</ul>` : ''}
-        ${g.noInit.length ? `<div class="sg-noinit"><small>مرتبطة بالهدف كاملًا دون مبادرة بعينها</small><div class="sg-ps">${g.noInit.map(stratChip).join('')}</div></div>` : ''}
-      </section>`).join('')}</div>
-      <section class="panel sg-un"><h2>${icon('flag')} شراكات لا تحقق 75% من أي هدف أو مبادرة <span class="muted small">${S.unlinked.length}</span></h2>
-        ${S.unlinked.length ? `<div class="sg-ps wrap">${S.unlinked.map((p) => `<span class="sg-unp">${stratChip(p)}${stratMiniHTML(p)}</span>`).join('')}</div>` : '<p class="muted small">كل الشراكات تحقق الحد الأدنى لهدف أو مبادرة.</p>'}</section>`;
+    const mapView = stratMapHTML(S);
     const rows = list.map((p) => ({ p, s: pStrat(p) })).sort((a, b) => (a.s.src === 'auto' ? 0 : 1) - (b.s.src === 'auto' ? 0 : 1) || (a.s.linked ? 1 : 0) - (b.s.linked ? 1 : 0) || partnerName(a.p).localeCompare(partnerName(b.p), 'ar'));
     const review = `<div class="panel sg-mx-w"><div class="row" style="justify-content:space-between;margin:0 0 12px;gap:10px;flex-wrap:wrap"><p class="small muted" style="margin:0">لكل شراكة هدف أو مبادرة واحدة. اضغط الشارة لفتح قائمة التحقق: علّم أو ألغِ العناصر، أو غيّر الهدف. تحت 75% تنتقل الشراكة تلقائيًا إلى أقرب هدف أو مبادرة تحققه.</p>${canEdit && S.pending.length ? `<button type="button" class="btn sm primary" data-sgall>${icon('check')} اعتماد كل المقترحات (${S.pending.length})</button>` : ''}</div>
       <div class="sg-mx-s"><table class="sg-mx sg-rv"><thead><tr><th>الشراكة</th><th>الهدف أو المبادرة</th><th>التحقق</th><th>الحالة</th></tr></thead><tbody>
@@ -172,14 +165,15 @@ function renderStrategy(el) {
         <ol class="sg-cl">${stratItems(g.k).map((it) => `<li>${esc(it.t)}</li>`).join('')}</ol>
         ${g.inits.map((i) => `<div class="sg-ci"><div class="sg-ci-h"><em>${esc(i.c.split('.')[1])}</em><b>${esc(i.t)}</b>${canLists ? `<button type="button" class="icon-btn sm" data-sgedit="${i.c}" title="تعديل البنود">${icon('edit')}</button>` : ''}</div><ol class="sg-cl">${stratItems(i.c).map((it) => `<li>${esc(it.t)}</li>`).join('')}</ol></div>`).join('')}</section>`).join('')}</div>`;
     el.innerHTML = `<div class="ph"><div><h1>الارتباط الاستراتيجي</h1><p>كيف تخدم الشراكات أهداف المؤسسة ومبادراتها. لكل هدف ومبادرة قائمة تحقق من أربعة عناصر؛ تُعدّ الشراكة تابعة إذا حققت 75% منها على الأقل.</p></div>
-      <div class="ph-actions"><div class="seg sg-vw"><button type="button" data-sgv="map" class="${st.view === 'map' ? 'on' : ''}">${icon('flag')} الخريطة</button><button type="button" data-sgv="rv" class="${st.view === 'rv' ? 'on' : ''}">${icon('check')} مراجعة الربط${S.pending.length ? ` <em class="sg-badge">${S.pending.length}</em>` : ''}</button><button type="button" data-sgv="crit" class="${st.view === 'crit' ? 'on' : ''}">${icon('list')} معايير الربط</button></div><button class="btn" type="button" onclick="window.print()">${icon('print')} طباعة</button></div></div>
-      <div class="sg-kpis">${kpi(pct + '%', 'من الشراكات تحقق 75% لهدف أو مبادرة', `${S.linked.length} من ${S.total}`, 'pri')}${kpi(`${S.goalsOn}/${S.goals.length}`, 'أهداف تخدمها شراكات', S.goals.length - S.goalsOn ? `${S.goals.length - S.goalsOn} بلا شراكات` : 'كل الأهداف مغطاة')}${kpi(`${S.initsOn}/${S.initsAll}`, 'مبادرات تخدمها شراكات', S.initsAll - S.initsOn ? `${S.initsAll - S.initsOn} فجوة` : '')}${kpi(S.pending.length, 'مقترح آلي بانتظار الاعتماد', S.pending.length ? 'من «مراجعة الربط»' : 'كل الارتباطات معتمدة', S.pending.length ? 'warn' : '')}</div>
+      <div class="ph-actions"><div class="seg sg-vw"><button type="button" data-sgv="map" class="${st.view === 'map' ? 'on' : ''}">${icon('flag')} الخريطة</button><button type="button" data-sgv="rv" class="${st.view === 'rv' ? 'on' : ''}">${icon('check')} مراجعة الربط${S.pending.length ? ` <em class="sg-badge">${S.pending.length}</em>` : ''}</button><button type="button" data-sgv="crit" class="${st.view === 'crit' ? 'on' : ''}">${icon('list')} معايير الربط</button></div><button class="btn" type="button" data-sgprint>${icon('print')} طباعة</button></div></div>
+      ${st.view === 'map' ? '' : `<div class="sg-kpis">${kpi(pct + '%', 'من الشراكات تحقق 75% لهدف أو مبادرة', `${S.linked.length} من ${S.total}`, 'pri')}${kpi(`${S.goalsOn}/${S.goals.length}`, 'أهداف تخدمها شراكات', S.goals.length - S.goalsOn ? `${S.goals.length - S.goalsOn} بلا شراكات` : 'كل الأهداف مغطاة')}${kpi(`${S.initsOn}/${S.initsAll}`, 'مبادرات تخدمها شراكات', S.initsAll - S.initsOn ? `${S.initsAll - S.initsOn} فجوة` : '')}${kpi(S.pending.length, 'مقترح آلي بانتظار الاعتماد', S.pending.length ? 'من «مراجعة الربط»' : 'كل الارتباطات معتمدة', S.pending.length ? 'warn' : '')}</div>`}
       ${st.view === 'rv' ? review : st.view === 'crit' ? crit : mapView}`;
     hydrateFiles(el);
   };
   draw();
   el.onclick = async (e) => {
-    const v = e.target.closest('[data-sgv]'); if (v) { st.view = v.dataset.sgv; return draw(); }
+    const v = e.target.closest('[data-sgv]'); if (v) { e.preventDefault(); st.view = v.dataset.sgv; return draw(); }
+    if (e.target.closest('[data-sgprint]')) return stratPrint(stratSummary(base()));
     if (e.target.closest('[data-sgall]')) {
       const L_ = base().filter((p) => pStrat(p).src === 'auto'); if (!L_.length) return;
       if (!(await confirmDlg(`اعتماد ${L_.length} ارتباطًا مقترحًا آليًا كما هي؟ يمكن تعديل أي منها لاحقًا.`))) return;
