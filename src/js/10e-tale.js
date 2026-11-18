@@ -50,7 +50,7 @@ function taleData() {
 function taleChapters(nums, signed = 0) {
   const N = [];
   const st = 0.105 / Math.max(1, nums.length);
-  nums.forEach((n, i) => N.push({ a: 0.775 + i * st, b: 0.775 + (i + 1) * st - 0.004, cls: 'num', eye: '', h: n[1], s: n[2] }));
+  nums.forEach((n, i) => N.push({ a: 0.775 + i * st + 0.004, b: 0.775 + (i + 1) * st + 0.002, cls: 'num', eye: '', h: n[1], s: n[2] }));
   return [
     { a: 0.000, b: 0.062, cls: 'open', eye: 'مؤسسة مروج الأهلية · إدارة الشراكات', h: '', s: 'حكاية الشراكة' },
     { a: 0.080, b: 0.185, cls: 'sd', eye: '', h: 'أرضٌ واسعة، وفكرة تبحث عن شريك', s: 'كل شراكة تبدأ بخطوة في مكان لم يُزرع بعد.' },
