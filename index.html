@@ -19492,22 +19492,22 @@ function taleData() {
   const nums = [[logos.length, 'جهة شريكة', 'من القطاعات الحكومية والخاصة وغير الربحية'], [active, 'شراكة سارية', 'تُتابَع مخرجاتها والتزاماتها'], [outputs, 'مخرجًا مستهدفًا', 'في الشراكات الموقّعة'], [publicStories().length, 'قصة أثر موثّقة', 'نتائج ميدانية منشورة مرتبطة بشراكاتها']].filter((x) => x[0] > 0);
   const photos = [['border-guard-signing', 'المديرية العامة لحرس الحدود'], ['waqf-saitah-signing', 'وقف الأمير صيته بنت عبدالعزيز'], ['muhaidib-meet', 'مؤسسة عبدالقادر المهيدب الخيرية']].filter(([k]) => ASSET_IMG[k]);
   /* مشاريع مروج على الأرض، ومع كل مشروع عدد الشراكات المرتبطة به في المنصة (يظهر إن وُجد) */
-  const txt = (p) => JSON.stringify([p.title, p.name, p.ptype, p.category, p.categories, p.domain, p.goals, p.outputs, p.scope, p.summary, partnerName(p)]);
+  const txt = (p) => JSON.stringify([p.title, p.name, p.ptype, p.category, p.categories, p.domain, p.goals, p.outputs, p.cooperationAreas, p.expectedImpact, p.scope, p.summary]);
   const hits = (re) => signed.filter((p) => re.test(txt(p))).length;
   const projects = [
     /* المواقع تقريبية على مستوى المنطقة: [خط الطول، خط العرض، الاسم] */
     ['leaf', 'زراعة المانجروف', 'على سواحل البحر الأحمر والخليج العربي', hits(/مانجروف|القرم|الشورى/), [[42.56, 16.9, 'جازان'], [40.27, 20.15, 'الليث'], [39.03, 22.8, 'رابغ'], [50.0, 26.56, 'القطيف']]],
     ['home', 'المساجد الخضراء وأنسنة المساجد', 'تشجير محيط المساجد وريّه بمياه الوضوء المعالجة', hits(/مسجد|مساجد|أنسنة/), [[46.72, 24.69, 'الرياض'], [39.17, 21.54, 'جدة'], [39.61, 24.47, 'المدينة المنورة'], [50.1, 26.43, 'الدمام']]],
-    ['award', 'التشجير بالأشجار المحلية', 'في المدن والطرق والمرافق والمسطحات الخضراء', hits(/تشجير|شجر|أشجار|غرس|زراعة/), [[43.97, 26.33, 'القصيم'], [41.69, 27.52, 'حائل'], [36.57, 28.38, 'تبوك'], [46.72, 24.69, 'الرياض']]],
+    ['award', 'التشجير بالأشجار المحلية', 'في المدن والطرق والمرافق والمسطحات الخضراء', hits(/تشجير|أشجار|غرس|شتلات|شتل /), [[43.97, 26.33, 'القصيم'], [41.69, 27.52, 'حائل'], [36.57, 28.38, 'تبوك'], [46.72, 24.69, 'الرياض']]],
     ['flag', 'تأهيل المحميات ونثر البذور', 'إعادة الغطاء النباتي في المحميات الملكية', hits(/محمية|محميات|بذور|بذر|مراعي/), [[38.6, 30.4, 'محمية الملك سلمان'], [43.3, 27.9, 'محمية الإمام تركي'], [46.6, 25.7, 'محمية الملك عبدالعزيز']]],
-    ['layers', 'الإدارة المستدامة للغابات', 'حماية الغابات الطبيعية في جبال السروات', hits(/غابة|غابات|العرعر|السروات/), [[42.5, 18.22, 'عسير'], [41.47, 20.01, 'الباحة'], [40.42, 21.27, 'الطائف']]],
+    ['layers', 'الإدارة المستدامة للغابات', 'حماية الغابات الطبيعية في جبال السروات', hits(/غابة|غابات(?!\s*المانجروف)|العرعر|السروات/), [[42.5, 18.22, 'عسير'], [41.47, 20.01, 'الباحة'], [40.42, 21.27, 'الطائف']]],
   ];
   /* المذكرات الموقّعة في كل عام (آخر سبعة أعوام بها توقيع) */
   const byY = {}; signed.forEach((p) => { const y = +String(p.signDate || p.startDate || '').slice(0, 4); if (y > 1990) byY[y] = (byY[y] || 0) + 1; });
   const ys = Object.keys(byY).map(Number).sort((a, b) => a - b); const y1 = ys[ys.length - 1];
   const years = ys.length >= 2 ? Array.from({ length: Math.min(7, y1 - ys[0] + 1) }, (_, i) => y1 - Math.min(6, y1 - ys[0]) + i).map((y) => [y, byY[y] || 0]) : [];
   /* الجهات حسب القطاع */
-  const SEC = ['حكومي', 'خاص', 'غير ربحي']; const bySec = {};
+  const SEC = ['حكومي', 'خاص', 'غير ربحي', 'تعليمي']; const bySec = {};
   logos.forEach((pr) => { const k = SEC.includes(pr.sector) ? pr.sector : 'أخرى'; bySec[k] = (bySec[k] || 0) + 1; });
   const sectors = [...SEC, 'أخرى'].filter((k) => bySec[k]).map((k) => [k, bySec[k]]);
   return { nums, logos, photos, signed: signed.length, projects, years, sectors: sectors.length >= 2 ? sectors : [] };
@@ -19523,7 +19523,7 @@ function taleChapters(nums, signed = 0) {
     { a: 0.080, b: 0.185, cls: 'sd', eye: '', h: 'أرضٌ واسعة، وفكرة تبحث عن شريك', s: 'كل شراكة تبدأ بخطوة في مكان لم يُزرع بعد.' },
     { a: 0.205, b: 0.305, cls: 'sd', eye: '', h: 'ثم امتدّت يد', s: 'شريكٌ يؤمن بالفكرة نفسها، فيلتقي الطريقان.' },
     { a: 0.325, b: 0.435, cls: 'sd l', eye: '', h: 'خطوةً بخطوة', s: 'منهجية واضحة تُبنى عليها كل مذكرة.' },
-    { a: 0.455, b: 0.555, cls: 'sd', eye: '', h: 'اتفاقاتٌ تُوقَّع', s: signed ? `${plural(signed, 'مذكرة تفاهم واحدة', 'مذكرتا تفاهم', 'مذكرات تفاهم', 'مذكرة تفاهم')} موقّعة مع جهات وطنية رائدة.` : 'مذكرات تفاهم مع جهات وطنية رائدة.', k: 'signed' },
+    { a: 0.455, b: 0.555, cls: 'sd', eye: '', h: 'اتفاقاتٌ تُوقَّع', s: signed ? `${plural(signed, 'مذكرة واحدة موقّعة', 'مذكرتان موقّعتان', 'مذكرات موقّعة', 'مذكرة موقّعة')} مع جهات وطنية رائدة.` : 'مذكرات موقّعة مع جهات وطنية رائدة.', k: 'signed' },
     { a: 0.572, b: 0.690, cls: 'sd up', eye: '', h: 'ثم تخضرّ الأرض', s: 'ليست المذكرات وحدها؛ مشاريع ومبادرات تُنفَّذ على أرض المملكة:' },
     { a: 0.695, b: 0.765, cls: 'logo', eye: '', h: '', s: 'نحو غطاءٍ نباتيٍّ مستدام' },
     ...N,
@@ -19603,8 +19603,8 @@ function renderTale(el) {
       <div class="tz-orbit" id="tzOrbit">${img('murooj-logo-white') ? `<img class="tz-core" src="${img('murooj-logo-white')}" alt="">` : ''}
         ${logos.map((pr, k) => `<span class="tz-pl" data-k="${k}" title="${esc(pr.name)}">${talePlate(pr)}</span>`).join('')}</div>
       <div class="tz-yrs" id="tzYrs">${years.map(([y, n]) => `<div class="tz-yl"><b>${n}</b><small>${y}</small></div>`).join('')}</div>
-      <div class="tz-scs" id="tzScs">${sectors.map(([k, n]) => `<div class="tz-sl"><b>${n}</b><small>${k === 'أخرى' ? 'قطاعات أخرى' : 'القطاع ' + k}</small></div>`).join('')}</div>
-      <div class="tz-xcaps">${years.length ? `<div class="tz-cap top" data-x="years"><h2>عامًا بعد عام</h2><p>مذكرات التفاهم الموقّعة في كل عام.</p></div>` : ''}${sectors.length ? `<div class="tz-cap top" data-x="sectors"><h2>من كل القطاعات</h2><p>جهات حكومية وخاصة وغير ربحية، يجمعها هدفٌ واحد.</p></div>` : ''}</div>
+      <div class="tz-scs" id="tzScs">${sectors.map(([k, n]) => `<div class="tz-sl"><b>${n}</b><small>${({ 'حكومي': 'القطاع الحكومي', 'خاص': 'القطاع الخاص', 'غير ربحي': 'القطاع غير الربحي', 'تعليمي': 'القطاع التعليمي' })[k] || 'قطاعات أخرى'}</small></div>`).join('')}</div>
+      <div class="tz-xcaps">${years.length ? `<div class="tz-cap top" data-x="years"><h2>عامًا بعد عام</h2><p>المذكرات الموقّعة في كل عام.</p></div>` : ''}${sectors.length ? `<div class="tz-cap top" data-x="sectors"><h2>من كل القطاعات</h2><p>جهات حكومية وخاصة وغير ربحية وتعليمية، يجمعها هدفٌ واحد.</p></div>` : ''}</div>
       <div class="tz-count" id="tzCount"><b>0</b><span>${logos.length === 1 ? 'جهة شريكة' : 'جهة شريكة'}</span></div>
       <div class="tz-caps">${chs.map((c, i) => `<div class="tz-cap ${c.cls}" data-c="${i}" ${c.k ? `data-k="${c.k}"` : ''}>${c.eye ? `<small>${c.eye}</small>` : ''}${c.h ? `<h2>${c.h}</h2>` : ''}${c.s ? `<p>${c.s}</p>` : ''}</div>`).join('')}</div>
       ${img('murooj-mangrove-seedlings') && img('ksa-farasan-mangrove') ? `<div class="tz-grow" id="tzGrow">
@@ -19718,7 +19718,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
       shapes.years = fit({ pts, cols }); }
     /* دوائر القطاعات */
     if (sectors.length) { const n = sectors.length, mx = Math.max(...sectors.map((x) => x[1])), Rm = Math.min(W / (n * 2.6), H * 0.19), gap = W * (small ? 0.9 : 0.66) / n, cy = H * 0.52; const pts = [], cols = [];
-      const COL = { 'حكومي': GOLD, 'خاص': CREAM, 'غير ربحي': [170, 225, 160], 'أخرى': [190, 175, 140] }, sl = $$('.tz-sl', el);
+      const COL = { 'حكومي': GOLD, 'خاص': CREAM, 'غير ربحي': [170, 225, 160], 'تعليمي': [150, 200, 220], 'أخرى': [190, 175, 140] }, sl = $$('.tz-sl', el);
       sectors.forEach(([k, v], j) => { const cx = W / 2 + (j - (n - 1) / 2) * gap * -1, R = Rm * Math.sqrt(v / mx) * 0.85 + Rm * 0.15, c = COL[k] || GOLD;
         for (let i = 0; i < R * R * 0.3; i++) { const a = Math.random() * 6.283, r = R * Math.sqrt(Math.random()); pts.push(cx + Math.cos(a) * r, cy + Math.sin(a) * r); cols.push(c[0] * 0.55, c[1] * 0.55, c[2] * 0.55); }
         for (let ring = 0; ring < 3; ring++) for (let a = 0; a < 6.283; a += 1.1 / R) { const rr = R + 3 + ring * 1.6 + (Math.random() - 0.5) * 1.5; pts.push(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); cols.push(...c); }
