@@ -8716,6 +8716,41 @@ html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n small{top:min(2cqw,2.67cqh);width
 html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n.up small{bottom:min(2cqw,2.67cqh);top:auto}
 html.ob-show #obBody>.ob-mosaic.v-orbit .orb-core{width:min(9cqw,12cqh);height:min(9cqw,12cqh)}
 html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n .star{left:min(.9cqw,1.2cqh);top:calc(min(2.3cqw,3.07cqh) * -1);width:min(1.4cqw,1.87cqh);height:min(1.4cqw,1.87cqh)}
+
+/* ===== نموذج Excel للشراكة ===== */
+.px-acts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.px-act{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;text-align:start;font:inherit;color:inherit;transition:border-color .15s,background .15s}
+.px-act:hover{border-color:var(--brand,#1F6B5C);background:var(--paper-2)}
+.px-act svg{width:22px;height:22px;color:var(--brand,#1F6B5C)}
+.px-act b{font-size:14.5px}.px-act span{font-size:12.5px;color:var(--muted)}
+@media (max-width:560px){.px-acts{grid-template-columns:1fr}}
+.px-tbl{max-height:60vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.px-tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.px-tbl th,.px-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top;white-space:pre-line}
+.px-tbl thead th{position:sticky;top:0;background:var(--paper-2);font-size:12px;color:var(--muted)}
+.px-tbl tbody th{color:var(--ink);font-weight:600;width:22%}
+.px-old{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(160,60,50,.45)}
+.px-new{color:var(--ok,#1E6B4A);font-weight:500}
+.px-tbl i{color:var(--faint);font-style:normal}
+
+/* ===== رفع صور الشراكات من مجلدات ===== */
+.bp-intro p{line-height:1.9;font-size:13.5px;color:var(--muted);margin-bottom:10px}
+.bp-tree{list-style:none;margin:0 0 14px;padding:10px 14px;font-size:12.5px;background:var(--paper-2);border-radius:10px;line-height:1.9}
+.bp-tree li{display:block;white-space:nowrap}.bp-tree li.sub{padding-inline-start:22px;position:relative}
+.bp-tree li.sub::before{content:'';position:absolute;inset-inline-start:8px;top:0;height:60%;width:9px;border-inline-start:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.bp-tree small{color:var(--muted);font-size:11.5px}
+.bp-drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px;border:2px dashed var(--line);border-radius:14px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
+.bp-drop:hover,.bp-drop.over{border-color:var(--brand);background:var(--paper-2)}
+.bp-drop svg{width:26px;height:26px;color:var(--brand)}.bp-drop b{font-size:15px}.bp-drop span{font-size:12.5px;color:var(--muted)}
+.bp-sum{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0 8px;font-size:13px;color:var(--muted)}.bp-sum b{color:var(--ink);font-size:15px}
+.bp-list{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.bp-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) auto;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.bp-row:last-child{border-bottom:0}.bp-row.off{background:var(--paper-2)}
+.bp-row .in{height:34px;font-size:12.5px;padding-block:4px}
+.bp-f{display:flex;flex-direction:column;min-width:0}.bp-f b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.bp-f span{font-size:11.5px;color:var(--muted)}
+@media (max-width:640px){.bp-row{grid-template-columns:1fr}}
+.bp-prog{margin:12px 0}.bp-prog div{height:8px;border-radius:99px;background:var(--paper-2);overflow:hidden}.bp-prog i{display:block;height:100%;background:var(--brand);transition:width .2s}
+.bp-prog span{display:block;font-size:12.5px;color:var(--muted);margin-top:6px}
 </style>
 </head>
 <body>
@@ -21443,7 +21478,7 @@ function renderRegister(el, r) {
   el.classList.add('regpage');
   el.innerHTML = `<div id="regPrintHead"></div>
     <div class="ph no-print"><div><h1>سجل الشراكات</h1><p>ابحث بالاسم أو الرمز أو أي نص في المجالات والمخرجات.</p></div>
-    <div class="ph-actions">${can('export') ? `<button class="btn" data-xls>${icon('download')} Excel</button><button class="btn icon-only" data-print title="طباعة" aria-label="طباعة">${icon('print')}</button>` : ''}${can('view.reports') ? `<button class="btn" data-rep title="تقرير بالشراكات المعروضة">${icon('file')} تقرير</button>` : ''}${canEdit ? `<a class="btn primary" href="#/partnerships/new">${icon('plus')} شراكة جديدة</a>` : ''}</div></div>
+    <div class="ph-actions">${can('export') ? `<button class="btn" data-xls>${icon('download')} Excel</button><button class="btn icon-only" data-print title="طباعة" aria-label="طباعة">${icon('print')}</button>` : ''}${can('view.reports') ? `<button class="btn" data-rep title="تقرير بالشراكات المعروضة">${icon('file')} تقرير</button>` : ''}${canEdit ? `<button class="btn" data-bulkph title="رفع صور كل الشراكات دفعة واحدة من مجلدات بأسمائها">${icon('image')} رفع الصور</button><a class="btn primary" href="#/partnerships/new">${icon('plus')} شراكة جديدة</a>` : ''}</div></div>
     ${design() === 'board' ? '<div class="bo-strip-st no-print" id="regStrip" role="group" aria-label="تصفية سريعة حسب الحالة"></div>' : ''}
     <div class="reg-tools" data-tour="reg-tools">
       <div class="searchbox">${icon('search')}<input id="regQ" type="search" placeholder="بحث في السجل…" value="${esc(st.q)}" aria-label="بحث في السجل"></div>
@@ -21529,6 +21564,7 @@ function renderRegister(el, r) {
     }
     const qa = e.target.closest('[data-rtgo]'); if (qa) { go(qa.dataset.rtgo); return; }
     if (e.target.closest('[data-xls]')) exportPartnershipsXlsx(App.lastRegList || [], 'سجل-الشراكات');
+    if (e.target.closest('[data-bulkph]')) return bulkPhotosDialog();
     if (e.target.closest('[data-rep]')) { const ids = (App.lastRegList || []).map((p) => p.id); if (!ids.length) return toast('لا توجد شراكات معروضة.', 'err'); App.ui.rpt.ids = ids; go('#/reports'); }
   });
 }
@@ -21655,6 +21691,7 @@ function renderPartnership(el, r) {
     <button class="icon-btn da-btn" data-print title="طباعة صفحة الشراكة" aria-label="طباعة">${icon('print')}</button>
     <button class="btn sm da-lbl" data-dossier data-tour="detail-dossier" title="الملف الشامل: ملف واحد يجمع التفاصيل والنماذج والصور والمستندات" aria-label="الملف الشامل">${icon('file')}<span>الملف الشامل</span></button>
     ${can('view.reports') ? `<a class="btn sm ghost da-lbl" href="#/reports?ids=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" data-tour="detail-report" title="تقرير الشراكة" aria-label="تقرير الشراكة">${icon('chart')}<span>تقرير</span></a><a class="btn sm ghost da-lbl" href="#/reports/marketing?p=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" title="العرض المرئي لهذه الشراكة: شرائح متحركة بصورها وأرقامها" aria-label="العرض المرئي">${icon('play')}<span>العرض المرئي</span></a>` : ''}
+    ${canEdit ? `<button class="icon-btn da-btn" data-ptxl title="نموذج Excel: تنزيل بيانات الشراكة أو رفع نموذج محدَّث" aria-label="نموذج Excel">${icon('table')}</button>` : ''}
     ${canEdit ? `<a class="icon-btn da-btn primary" href="#/partnerships/${p.id}/edit" title="تعديل" aria-label="تعديل">${icon('edit')}</a>` : ''}
     ${can('delete.partnership') ? `<button class="icon-btn da-btn danger" data-del title="حذف" aria-label="حذف">${icon('trash')}</button>` : ''}
     <button class="icon-btn da-btn" data-asidet title="إخفاء أو إظهار الشريط الجانبي" aria-label="الشريط الجانبي">${icon('sidebar')}</button></div></div></div>
@@ -21743,6 +21780,7 @@ function renderPartnership(el, r) {
     if (an) { e.preventDefault(); if (el.classList.contains('tabbed')) { showTab(an.dataset.anchor); return; } const s = $('#' + an.dataset.anchor, el); s && window.scrollTo({ top: s.getBoundingClientRect().top + scrollY - 124, behavior: 'smooth' }); return; }
     if (e.target.closest('[data-print]')) return printPartnershipCard(p); // بطاقة مصممة للطباعة بدل واجهة الصفحة
     if (e.target.closest('[data-dossier]')) return dossierDialog(p);
+    if (e.target.closest('[data-ptxl]')) return ptXlsxDialog(p);
     const dg = e.target.closest('[data-dgal]'); if (dg) return openGallery(photos, +dg.dataset.dgal);
     const vf = e.target.closest('[data-viewf]'); if (vf) return viewStored(vf.dataset.viewf);
     const sc = e.target.closest('[data-setcover]');
@@ -21866,7 +21904,7 @@ const AUDIT_LABELS = {
   'partnership.create': 'إنشاء سجل الشراكة', 'partnership.update': 'تعديل البيانات', 'partnership.delete': 'حذف سجل الشراكة', 'partnership.confirm': 'تأكيد قيمة مستوردة', 'partnership.publish': 'تغيير الظهور في الواجهة',
   'home.featured': 'تغيير العرض المميز', 'partnership.golden': 'الشراكات الذهبية', 'list.request': 'اقتراح خيار جديد', 'list.decision': 'قرار على خيار مقترح', 'workflow.direct': 'تسجيل مباشر', 'partnership.files': 'تحديث ملفات الشراكة', 'list.add': 'إضافة قيمة إلى قائمة', 'proposal.create': 'إنشاء مقترح', 'proposal.submit': 'تقديم مقترح', 'proposal.status': 'تغيير حالة مقترح', 'proposal.note': 'ملاحظة على مقترح', 'proposal.update': 'تحديث مقترح',
   'partner.create': 'إضافة جهة', 'partner.update': 'تعديل جهة', 'partner.merge': 'دمج جهتين', 'partner.delete': 'حذف جهة', 'settings.update': 'تعديل الإعدادات', 'content.save': 'حفظ محتوى', 'content.delete': 'حذف محتوى',
-  'partnership.dossier': 'تجهيز الملف الشامل', seed: 'تهيئة المنصة', backup: 'نسخة احتياطية', restore: 'استعادة نسخة احتياطية', 'demo.toggle': 'إظهار/إخفاء البيانات التجريبية', 'role.switch': 'معاينة بحساب آخر', 'auth.login': 'تسجيل دخول', 'notify.read': 'قراءة الإشعارات', 'auth.logout': 'تسجيل خروج', 'auth.password': 'تغيير كلمة مرور',
+  'partnership.dossier': 'تجهيز الملف الشامل', 'partnership.export': 'تنزيل نموذج Excel', seed: 'تهيئة المنصة', backup: 'نسخة احتياطية', restore: 'استعادة نسخة احتياطية', 'demo.toggle': 'إظهار/إخفاء البيانات التجريبية', 'role.switch': 'معاينة بحساب آخر', 'auth.login': 'تسجيل دخول', 'notify.read': 'قراءة الإشعارات', 'auth.logout': 'تسجيل خروج', 'auth.password': 'تغيير كلمة مرور',
 };
 
 /* ===== نموذج الإدخال والتعديل ===== */
@@ -23667,10 +23705,11 @@ function xlSheetXML(sh) {
 <sheetPr>${sh.tab ? `<tabColor rgb="${sh.tab}"/>` : ''}<pageSetUpPr fitToPage="1"/></sheetPr>
 <sheetViews><sheetView rightToLeft="1" showGridLines="0" workbookViewId="0"${sh.zoom ? ` zoomScale="${sh.zoom}"` : ''}>${pane}</sheetView></sheetViews>
 <sheetFormatPr defaultRowHeight="18"/>
-<cols>${sh.cols.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>
+<cols>${sh.cols.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"${(sh.hiddenCols || []).includes(i) ? ' hidden="1"' : ''}/>`).join('')}</cols>
 <sheetData>${rows}</sheetData>
 ${sh.filter ? `<autoFilter ref="${sh.filter}"/>` : ''}
 ${(sh.merges || []).length ? `<mergeCells count="${sh.merges.length}">${sh.merges.map((m) => `<mergeCell ref="${m}"/>`).join('')}</mergeCells>` : ''}
+${(sh.valid || []).length ? `<dataValidations count="${sh.valid.length}">${sh.valid.map((v) => `<dataValidation type="list" allowBlank="1" showErrorMessage="${v.strict ? 1 : 0}" errorStyle="${v.strict ? 'stop' : 'warning'}" sqref="${v.ref}"><formula1>${xmlEsc(v.f)}</formula1></dataValidation>`).join('')}</dataValidations>` : ''}
 <pageMargins left="0.35" right="0.35" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>
 <pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>
 <headerFooter><oddFooter>&amp;C&amp;"${XL_FONT}"&amp;8${xmlEsc(D.settings.org.name)} — صفحة &amp;P من &amp;N</oddFooter></headerFooter>
@@ -23678,7 +23717,7 @@ ${(sh.merges || []).length ? `<mergeCells count="${sh.merges.length}">${sh.merge
 }
 function xlBook(sheets, st) {
   const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`;
-  const wb = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView activeTab="${sheets.findIndex((s) => s.active) >= 0 ? sheets.findIndex((s) => s.active) : 0}"/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => (s.filter ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xmlEsc(s.name)}'!$${s.filter.replace(/:/, ':$').replace(/([A-Z]+)(\d+)/g, '$1$$$2')}</definedName>` : '') + (s.printTitles ? `<definedName name="_xlnm.Print_Titles" localSheetId="${i}">'${xmlEsc(s.name)}'!$${s.printTitles}:$${s.printTitles}</definedName>` : '')).join('')}</definedNames></workbook>`;
+  const wb = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView activeTab="${sheets.findIndex((s) => s.active) >= 0 ? sheets.findIndex((s) => s.active) : 0}"/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}"${s.hidden ? ' state="hidden"' : ''} r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => (s.filter ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xmlEsc(s.name)}'!$${s.filter.replace(/:/, ':$').replace(/([A-Z]+)(\d+)/g, '$1$$$2')}</definedName>` : '') + (s.printTitles ? `<definedName name="_xlnm.Print_Titles" localSheetId="${i}">'${xmlEsc(s.name)}'!$${s.printTitles}:$${s.printTitles}</definedName>` : '')).join('')}</definedNames></workbook>`;
   const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
   return zipStore([
     { name: '[Content_Types].xml', data: ct },
@@ -23959,6 +23998,294 @@ async function importPartnerPackage(file, onStep) {
   await Repo.save('partnerships', p);
   await Repo.log('package.import', 'partnership', p.id, p.code, `استيراد حزمة: ${added} مرفق${forms ? ` و${forms} نموذج` : ''}`);
   return { p, added, skipped, forms, steps };
+}
+
+/* —— 18e-pt-xlsx.js —— */
+/* =====================================================================
+   نموذج Excel لكل شراكة: تنزيل ببياناتها، ثم رفعه بعد التحديث
+   - ورقة «بيانات الشراكة»: حقل في كل صف (الحقل · القيمة · إرشاد التعبئة).
+   - عمود A مخفي يحمل مفتاح الحقل، والخلية A2 تحمل معرّف الشراكة؛ فلا يُطابق الملف إلا شراكته.
+   - القوائم المنسدلة من «القوائم» في المنصة (ورقة مخفية).
+   - عند الرفع تُعرض الفروق حقلًا حقلًا للمراجعة قبل الحفظ، ويُسجَّل التحديث في سجل التغييرات.
+   - لا تُصدَّر بيانات التواصل ولا الحقول الداخلية لمن لا يملك صلاحيتها، ولا تُحدَّث من الملف.
+   ===================================================================== */
+const PX_MARK = 'shk-pt-v1';
+function pxFields() {
+  const contacts = can('view.contacts'), internal = can('view.internal');
+  const st = (D.settings.stages || []);
+  return [
+    { sec: 'البيانات الأساسية' },
+    { k: 'code', l: 'رمز الشراكة', ro: 1, get: (p) => p.code || '' },
+    { k: 'partner', l: 'الجهة الشريكة', ro: 1, get: (p) => partnerName(p), h: 'للاطلاع — تغيير الجهة من صفحة التعديل في المنصة' },
+    { k: 'status', l: 'حالة السريان', ro: 1, get: (p) => statusLabel(pStatus(p)), h: 'تُحسب تلقائيًا من التواريخ والمرحلة' },
+    { k: 'title', l: 'اسم الشراكة', h: 'يُستخدم اسم الجهة إن تُرك فارغًا' },
+    { k: 'sector', l: 'القطاع', list: L('sectors'), get: (p) => pSector(p), h: 'اختر من القائمة · يُحفظ على مستوى الجهة' },
+    { k: 'classification', l: 'تصنيف المذكرة', list: L('classifications'), h: 'اختر من القائمة' },
+    { k: 'categories', l: 'تصنيف الشراكة', multi: 1, h: `افصل بين القيم بـ «،» — المتاح: ${L('categories').join('، ')}` },
+    { k: 'region', l: 'المنطقة', list: typeof KSA_REGION_NAMES !== 'undefined' ? KSA_REGION_NAMES : [], h: 'اختر من القائمة' },
+    { sec: 'الفترة والتفعيل' },
+    { k: 'startDate', l: 'تاريخ بدء الشراكة', date: 1, h: 'تاريخ بصيغة يوم/شهر/سنة، مثل 15/03/2026' },
+    { k: 'endDate', l: 'تاريخ انتهاء الشراكة', date: 1, h: 'لا يسبق تاريخ البدء' },
+    { k: 'activation', l: 'تفعيل الشراكة', list: L('activation'), h: 'اختر من القائمة' },
+    { k: 'stage', l: 'مرحلة الشراكة', list: st.map((x) => x.label), get: (p) => stageLabel(p.stage), set: (v) => (st.find((x) => x.label === v) || {}).id, h: 'اختر من القائمة' },
+    { sec: 'مجالات التعاون والأثر' },
+    { k: 'cooperationAreas', l: 'مجالات التعاون', long: 1, h: 'كل بند في سطر مستقل (Alt+Enter لسطر جديد داخل الخلية)' },
+    { k: 'expectedImpact', l: 'الأثر المتوقع وكيف يخدم المؤسسة', long: 1, h: 'كل بند في سطر مستقل' },
+    { k: 'outputs', l: 'المخرجات (إسناد مشاريع، بناء مبادرات)', long: 1, h: 'كل مخرج في سطر مستقل' },
+    ...(internal ? [{ k: 'notes', l: 'الملاحظات', long: 1 }, { k: 'recommendations', l: 'التوصيات', long: 1 }, { k: 'challenges', l: 'التحديات', long: 1 }] : []),
+    { sec: 'الفريق والإدارات' },
+    { k: 'owners', l: 'المسؤول من إدارة الشراكات', multi: 1, h: `افصل بين الأسماء بـ «،» — الفريق: ${L('team').join('، ')}` },
+    { k: 'departments', l: 'التقاطع مع الإدارات', multi: 1, h: 'افصل بين الإدارات بـ «،»' },
+    ...(contacts ? [{ sec: 'ضابط الاتصال لدى الجهة' }, { k: 'contactName', l: 'ضابط الاتصال' }, { k: 'contactEmail', l: 'البريد الإلكتروني', h: 'name@example.com' }, { k: 'contactPhone', l: 'رقم الجوال', h: '05XXXXXXXX' }] : []),
+    { sec: 'العرض في الواجهة' },
+    { k: 'showcaseGoal', l: 'الهدف المختصر للعرض', h: 'جملة واحدة' },
+    { k: 'hl.value', l: 'أبرز نتيجة — الرقم', get: (p) => (p.highlight || {}).value || '', h: 'نتيجة متحققة فعلًا، مثل 4,800' },
+    { k: 'hl.label', l: 'أبرز نتيجة — الوحدة', get: (p) => (p.highlight || {}).label || '', h: 'مثل: شجرة محلية' },
+    { k: 'hl.text', l: 'أبرز نتيجة — الوصف', get: (p) => (p.highlight || {}).text || '' },
+  ];
+}
+const pxVal = (f, p) => (f.get ? f.get(p) : f.multi ? (p[f.k] || []).join('، ') : p[f.k] == null ? '' : String(p[f.k]));
+
+function exportPartnershipXlsx(p) {
+  const S = xlStyles(), org = D.settings.org, F = pxFields();
+  const T = {
+    key: S.get({ font: { sz: 8, color: 'FFBBBBBB' }, border: 'none' }),
+    title: S.get({ font: { b: 1, sz: 17, color: XL_C.petrol }, border: 'none', align: { wrap: false } }),
+    sub: S.get({ font: { sz: 10, color: XL_C.mut }, border: 'none', align: { wrap: false } }),
+    band: S.get({ fill: XL_C.gold, border: 'none' }),
+    note: S.get({ font: { sz: 10, color: XL_C.ink }, fill: XL_C.sand, border: 'none', align: { v: 'center', indent: 1 } }),
+    head: S.get({ font: { b: 1, sz: 10.5, color: XL_C.white }, fill: XL_C.petrol, align: { h: 'center' } }),
+    sec: S.get({ font: { b: 1, sz: 11.5, color: XL_C.petrol }, fill: 'FFEAF2EF', border: 'bottom', bcolor: XL_C.petrol2 }),
+    lab: S.get({ font: { b: 1, sz: 10.5, color: XL_C.petrol }, align: { v: 'top' } }),
+    val: S.get({ font: { sz: 10.5 }, fill: 'FFFFFDF6', align: { v: 'top' } }),
+    date: S.get({ font: { sz: 10.5 }, fill: 'FFFFFDF6', numFmt: 'dd/mm/yyyy', align: { h: 'right', v: 'top' } }),
+    ro: S.get({ font: { sz: 10.5, color: XL_C.mut }, fill: 'FFF1F3F2', align: { v: 'top' } }),
+    hint: S.get({ font: { sz: 9, color: XL_C.mut }, align: { v: 'top' } }),
+  };
+  const W = [3, 30, 72, 40];
+  const rows = [
+    { ht: 32, cells: [{ v: PX_MARK, s: T.key }, { v: `نموذج بيانات الشراكة — ${partnerName(p)}`, s: T.title }] },
+    { ht: 20, cells: [{ v: p.id, s: T.key }, { v: `${p.code || ''}${p.title && p.title !== partnerName(p) ? ' · ' + p.title : ''} · ${org.name} — صُدّر في ${fmtDT(nowISO())}`, s: T.sub }] },
+    { ht: 5, cells: [{ v: '', s: T.key }, { v: '', s: T.band }, { v: '', s: T.band }, { v: '', s: T.band }] },
+    { ht: 46, cells: [{ v: '', s: T.key }, { v: 'عدّل عمود «القيمة» فقط (الخلايا الملوّنة)، ثم احفظ الملف وأعده إلى فريق الشراكات ليُرفع من صفحة الشراكة ← «نموذج Excel» ← «رفع نموذج محدَّث». الخلايا الرمادية للاطلاع ولا تُحدَّث. لا تغيّر ترتيب الصفوف ولا اسم الورقة.', s: T.note }] },
+    { ht: 26, cells: [{ v: '', s: T.key }, { v: 'الحقل', s: T.head }, { v: 'القيمة', s: T.head }, { v: 'إرشاد التعبئة', s: T.head }] },
+  ];
+  const merges = ['B1:D1', 'B2:D2', 'B4:D4'], valid = [], lists = [];
+  F.forEach((f) => {
+    const r = rows.length + 1;
+    if (f.sec) { rows.push({ ht: 24, cells: [{ v: '', s: T.key }, { v: f.sec, s: T.sec }, { v: '', s: T.sec }, { v: '', s: T.sec }] }); merges.push(`B${r}:D${r}`); return; }
+    const v = pxVal(f, p);
+    const cell = f.date ? { v: xlDate(v) || '', s: T.date } : { v, s: f.ro ? T.ro : T.val };
+    rows.push({ ht: f.long ? xlHt([v], [W[2]], 40, 260) : xlHt([v, f.h || ''], [W[2], W[3]], 24, 80), cells: [{ v: f.k, s: T.key }, { v: f.l, s: T.lab }, cell, { v: f.h || '', s: T.hint }] });
+    if (f.list && f.list.length && !f.ro) { lists.push(f.list); const c = colName(lists.length - 1); valid.push({ ref: `C${r}`, f: `'القوائم'!$${c}$1:$${c}$${f.list.length}` }); }
+  });
+  rows.push({ ht: 10, cells: [] }, { cells: [{ v: '', s: T.key }, { v: `${org.name} · ${org.platform}`, s: T.hint }] });
+  const sheet = { name: 'بيانات الشراكة', tab: XL_C.petrol, cols: W, hiddenCols: [0], rows, merges, valid, freeze: { row: 5 }, active: true };
+  const n = Math.max(1, ...lists.map((l) => l.length));
+  const lsheet = { name: 'القوائم', hidden: true, cols: lists.map(() => 30), rows: Array.from({ length: n }, (_, i) => ({ cells: lists.map((l) => (l[i] != null ? { v: l[i] } : null)) })) };
+  download(`نموذج-شراكة-${(p.code || '').replace(/[^\w-]/g, '')}-${partnerName(p).replace(/[\\/:*?"<>|]/g, '').slice(0, 40)}.xlsx`, xlBook(lists.length ? [sheet, lsheet] : [sheet], S));
+  Repo.log('partnership.export', 'partnership', p.id, p.code, 'تنزيل نموذج Excel ببيانات الشراكة');
+  toast('نُزِّل نموذج Excel ببيانات الشراكة');
+}
+
+/* قراءة قيمة الخلية حسب نوع الحقل */
+function pxParse(f, raw) {
+  let v = String(raw == null ? '' : raw).replace(/_x000D_/g, '').replace(/\r\n?/g, '\n').trim();
+  if (f.date) {
+    if (!v) return { v: '' };
+    if (/^\d+(\.\d+)?$/.test(v)) { const d = new Date(Date.UTC(1899, 11, 30) + Math.round(+v) * 864e5); return { v: d.toISOString().slice(0, 10) }; }
+    let m = v.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/); if (m) return { v: `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` };
+    m = v.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/); if (m) return { v: `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` };
+    return { err: `«${v}» ليس تاريخًا مفهومًا` };
+  }
+  if (f.multi) return { v: v ? [...new Set(v.split(/[،,;\n]+/).map((x) => x.trim()).filter(Boolean))] : [] };
+  if (f.set) { if (!v) return { v: '' }; const id = f.set(v); return id ? { v: id } : { err: `«${v}» ليست من القائمة` }; }
+  if (f.k === 'contactEmail' && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { err: `«${v}» ليس بريدًا صحيحًا` };
+  if (f.k === 'contactPhone') v = v.replace(/\.0$/, '').replace(/^5(\d{8})$/, '05$1');
+  return { v };
+}
+const pxCur = (f, p) => (f.k === 'sector' ? pSector(p) : f.k.startsWith('hl.') ? (p.highlight || {})[f.k.slice(3)] || '' : f.multi ? (p[f.k] || []) : p[f.k] == null ? '' : p[f.k]);
+const pxShow = (f, v) => { if (Array.isArray(v)) return v.join('، '); if (f.set) return stageLabel(v); if (f.date) return v ? fmtDate(v) : ''; return String(v || ''); };
+
+async function importPartnershipXlsx(p, file) {
+  let rows;
+  try { rows = await readXlsxFirstSheet(file); } catch (e) { return toast(e.message, 'err'); }
+  if (((rows[1] || {}).A || '') !== PX_MARK) return toast('هذا الملف ليس نموذج بيانات شراكة من المنصة. نزّل النموذج من صفحة الشراكة ثم عدّله.', 'err');
+  const id = (rows[2] || {}).A;
+  let t = D.partnerships.find((x) => x.id === id);
+  if (!t) return toast('الشراكة التي يخصها هذا الملف غير موجودة في المنصة (ربما حُذفت).', 'err');
+  if (t.id !== p.id && !(await confirmDlg(`هذا الملف يخص شراكة أخرى: <b>${esc(t.code || '')} — ${esc(partnerName(t))}</b>.<br>هل تريد مراجعة تحديثه لتلك الشراكة؟`, { title: 'ملف لشراكة أخرى', ok: 'متابعة' }))) return;
+  const F = pxFields().filter((f) => f.k && !f.ro), byK = Object.fromEntries(F.map((f) => [f.k, f]));
+  const ch = [], errs = [];
+  Object.keys(rows).map(Number).filter((r) => r > 5).forEach((r) => {
+    const f = byK[(rows[r] || {}).A]; if (!f) return;
+    const res = pxParse(f, rows[r].C);
+    if (res.err) return errs.push(`${f.l}: ${res.err}`);
+    const old = pxCur(f, t), same = Array.isArray(old) ? old.join('|') === res.v.join('|') : String(old || '').replace(/\r/g, '').trim() === String(res.v || '').trim();
+    if (!same) ch.push({ f, old, v: res.v });
+  });
+  const sd = (ch.find((c) => c.f.k === 'startDate') || {}).v ?? t.startDate, ed = (ch.find((c) => c.f.k === 'endDate') || {}).v ?? t.endDate;
+  if (sd && ed && ed < sd) errs.push('تاريخ الانتهاء يسبق تاريخ البدء — لن يُحدَّث التاريخان.');
+  const bad = sd && ed && ed < sd ? new Set(['startDate', 'endDate']) : new Set();
+  const list = ch.filter((c) => !bad.has(c.f.k));
+  if (!list.length) return toast(errs.length ? 'لم يُحدَّث شيء: ' + errs.join(' · ') : 'لا توجد تغييرات في الملف عن بيانات الشراكة الحالية.', errs.length ? 'err' : 'ok');
+  const m = Modal.open({
+    title: `مراجعة التحديث من Excel — ${partnerName(t)}`, size: 'lg', cls: 'px-dlg',
+    body: `<p class="small muted" style="margin-bottom:10px">${plural(list.length, 'حقل واحد تغيّر', 'حقلان تغيّرا', 'حقول تغيّرت', 'حقلًا تغيّر')} عن البيانات الحالية. ألغِ تحديد ما لا تريد اعتماده.</p>
+      ${errs.length ? `<div class="note warn" style="margin-bottom:10px">${icon('alert')}<span>${errs.map(esc).join('<br>')}</span></div>` : ''}
+      <div class="px-tbl"><table><thead><tr><th></th><th>الحقل</th><th>الحالي</th><th>الجديد من الملف</th></tr></thead><tbody>
+      ${list.map((c, i) => `<tr><td><input type="checkbox" checked data-pxi="${i}"></td><th>${esc(c.f.l)}</th><td class="px-old">${esc(pxShow(c.f, c.old)) || '<i>فارغ</i>'}</td><td class="px-new">${esc(pxShow(c.f, c.v)) || '<i>يُفرَّغ</i>'}</td></tr>`).join('')}
+      </tbody></table></div>`,
+    foot: `<button class="btn primary" data-ok>${icon('check')} اعتماد التحديث</button><button class="btn ghost" data-mclose>إلغاء</button>`,
+  });
+  m.el.querySelector('[data-ok]').onclick = async () => {
+    const pick = list.filter((_, i) => m.el.querySelector(`[data-pxi="${i}"]`).checked);
+    if (!pick.length) return m.close();
+    for (const c of pick) {
+      const k = c.f.k;
+      if (k === 'sector') { const pr = partnerById(t.partnerId); if (pr) { pr.sector = c.v; await Repo.save('partners', pr); } }
+      else if (k.startsWith('hl.')) { t.highlight = { value: '', label: '', text: '', ...(t.highlight || {}) }; t.highlight[k.slice(3)] = c.v; if (!t.highlight.value) t.highlight = null; }
+      else t[k] = c.v;
+    }
+    if (!(t.title || '').trim()) t.title = partnerName(t);
+    t.updatedAt = nowISO(); t.updatedBy = Session.userName();
+    await Repo.save('partnerships', t);
+    await Repo.log('partnership.update', 'partnership', t.id, t.code + ' — ' + t.title, 'تحديث من نموذج Excel: ' + pick.map((c) => c.f.l).join('، '));
+    m.close(); toast(`حُدِّث ${plural(pick.length, 'حقل واحد', 'حقلان', 'حقول', 'حقلًا')} من ملف Excel`);
+    if (t.id === p.id) rerenderKeep(); else go('#/partnerships/' + t.id);
+  };
+}
+
+function ptXlsxDialog(p) {
+  const m = Modal.open({
+    title: 'نموذج Excel للشراكة', cls: 'px-menu',
+    body: `<p class="small muted" style="line-height:1.9;margin-bottom:14px">نزّل ملف Excel فيه كل بيانات هذه الشراكة، وأرسله لمن يحدّثها. بعد إعادته ارفعه هنا: تُعرض التغييرات للمراجعة قبل الحفظ، ويُسجَّل التحديث في سجل التغييرات.</p>
+      <div class="px-acts"><button class="px-act" data-pxdl>${icon('download')}<b>تنزيل النموذج ببيانات الشراكة</b><span>ملف xlsx بقوائم منسدلة وإرشادات تعبئة</span></button>
+      <label class="px-act">${icon('upload')}<b>رفع نموذج محدَّث</b><span>يُطابَق مع الشراكة تلقائيًا</span><input type="file" hidden accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-pxup></label></div>`,
+  });
+  m.el.querySelector('[data-pxdl]').onclick = () => { m.close(); exportPartnershipXlsx(p); };
+  m.el.querySelector('[data-pxup]').onchange = (e) => { const f = e.target.files[0]; if (!f) return; m.close(); importPartnershipXlsx(p, f); };
+}
+
+/* —— 18f-bulk-photos.js —— */
+/* =====================================================================
+   رفع صور كل الشراكات دفعة واحدة من مجلدات
+   - مجلد لكل شراكة باسمها كما في المنصة (أو باسم الجهة، أو برمز الشراكة مثل PT-2026-001).
+   - يُختار المجلد الرئيسي، أو تُسحب المجلدات إلى النافذة.
+   - تُعرض المطابقة للمراجعة (ويمكن تغيير الشراكة لأي مجلد) قبل الرفع.
+   - تُضاف الصور إلى «صور الشراكة»، وتُتجاوز الصور الموجودة بالاسم نفسه، وتصبح الأولى غلافًا إن لم يكن للشراكة غلاف.
+   ===================================================================== */
+const BP_IMG = /\.(jpe?g|png|webp|gif|heic|heif|bmp)$/i;
+function bpCandidates() { return D.partnerships.filter((p) => showDemo() || !p.demo); }
+/* مطابقة اسم مجلد بشراكة: الرمز، ثم اسم الشراكة، ثم اسم الجهة وأسماؤها البديلة */
+function bpMatch(name) {
+  const n = normAr(name), list = bpCandidates();
+  if (!n) return { ids: [] };
+  const code = name.match(/PT-\d{4}-\d{3}/i);
+  if (code) { const p = list.find((x) => (x.code || '').toUpperCase() === code[0].toUpperCase()); if (p) return { ids: [p.id], how: 'الرمز' }; }
+  let m = list.filter((p) => normAr(p.title) === n);
+  if (m.length) return { ids: m.map((p) => p.id), how: 'اسم الشراكة' };
+  m = list.filter((p) => { const pr = partnerById(p.partnerId); return pr && (normAr(pr.name) === n || (pr.aliases || []).some((a) => normAr(a) === n)); });
+  if (m.length) return { ids: m.map((p) => p.id), how: 'اسم الجهة' };
+  // بلا الأقواس: «المركز الوطني لكفاءة وترشيد المياه» تطابق «… (مائي)»
+  const bare = (s) => normAr(String(s || '').replace(/\(.*?\)/g, ''));
+  m = list.filter((p) => bare(p.title) === bare(name) || bare(partnerName(p)) === bare(name));
+  if (m.length) return { ids: m.map((p) => p.id), how: 'اسم مقارب' };
+  return { ids: [] };
+}
+/* تجميع الملفات حسب المجلد: يُجرَّب كل مستوى من الأعمق إلى الأعلى حتى يطابق شراكة */
+function bpGroup(entries) {
+  const groups = new Map();
+  for (const { file, path } of entries) {
+    if (!BP_IMG.test(file.name) && !/^image\//.test(file.type)) continue;
+    const segs = path.split('/').slice(0, -1).filter(Boolean);
+    if (!segs.length) continue;
+    let key = segs[segs.length - 1], hit = null;
+    for (let i = segs.length - 1; i >= 0; i--) { const r = bpMatch(segs[i]); if (r.ids.length) { key = segs[i]; hit = r; break; } }
+    if (!groups.has(key)) groups.set(key, { folder: key, files: [], match: hit || bpMatch(key) });
+    groups.get(key).files.push(file);
+  }
+  return [...groups.values()].sort((a, b) => (b.match.ids.length === 1) - (a.match.ids.length === 1) || a.folder.localeCompare(b.folder, 'ar'));
+}
+/* قراءة مجلدات مسحوبة إلى النافذة */
+async function bpReadDrop(items) {
+  const out = [];
+  const walk = (entry, path) => new Promise((res) => {
+    if (entry.isFile) entry.file((f) => { out.push({ file: f, path: path + f.name }); res(); }, () => res());
+    else if (entry.isDirectory) {
+      const rd = entry.createReader(), all = [];
+      const next = () => rd.readEntries(async (ents) => { if (!ents.length) { for (const e of all) await walk(e, path + entry.name + '/'); res(); } else { all.push(...ents); next(); } }, () => res());
+      next();
+    } else res();
+  });
+  for (const it of [...items]) { const e = it.webkitGetAsEntry && it.webkitGetAsEntry(); if (e) await walk(e, ''); }
+  return out;
+}
+
+function bulkPhotosDialog() {
+  let groups = [];
+  const m = Modal.open({
+    title: 'رفع صور الشراكات من مجلدات', size: 'lg', cls: 'bp-dlg',
+    body: `<div class="bp-intro">
+        <p>جهّز مجلدًا رئيسيًا فيه <b>مجلد لكل شراكة</b> يحمل اسمها كما يظهر في المنصة (أو اسم الجهة، أو رمز الشراكة مثل <span dir="ltr">PT-2026-001</span>)، وضع صور كل شراكة داخل مجلدها.</p>
+        <ul class="bp-tree"><li>📁 صور الشراكات</li><li class="sub">📁 بنك البلاد <small>— صور هذه الشراكة بداخله</small></li><li class="sub">📁 جامعة الجوف</li><li class="sub">📁 <span dir="ltr">PT-2026-014</span></li></ul>
+      </div>
+      <label class="bp-drop" data-bpdrop>${icon('upload')}<b>اختر المجلد الرئيسي</b><span>أو اسحب المجلدات إلى هنا</span><input type="file" hidden webkitdirectory directory multiple data-bpin></label>
+      <div data-bpout></div>`,
+    foot: `<button class="btn primary" data-bpgo disabled>${icon('upload')} رفع الصور</button><button class="btn ghost" data-mclose>إغلاق</button>`,
+  });
+  const out = m.el.querySelector('[data-bpout]'), go = m.el.querySelector('[data-bpgo]'), drop = m.el.querySelector('[data-bpdrop]');
+  const opts = bpCandidates().slice().sort((a, b) => partnerName(a).localeCompare(partnerName(b), 'ar'));
+  const optHTML = (sel) => `<option value="">— تجاهل هذا المجلد —</option>${opts.map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''}>${esc(partnerName(p))}${p.title && p.title !== partnerName(p) ? ' — ' + esc(p.title) : ''} · ${esc(p.code || '')}</option>`).join('')}`;
+  const draw = () => {
+    if (!groups.length) { out.innerHTML = '<div class="note warn" style="margin-top:12px">' + icon('alert') + '<span>لم أجد صورًا داخل مجلدات. تأكد أن الصور داخل مجلد لكل شراكة.</span></div>'; go.disabled = true; return; }
+    groups.forEach((g) => { if (g.pick === undefined) g.pick = g.match.ids.length === 1 ? g.match.ids[0] : ''; });
+    const ok = groups.filter((g) => g.pick), nImg = ok.reduce((t, g) => t + g.files.length, 0);
+    out.innerHTML = `<div class="bp-sum"><span><b>${groups.length}</b> مجلد</span><span><b>${ok.length}</b> مطابق</span><span><b>${groups.length - ok.length}</b> بلا مطابقة</span><span><b>${nImg}</b> صورة ستُرفع</span></div>
+      <div class="bp-list">${groups.map((g, i) => {
+        const st = g.pick ? (g.match.ids.includes(g.pick) && g.match.ids.length === 1 ? `<span class="chip ok plain">طابق ${esc(g.match.how)}</span>` : '<span class="chip gold plain">اختيار يدوي</span>') : g.match.ids.length > 1 ? '<span class="chip warn plain">أكثر من شراكة — اختر</span>' : '<span class="chip warn plain">لا يطابق — اختر أو تجاهل</span>';
+        return `<div class="bp-row ${g.pick ? '' : 'off'}"><div class="bp-f"><b>📁 ${esc(g.folder)}</b><span>${plural(g.files.length, 'صورة واحدة', 'صورتان', 'صور', 'صورة')}</span></div>
+          <select class="in" data-bpsel="${i}">${g.match.ids.length > 1 && !g.pick ? `<option value="">— اختر من ${g.match.ids.length} شراكات للجهة —</option>` : ''}${optHTML(g.pick)}</select>${st}</div>`;
+      }).join('')}</div>`;
+    go.disabled = !nImg;
+    out.querySelectorAll('[data-bpsel]').forEach((s) => { s.onchange = () => { groups[+s.dataset.bpsel].pick = s.value; draw(); }; });
+  };
+  const load = (entries) => { groups = bpGroup(entries); draw(); };
+  m.el.querySelector('[data-bpin]').onchange = (e) => load([...e.target.files].map((f) => ({ file: f, path: f.webkitRelativePath || f.name })));
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = async (e) => { e.preventDefault(); drop.classList.remove('over'); load(await bpReadDrop(e.dataTransfer.items)); };
+  go.onclick = async () => {
+    const todo = groups.filter((g) => g.pick && g.files.length);
+    const byP = new Map(); todo.forEach((g) => { byP.set(g.pick, [...(byP.get(g.pick) || []), ...g.files]); });
+    const total = [...byP.values()].reduce((t, f) => t + f.length, 0);
+    go.disabled = true; m.el.querySelectorAll('select,input').forEach((x) => { x.disabled = true; });
+    out.insertAdjacentHTML('afterbegin', `<div class="bp-prog"><div><i style="width:0"></i></div><span>جارٍ الرفع… 0 / ${total}</span></div>`);
+    const bar = out.querySelector('.bp-prog i'), lab = out.querySelector('.bp-prog span');
+    let done = 0, added = 0, skipped = 0, failed = 0; const touched = [];
+    for (const [pid, files] of byP) {
+      const p = D.partnerships.find((x) => x.id === pid); if (!p) continue;
+      const have = new Set((p.attachments || []).filter((a) => a.category === 'صور الشراكة').map((a) => normAr(a.name)));
+      const add = [];
+      for (const f of files) {
+        if (have.has(normAr(f.name))) skipped++;
+        else {
+          try { const rec = await saveUpload(f); add.push({ id: uid('att'), fileId: rec.id, name: rec.name, type: rec.type, size: rec.size, category: 'صور الشراكة', addedAt: nowISO(), by: Session.userName() }); have.add(normAr(f.name)); }
+          catch (_) { failed++; }
+        }
+        done++; bar.style.width = Math.round((done / total) * 100) + '%'; lab.textContent = `جارٍ الرفع… ${done} / ${total}`;
+      }
+      if (!add.length) continue;
+      p.attachments = [...(p.attachments || []), ...add];
+      if (!p.coverFileId || p.coverFileId.startsWith('lib:')) p.coverFileId = add[0].fileId;
+      await Repo.save('partnerships', p);
+      await Repo.log('partnership.files', 'partnership', p.id, p.code, `رفع جماعي من مجلد: ${add.length} صورة إلى «صور الشراكة»`);
+      added += add.length; touched.push(p);
+    }
+    lab.textContent = `اكتمل: رُفعت ${added} صورة إلى ${touched.length} شراكة${skipped ? ` · تُجووزت ${skipped} موجودة مسبقًا` : ''}${failed ? ` · تعذّر ${failed}` : ''}`;
+    go.textContent = 'تم'; go.disabled = false; go.onclick = () => { m.close(); route(); };
+    toast(`رُفعت ${added} صورة إلى ${touched.length} شراكة`);
+  };
 }
 
 /* —— 20-designs.js —— */

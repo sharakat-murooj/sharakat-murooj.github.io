@@ -18,7 +18,7 @@ function renderRegister(el, r) {
   el.classList.add('regpage');
   el.innerHTML = `<div id="regPrintHead"></div>
     <div class="ph no-print"><div><h1>سجل الشراكات</h1><p>ابحث بالاسم أو الرمز أو أي نص في المجالات والمخرجات.</p></div>
-    <div class="ph-actions">${can('export') ? `<button class="btn" data-xls>${icon('download')} Excel</button><button class="btn icon-only" data-print title="طباعة" aria-label="طباعة">${icon('print')}</button>` : ''}${can('view.reports') ? `<button class="btn" data-rep title="تقرير بالشراكات المعروضة">${icon('file')} تقرير</button>` : ''}${canEdit ? `<a class="btn primary" href="#/partnerships/new">${icon('plus')} شراكة جديدة</a>` : ''}</div></div>
+    <div class="ph-actions">${can('export') ? `<button class="btn" data-xls>${icon('download')} Excel</button><button class="btn icon-only" data-print title="طباعة" aria-label="طباعة">${icon('print')}</button>` : ''}${can('view.reports') ? `<button class="btn" data-rep title="تقرير بالشراكات المعروضة">${icon('file')} تقرير</button>` : ''}${canEdit ? `<button class="btn" data-bulkph title="رفع صور كل الشراكات دفعة واحدة من مجلدات بأسمائها">${icon('image')} رفع الصور</button><a class="btn primary" href="#/partnerships/new">${icon('plus')} شراكة جديدة</a>` : ''}</div></div>
     ${design() === 'board' ? '<div class="bo-strip-st no-print" id="regStrip" role="group" aria-label="تصفية سريعة حسب الحالة"></div>' : ''}
     <div class="reg-tools" data-tour="reg-tools">
       <div class="searchbox">${icon('search')}<input id="regQ" type="search" placeholder="بحث في السجل…" value="${esc(st.q)}" aria-label="بحث في السجل"></div>
@@ -104,6 +104,7 @@ function renderRegister(el, r) {
     }
     const qa = e.target.closest('[data-rtgo]'); if (qa) { go(qa.dataset.rtgo); return; }
     if (e.target.closest('[data-xls]')) exportPartnershipsXlsx(App.lastRegList || [], 'سجل-الشراكات');
+    if (e.target.closest('[data-bulkph]')) return bulkPhotosDialog();
     if (e.target.closest('[data-rep]')) { const ids = (App.lastRegList || []).map((p) => p.id); if (!ids.length) return toast('لا توجد شراكات معروضة.', 'err'); App.ui.rpt.ids = ids; go('#/reports'); }
   });
 }

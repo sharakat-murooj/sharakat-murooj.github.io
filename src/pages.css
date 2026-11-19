@@ -5071,3 +5071,38 @@ html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n small{top:min(2cqw,2.67cqh);width
 html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n.up small{bottom:min(2cqw,2.67cqh);top:auto}
 html.ob-show #obBody>.ob-mosaic.v-orbit .orb-core{width:min(9cqw,12cqh);height:min(9cqw,12cqh)}
 html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n .star{left:min(.9cqw,1.2cqh);top:calc(min(2.3cqw,3.07cqh) * -1);width:min(1.4cqw,1.87cqh);height:min(1.4cqw,1.87cqh)}
+
+/* ===== نموذج Excel للشراكة ===== */
+.px-acts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.px-act{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--paper);cursor:pointer;text-align:start;font:inherit;color:inherit;transition:border-color .15s,background .15s}
+.px-act:hover{border-color:var(--brand,#1F6B5C);background:var(--paper-2)}
+.px-act svg{width:22px;height:22px;color:var(--brand,#1F6B5C)}
+.px-act b{font-size:14.5px}.px-act span{font-size:12.5px;color:var(--muted)}
+@media (max-width:560px){.px-acts{grid-template-columns:1fr}}
+.px-tbl{max-height:60vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.px-tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.px-tbl th,.px-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top;white-space:pre-line}
+.px-tbl thead th{position:sticky;top:0;background:var(--paper-2);font-size:12px;color:var(--muted)}
+.px-tbl tbody th{color:var(--ink);font-weight:600;width:22%}
+.px-old{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(160,60,50,.45)}
+.px-new{color:var(--ok,#1E6B4A);font-weight:500}
+.px-tbl i{color:var(--faint);font-style:normal}
+
+/* ===== رفع صور الشراكات من مجلدات ===== */
+.bp-intro p{line-height:1.9;font-size:13.5px;color:var(--muted);margin-bottom:10px}
+.bp-tree{list-style:none;margin:0 0 14px;padding:10px 14px;font-size:12.5px;background:var(--paper-2);border-radius:10px;line-height:1.9}
+.bp-tree li{display:block;white-space:nowrap}.bp-tree li.sub{padding-inline-start:22px;position:relative}
+.bp-tree li.sub::before{content:'';position:absolute;inset-inline-start:8px;top:0;height:60%;width:9px;border-inline-start:1px solid var(--faint);border-bottom:1px solid var(--faint)}
+.bp-tree small{color:var(--muted);font-size:11.5px}
+.bp-drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px;border:2px dashed var(--line);border-radius:14px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
+.bp-drop:hover,.bp-drop.over{border-color:var(--brand);background:var(--paper-2)}
+.bp-drop svg{width:26px;height:26px;color:var(--brand)}.bp-drop b{font-size:15px}.bp-drop span{font-size:12.5px;color:var(--muted)}
+.bp-sum{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0 8px;font-size:13px;color:var(--muted)}.bp-sum b{color:var(--ink);font-size:15px}
+.bp-list{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.bp-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) auto;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.bp-row:last-child{border-bottom:0}.bp-row.off{background:var(--paper-2)}
+.bp-row .in{height:34px;font-size:12.5px;padding-block:4px}
+.bp-f{display:flex;flex-direction:column;min-width:0}.bp-f b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.bp-f span{font-size:11.5px;color:var(--muted)}
+@media (max-width:640px){.bp-row{grid-template-columns:1fr}}
+.bp-prog{margin:12px 0}.bp-prog div{height:8px;border-radius:99px;background:var(--paper-2);overflow:hidden}.bp-prog i{display:block;height:100%;background:var(--brand);transition:width .2s}
+.bp-prog span{display:block;font-size:12.5px;color:var(--muted);margin-top:6px}

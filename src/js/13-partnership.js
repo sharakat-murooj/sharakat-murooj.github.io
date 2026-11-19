@@ -32,6 +32,7 @@ function renderPartnership(el, r) {
     <button class="icon-btn da-btn" data-print title="طباعة صفحة الشراكة" aria-label="طباعة">${icon('print')}</button>
     <button class="btn sm da-lbl" data-dossier data-tour="detail-dossier" title="الملف الشامل: ملف واحد يجمع التفاصيل والنماذج والصور والمستندات" aria-label="الملف الشامل">${icon('file')}<span>الملف الشامل</span></button>
     ${can('view.reports') ? `<a class="btn sm ghost da-lbl" href="#/reports?ids=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" data-tour="detail-report" title="تقرير الشراكة" aria-label="تقرير الشراكة">${icon('chart')}<span>تقرير</span></a><a class="btn sm ghost da-lbl" href="#/reports/marketing?p=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" title="العرض المرئي لهذه الشراكة: شرائح متحركة بصورها وأرقامها" aria-label="العرض المرئي">${icon('play')}<span>العرض المرئي</span></a>` : ''}
+    ${canEdit ? `<button class="icon-btn da-btn" data-ptxl title="نموذج Excel: تنزيل بيانات الشراكة أو رفع نموذج محدَّث" aria-label="نموذج Excel">${icon('table')}</button>` : ''}
     ${canEdit ? `<a class="icon-btn da-btn primary" href="#/partnerships/${p.id}/edit" title="تعديل" aria-label="تعديل">${icon('edit')}</a>` : ''}
     ${can('delete.partnership') ? `<button class="icon-btn da-btn danger" data-del title="حذف" aria-label="حذف">${icon('trash')}</button>` : ''}
     <button class="icon-btn da-btn" data-asidet title="إخفاء أو إظهار الشريط الجانبي" aria-label="الشريط الجانبي">${icon('sidebar')}</button></div></div></div>
@@ -120,6 +121,7 @@ function renderPartnership(el, r) {
     if (an) { e.preventDefault(); if (el.classList.contains('tabbed')) { showTab(an.dataset.anchor); return; } const s = $('#' + an.dataset.anchor, el); s && window.scrollTo({ top: s.getBoundingClientRect().top + scrollY - 124, behavior: 'smooth' }); return; }
     if (e.target.closest('[data-print]')) return printPartnershipCard(p); // بطاقة مصممة للطباعة بدل واجهة الصفحة
     if (e.target.closest('[data-dossier]')) return dossierDialog(p);
+    if (e.target.closest('[data-ptxl]')) return ptXlsxDialog(p);
     const dg = e.target.closest('[data-dgal]'); if (dg) return openGallery(photos, +dg.dataset.dgal);
     const vf = e.target.closest('[data-viewf]'); if (vf) return viewStored(vf.dataset.viewf);
     const sc = e.target.closest('[data-setcover]');
@@ -243,7 +245,7 @@ const AUDIT_LABELS = {
   'partnership.create': 'إنشاء سجل الشراكة', 'partnership.update': 'تعديل البيانات', 'partnership.delete': 'حذف سجل الشراكة', 'partnership.confirm': 'تأكيد قيمة مستوردة', 'partnership.publish': 'تغيير الظهور في الواجهة',
   'home.featured': 'تغيير العرض المميز', 'partnership.golden': 'الشراكات الذهبية', 'list.request': 'اقتراح خيار جديد', 'list.decision': 'قرار على خيار مقترح', 'workflow.direct': 'تسجيل مباشر', 'partnership.files': 'تحديث ملفات الشراكة', 'list.add': 'إضافة قيمة إلى قائمة', 'proposal.create': 'إنشاء مقترح', 'proposal.submit': 'تقديم مقترح', 'proposal.status': 'تغيير حالة مقترح', 'proposal.note': 'ملاحظة على مقترح', 'proposal.update': 'تحديث مقترح',
   'partner.create': 'إضافة جهة', 'partner.update': 'تعديل جهة', 'partner.merge': 'دمج جهتين', 'partner.delete': 'حذف جهة', 'settings.update': 'تعديل الإعدادات', 'content.save': 'حفظ محتوى', 'content.delete': 'حذف محتوى',
-  'partnership.dossier': 'تجهيز الملف الشامل', seed: 'تهيئة المنصة', backup: 'نسخة احتياطية', restore: 'استعادة نسخة احتياطية', 'demo.toggle': 'إظهار/إخفاء البيانات التجريبية', 'role.switch': 'معاينة بحساب آخر', 'auth.login': 'تسجيل دخول', 'notify.read': 'قراءة الإشعارات', 'auth.logout': 'تسجيل خروج', 'auth.password': 'تغيير كلمة مرور',
+  'partnership.dossier': 'تجهيز الملف الشامل', 'partnership.export': 'تنزيل نموذج Excel', seed: 'تهيئة المنصة', backup: 'نسخة احتياطية', restore: 'استعادة نسخة احتياطية', 'demo.toggle': 'إظهار/إخفاء البيانات التجريبية', 'role.switch': 'معاينة بحساب آخر', 'auth.login': 'تسجيل دخول', 'notify.read': 'قراءة الإشعارات', 'auth.logout': 'تسجيل خروج', 'auth.password': 'تغيير كلمة مرور',
 };
 
 /* ===== نموذج الإدخال والتعديل ===== */
