@@ -8770,6 +8770,20 @@ html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n .star{left:min(.9cqw,1.2cqh);top:
 .ml-log li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:8px 12px;border-bottom:1px solid var(--line)}.ml-log li:last-child{border-bottom:0}
 .ml-log li small{color:var(--muted)}.ml-log li em{grid-column:1/-1;font-style:normal;color:var(--muted)}
 .ml-log li.ok em{color:var(--ok,#1E6B4A)}.ml-log li.bad em{color:var(--bad,#9A2F22)}
+
+/* ===== مسار المذكرة في الوضع الداكن: حدود وعناوين أهدأ (لا تمس الوضع الفاتح) ===== */
+:root[data-theme="dark"] .wf-ph{border-color:color-mix(in srgb,var(--ink) 9%,transparent);background:color-mix(in srgb,var(--paper-2) 70%,transparent)}
+:root[data-theme="dark"] .wf-s{border-top-color:color-mix(in srgb,var(--ink) 7%,transparent)}
+:root[data-theme="dark"] .wf-h b{color:color-mix(in srgb,var(--ink) 84%,var(--paper));font-weight:500}
+:root[data-theme="dark"] .wf-s.cur .wf-h b{color:var(--ink)}
+:root[data-theme="dark"] .wf-ph h4{color:color-mix(in srgb,var(--ink) 80%,var(--paper));font-weight:600}
+:root[data-theme="dark"] .wf-doc{border-color:color-mix(in srgb,var(--ink) 11%,transparent);background:color-mix(in srgb,var(--ink) 3%,var(--paper));color:color-mix(in srgb,var(--ink) 78%,var(--paper))}
+:root[data-theme="dark"] .wf-doc:hover{border-color:color-mix(in srgb,var(--gold) 55%,transparent)}
+:root[data-theme="dark"] .wf-doc small{color:color-mix(in srgb,var(--ink) 45%,var(--paper))}
+:root[data-theme="dark"] .wf-doc .ic{color:color-mix(in srgb,var(--gold) 80%,var(--paper))}
+:root[data-theme="dark"] .wf-dot{border-color:color-mix(in srgb,var(--ink) 16%,transparent)}
+:root[data-theme="dark"] .wf-s.done .wf-dot{background:color-mix(in srgb,var(--petrol-3) 70%,var(--paper));border-color:transparent}
+:root[data-theme="dark"] .wf-m,:root[data-theme="dark"] .wf-who{color:color-mix(in srgb,var(--ink) 52%,var(--paper))}
 </style>
 </head>
 <body>
