@@ -268,6 +268,7 @@ async function setPropStatus(x, to, message = '', vis = 'all') {
   await propEvent(x, { type: 'status', from, to, message, vis });
   await Repo.save('proposals', x);
   await Repo.log('proposal.status', 'proposal', x.id, x.ref, `${propStatusLabel(from)} ← ${propStatusLabel(to)}${message ? ' — ' + message.slice(0, 80) : ''}`);
+  if (x.external && vis !== 'internal' && from !== to && typeof extMailUpdate === 'function') extMailUpdate(x, to, message);
   if (['info', 'converted'].includes(to) && typeof notify === 'function') await notify([{ dept: x.department }], { t: to === 'info' ? `طلب استكمال للمقترح ${x.ref}` : `تحوّل مقترحكم ${x.ref} إلى سجل شراكة`, b: message ? message.slice(0, 140) : propStatusLabel(to), href: '#/proposals/' + x.id, ic: to === 'info' ? 'msg' : 'convert' });
 }
 /* تحويل المقترح المقبول إلى سجل شراكة مع نقل البيانات والمرفقات */
