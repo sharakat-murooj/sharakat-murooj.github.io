@@ -109,7 +109,8 @@ const FORMS = {
     no: 'LTR', title: 'خطاب طلب موافقة المعالي', step: 'legal', ic: 'mail', letter: true,
     sections: (R) => {
       const L_ = D.settings.letter || {};
-      const body = `نحيط معاليكم علمًا بأن ${D.settings.org.name} تعمل حاليًا على التنسيق مع ${R.name}، وذلك لإبرام ${R.cls || 'مذكرة تفاهم'} تهدف إلى ${R.purpose || 'تعزيز التعاون في المجالات ذات الاهتمام المشترك'}.${R.added ? ` وتكمن القيمة المضافة لهذه الشراكة في ${R.added}` : ''}${R.coop.length ? `، وتشمل مجالات التعاون: ${R.coop.slice(0, 4).map((x) => trimP(x.split(':')[0])).join('، ')}` : ''}. ومن شأن هذه الشراكة أن تسهم في تعزيز القدرات الفنية والمؤسسية للمؤسسة، ورفع جودة مخرجاتها، وتعظيم الأثر المستدام لمبادراتها، بما يدعم تحقيق مستهدفاتها الاستراتيجية ومستهدفات رؤية المملكة 2030. (مرفق نسخة المذكرة).`;
+      R = { ...R, purpose: String(R.purpose || '').replace(/[\s.،:]+$/, ''), added: String(R.added || '').replace(/[\s.،:]+$/, '') };
+      const body = `نحيط معاليكم علمًا بأن ${D.settings.org.name} تعمل حاليًا على التنسيق مع ${R.name}، وذلك لإبرام ${R.cls || 'مذكرة تفاهم'} تهدف إلى ${R.purpose || 'تعزيز التعاون في المجالات ذات الاهتمام المشترك'}${R.coop.length ? `، وتشمل مجالات التعاون: ${R.coop.slice(0, 4).map((x) => trimP(x.split(':')[0]).replace(/[\s.،:]+$/, '')).join('، ')}` : ''}.${R.added && R.added !== R.purpose ? ` وتكمن القيمة المضافة لهذه الشراكة في ${R.added}.` : ''} ومن شأن هذه الشراكة أن تسهم في تعزيز القدرات الفنية والمؤسسية للمؤسسة، ورفع جودة مخرجاتها، وتعظيم الأثر المستدام لمبادراتها، بما يدعم تحقيق مستهدفاتها الاستراتيجية ومستهدفات رؤية المملكة 2030. (مرفق نسخة المذكرة).`;
       return [
         { t: 'المخاطَب', fields: [
           { k: 'to1', l: 'المخاطَب', type: 'text', def: L_.to1 || 'معالي نائب وزير البيئة والمياه والزراعة', req: true },
@@ -119,7 +120,7 @@ const FORMS = {
         { t: 'نص الخطاب', note: 'يُولَّد النص من بيانات الشراكة، ويمكن تعديله قبل الإرسال للمراجعة القانونية.', fields: [
           { k: 'body', l: 'المتن', type: 'textarea', rows: 9, def: body, req: true },
           { k: 'closing', l: 'الختام', type: 'textarea', rows: 3, def: 'ونظرًا لأهمية هذه الشراكة وما تحققه من تكامل بين الجهات ذات العلاقة.\nآمل من معاليكم التلطف بالاطلاع والمباركة، أو التوجيه بما ترونه من سديد الرأي.' },
-          { k: 'atts', l: 'مرفقات الخطاب', type: 'text', def: 'نسخة من مذكرة التفاهم' },
+          { k: 'atts', l: 'مرفقات الخطاب', type: 'text', def: `نسخة من ${R.cls || 'مذكرة التفاهم'}` },
         ] },
         { t: 'التوقيع', fields: [
           { k: 'signTitle', l: 'صفة الموقِّع', type: 'text', def: L_.signTitle || `الرئيس التنفيذي لـ${D.settings.org.name}`, req: true },
@@ -490,7 +491,9 @@ function formDocHTML(kind, rec, key, evalIdx = null, forWord = false) {
   const secs = F.sections(R, rec);
   const head = `<div class="fd-head"><div class="fd-brand">${logo ? `<img src="${logo}" alt="">` : ''}<div><b>${esc(D.settings.org.name)}</b><span>${esc(D.settings.org.dept)}</span></div></div><div class="fd-meta"><div><span>رقم النموذج</span><b>${esc((st && st.no) || '—')}</b></div><div><span>التاريخ</span><b>${st && st.at ? fmtDate(st.at.slice(0, 10)) + 'م' : '—'}</b></div></div></div>`;
   if (F.letter) {
-    return `<article class="fdoc fletter" dir="rtl">${head}
+    /* خطاب رسمي لمعالي نائب الوزير: ترويسة المؤسسة فقط — بلا اسم الإدارة ولا رقم النموذج ولا تذييل المنصة */
+    const lhead = `<div class="fl-head">${logo ? `<img src="${logo}" alt="${esc(D.settings.org.name)}">` : `<b>${esc(D.settings.org.name)}</b>`}</div>`;
+    return `<article class="fdoc fletter fl-official" dir="rtl">${lhead}
       <div class="fl-to"><b>${esc(d.to1 || '')}</b><b>${esc(d.to2 || '')}</b><span>سلمه الله</span></div>
       <p class="fl-salam">السلام عليكم ورحمة الله وبركاته،</p>
       <p class="fl-sub"><b>الموضوع:</b> ${esc(d.subject || '')}</p>
@@ -498,8 +501,7 @@ function formDocHTML(kind, rec, key, evalIdx = null, forWord = false) {
       <div class="fl-body">${esc(d.closing || '').replace(/\n/g, '<br>')}</div>
       <p class="fl-thanks">وتقبلوا معاليكم خالص تحياتي،</p>
       <div class="fl-sign"><b>${esc(d.signTitle || '')}</b><b>${esc(d.signName || '')}</b></div>
-      ${d.atts ? `<p class="fl-atts"><b>المرفقات:</b> ${esc(d.atts)}</p>` : ''}
-      <footer class="fd-foot">${esc(D.settings.org.name)} · ${esc(D.settings.org.platform)} · ${st && st.status === 'done' ? 'نسخة معتمدة' : 'مسودة'}</footer></article>`;
+      ${d.atts ? `<p class="fl-atts"><b>المرفقات:</b> ${esc(d.atts)}</p>` : ''}</article>`;
   }
   const body = secs.map((s) => {
     const simple = s.fields.filter((f) => !['checklist', 'scores', 'clauses'].includes(f.type) && !(f.type === 'textarea' && f.n));

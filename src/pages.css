@@ -382,6 +382,12 @@ html.printing-form #formPrint{display:block}
 .fl-sign{margin-top:30px;display:flex;flex-direction:column;align-items:flex-end;text-align:center}
 .fl-sign b{display:block;min-width:260px}
 .fl-atts{margin-top:30px;font-size:12px;color:#5C6861}
+/* الخطاب الرسمي: ترويسة المؤسسة فقط، وموضوع بلا صندوق ملوّن */
+.fl-official .fl-head{display:flex;flex-direction:column;align-items:center;gap:6px;padding-bottom:14px;border-bottom:1px solid #C9CFCB;text-align:center}
+.fl-official .fl-head img{height:86px;width:auto}
+.fl-official .fl-head b{font-size:17px;color:#0B3F38;letter-spacing:.2px}
+.fl-official .fl-sub{background:none;border:0;padding:0;margin:14px 0;text-align:center}
+.fl-official .fl-atts{color:#14201B}
 
 /* — بطاقة التصنيف والقيمة والتقييم — */
 .pf-sec>h2{display:flex;align-items:center;gap:10px}
