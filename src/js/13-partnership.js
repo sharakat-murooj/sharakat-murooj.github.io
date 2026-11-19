@@ -181,7 +181,10 @@ function pFactsHTML(p) {
   const files = (p.attachments || []).length;
   const cell = (ic, l, v, sub, href, tone = '') => `<a class="pfx ${tone}" href="${href}" data-anchor-to="${href.slice(1)}"><span class="pfx-ic">${icon(ic)}</span><span class="pfx-b"><small>${l}</small><b>${v}</b>${sub ? `<em>${sub}</em>` : ''}</span></a>`;
   return `<div class="pfacts" aria-label="حقائق سريعة">
-    ${cell('flag', 'الحالة', esc(statusLabel(st)), dl !== null && ['active', 'soon'].includes(st) ? `متبقٍ ${plural(dl, 'يوم واحد', 'يومان', 'أيام', 'يومًا')}` : p.endDate ? 'حتى ' + fmtDate(p.endDate, 'short') : '', '#ov', st === 'soon' ? 'warn' : '')}
+    ${(() => { /* السارية: المتبقي وتاريخ الانتهاء معًا؛ وإن لم يُسجَّل تاريخ الانتهاء يُقال ذلك صراحة */
+      const live = ['active', 'soon'].includes(st), end = p.endDate;
+      const sub = live && dl !== null ? `متبقٍ ${plural(dl, 'يوم واحد', 'يومان', 'أيام', 'يومًا')} · تنتهي ${fmtDate(end)}` : live && !end ? 'تاريخ الانتهاء غير مسجّل' : end ? (st === 'ended' ? 'انتهت ' : 'حتى ') + fmtDate(end, 'short') : '';
+      return cell('flag', 'الحالة', esc(statusLabel(st)), sub, '#ov', st === 'soon' || (live && !end) ? 'warn' : ''); })()}
     ${wf ? cell('layers', 'مسار المذكرة', `${done} من ${WF_STEPS.length}`, wf.cur ? `${wf.cur.n}. ${esc(wf.cur.t)}` : 'اكتمل المسار', '#wf') : ''}
     ${cell('star', 'آخر تقييم', P.ev && P.ev.score !== null ? `${P.ev.score} <span class="pfx-u">من 100</span>` : 'لم تُقيَّم', P.ev && P.ev.score !== null ? evalGrade(P.ev.score) : 'نموذج تقييم الشراكة', '#profile', P.ev && P.ev.score !== null ? evalTone(P.ev.score) : 'mute')}
     ${can('view.internal') ? cell('chart', 'القيمة التقديرية', P.total ? sarShort(P.total) + ' <span class="pfx-u">⃁</span>' : '—', P.ptype || 'تصنيف غير محدد', '#profile') : ''}
