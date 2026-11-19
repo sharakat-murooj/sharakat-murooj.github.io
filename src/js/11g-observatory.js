@@ -309,7 +309,7 @@ function obMosaic(nd) {
     <header class="ob-sh"><div><h2>${icon('grid')} خريطة الشركاء</h2><p>${nd.length} شراكة في ${order.length} ${order.length === 1 ? 'قطاع' : 'قطاعات'}${strat ? ` · ${strat} شريك استراتيجي ${icon('star')}` : ''}. اضغط القطاع لتصفية اللوحة.</p></div>
       <div class="ob-mzv" role="group" aria-label="طريقة العرض"><button type="button" data-mzv="orbit" class="${obMzView() === 'orbit' ? 'on' : ''}">${icon('globe')} كوكبة</button><button type="button" data-mzv="list" class="${obMzView() === 'list' ? 'on' : ''}">${icon('list')} قائمة</button></div>
       <div class="ob-mzl">${stl.map((k) => `<span><i style="background:${ST_VAR(k)}"></i>${esc(statusLabel(k))} <b>${nd.filter((p) => pStatus(p) === k).length}</b></span>`).join('')}</div></header>
-    ${obOrbit(order, g)}
+    ${obOrbit(order, g).replace('<!--OBST-->', `<div class="ob-mzl orb-st">${stl.map((k) => `<span><i style="background:${ST_VAR(k)}"></i>${esc(statusLabel(k))} <b>${nd.filter((p) => pStatus(p) === k).length}</b></span>`).join('')}</div>`)}
     <div class="mz3">${order.map((s) => {
       const ps = g[s].sort((a, b) => rank(a) - rank(b) || partnerName(a).localeCompare(partnerName(b), 'ar'));
       const cnt = ST.map((k) => [k, ps.filter((p) => pStatus(p) === k).length]).filter(([, n]) => n);
@@ -367,8 +367,9 @@ function obOrbit(order, g) {
       ${rings.map(([rx, ry], i) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" class="rg" style="--k:${i}"/>`).join('')}${TG.length ? `<ellipse cx="${cx}" cy="${cy}" rx="578" ry="418" class="rg rgt"/>` : ''}
       <g class="rays">${rays}</g>${wedges}</svg>
     <div class="orb-core">${logo ? `<img src="${logo}" alt="">` : ''}<b>${N}</b><small>شراكة</small></div>
-    ${tgt}${nodes}<div class="orb-legend">${labels}${TG.length ? `<a class="orb-sec orb-sec-t" href="#/partners?kind=target" style="--c:#8FA9A0"><i></i>مستهدفة<b>${TG.length}</b></a>` : ''}</div>
-  </div>`;
+    ${tgt}${nodes}
+  </div>
+  <div class="orb-foot"><div class="orb-legend">${labels}${TG.length ? `<a class="orb-sec orb-sec-t" href="#/partners?kind=target" style="--c:#8FA9A0"><i></i>مستهدفة<b>${TG.length}</b></a>` : ''}</div><!--OBST--></div>`;
 }
 
 /* — التذييل المدمج: القرارات واكتمال البيانات وفريق المتابعة في شريط واحد — */

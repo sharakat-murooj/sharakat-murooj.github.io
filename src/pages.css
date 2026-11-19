@@ -5045,3 +5045,29 @@ html.printing-bp.bp-dark,html.printing-bp.bp-dark body{background:#0E1613!import
 .sgp-un{border:1px dashed #B5543C;border-radius:12px;padding:10px 14px;font-size:11.5px}.sgp-un h3{margin:0 0 6px;font-size:13px;color:#B5543C}.sgp-un p{margin:0;line-height:1.7}
 .sgp-f{margin-top:auto;display:flex;justify-content:space-between;border-top:1px solid #E5DFD0;padding-top:6px;font-size:10.5px;color:#8C958E}
 .sgv-lg .plate{width:38px!important;height:38px!important;min-width:38px;border-radius:50%!important;overflow:hidden;display:grid!important;place-items:center;background:#fff;padding:0!important}.sgv-lg .plate img{max-width:76%!important;max-height:76%!important;width:auto!important;height:auto!important;object-fit:contain}.sgv-lg .plate svg{width:56%;height:56%}.sgv-lg .plate .pt{font-size:9px}
+
+/* خريطة الشركاء (كوكبة): بلا بطاقة بيضاء، والمفاتيح تحت الخريطة */
+.ob-mz3.v-orbit{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+.ob-mz3.v-orbit .ob-sh{padding:0 4px}
+.ob-mz3.v-orbit .ob-sh>.ob-mzl{display:none}
+.ob-mz3.v-list .orb-foot{display:none}
+.orb-foot{display:flex;align-items:center;justify-content:space-between;gap:10px 22px;flex-wrap:wrap;margin-top:10px;padding:0 4px}
+.orb-foot .orb-legend{position:static!important;flex-direction:row!important;flex-wrap:wrap;gap:6px!important;top:auto;right:auto}
+.orb-foot .orb-legend .orb-sec{font-size:12.5px;background:var(--paper,#fff);color:var(--ink);border-color:var(--line)}
+.orb-foot .orb-legend .orb-sec b{color:var(--ink)}
+.orb-foot .orb-st{font-size:12.5px}
+.ob-mz3.v-orbit .orb{margin-top:10px}
+/* العرض بملء الشاشة: الخريطة تملأ الشاشة */
+html.ob-show #obBody>.ob-mosaic.v-orbit{padding:0!important;background:transparent!important}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb{height:calc(100vh - 250px)!important;border-radius:22px}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-foot{flex:none;margin-top:12px}
+html.ob-show #obBody>.ob-mosaic.v-orbit .ob-sh h2{font-size:22px}
+html.ob-show #obBody>.ob-mosaic.v-orbit{height:100%!important;max-height:100%!important;display:flex!important;flex-direction:column}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb{flex:1 1 auto!important;min-height:0;height:auto!important;width:100%!important;max-width:none!important;aspect-ratio:auto!important;margin:8px 0 0!important}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-foot{flex:none;margin-top:10px}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb{container-type:size}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n .mg{left:calc(min(3.2cqw,4.27cqh) / -2);top:calc(min(3.2cqw,4.27cqh) / -2);width:min(3.2cqw,4.27cqh);height:min(3.2cqw,4.27cqh)}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n small{top:min(2cqw,2.67cqh);width:min(10.4cqw,13.9cqh);left:calc(min(10.4cqw,13.9cqh) / -2);font-size:max(8.5px,min(.8cqw,1.07cqh))!important}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n.up small{bottom:min(2cqw,2.67cqh);top:auto}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-core{width:min(9cqw,12cqh);height:min(9cqw,12cqh)}
+html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n .star{left:min(.9cqw,1.2cqh);top:calc(min(2.3cqw,3.07cqh) * -1);width:min(1.4cqw,1.87cqh);height:min(1.4cqw,1.87cqh)}
