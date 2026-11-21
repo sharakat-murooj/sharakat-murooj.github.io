@@ -57,15 +57,20 @@ async def main():
         g = await E("(()=>{const G=gapsData(visiblePartnerships().filter(p=>!p.isDraft&&p.stage!=='cancel'));return [G.initGaps.length, document.querySelectorAll('.gp-item').length, G.S.initsAll]})()")
         ok('initiative gaps listed match the data', g[0] == g[1], g)
         await shot('gaps', '#main .page')
-        # — شاشة العرض —
+        # — شاشة العرض (مكتب المعالي) —
         await go('#/live'); await pg.wait_for_timeout(1800)
-        ok('live screen overlay with clock and slides', await E("!!document.querySelector('#liveScreen .lv-clock b').textContent && document.querySelectorAll('#liveScreen [data-lv]').length===5"))
-        await pg.wait_for_timeout(1200); await shot('live_nums')
-        for k, nm in [(1, 'map'), (2, 'sign'), (3, 'field'), (4, 'logos')]:
-            await pg.click(f'#liveScreen [data-lv="{k}"]', force=True); await pg.wait_for_timeout(1600); await shot('live_' + nm)
-        ok('map slide draws regions', await E("(document.querySelector('[data-lv]').click(),1)") and True)
-        await pg.click('#liveScreen [data-lv="1"]', force=True); await pg.wait_for_timeout(800)
-        ok('map slide has region bubbles', await E("document.querySelectorAll('#liveScreen .lv-reg').length") >= 10)
+        ok('executive live screen with clock, Hijri date and chapters', await E("!!document.querySelector('#liveScreen #lxTime').textContent && /هـ/.test(document.querySelector('#lxHijri').textContent) && document.querySelectorAll('#lxNav [data-lx]').length>=5"))
+        chs = await E("[...document.querySelectorAll('#lxNav [data-lx] span')].map(x=>x.textContent)")
+        ok('chapters include executive summary, strategy, map, attention', all(c in chs for c in ['الملخص التنفيذي', 'المواءمة مع الاستراتيجية', 'الانتشار الجغرافي', 'يتطلب اهتمامكم']), chs)
+        ok('news ticker has items', await E("document.querySelectorAll('#lxTick span').length") > 0)
+        ok('screen fits the viewport (no horizontal overflow)', await E("document.getElementById('liveScreen').scrollWidth<=innerWidth+1"))
+        for k, nm in enumerate(chs):
+            await E(f"document.querySelector('#lxNav [data-lx=\"{k}\"]').click()"); await pg.wait_for_timeout(1500); await shot(f'live_{k}')
+            ok(f'chapter «{nm}» renders without leaking objects', await E("!/\\[object Object\\]|undefined|NaN/.test(document.querySelector('#lxStage').innerText)"))
+        await E("document.querySelector('[data-lxcfg]').click()"); await pg.wait_for_timeout(300)
+        await E("document.querySelector('[data-lxon=\"impact\"]').click()"); await E("document.querySelector('[data-lxdone]').click()"); await pg.wait_for_timeout(600)
+        ok('screen settings hide a chapter (saved on this device)', 'الأثر الميداني' not in await E("document.querySelector('#lxNav').innerText") and 'impact' in await E("localStorage.getItem('shk_live_cfg')||''"))
+        await E("localStorage.removeItem('shk_live_cfg')")
         await pg.keyboard.press('Escape'); await pg.wait_for_timeout(800)
         ok('Esc leaves the live screen', await E("!document.getElementById('liveScreen') && !document.documentElement.classList.contains('live-on')"))
         ok('nav has the live screen entry', await E("!!document.querySelector('a[href=\"#/live\"]')"))
