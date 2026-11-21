@@ -8784,6 +8784,50 @@ html.ob-show #obBody>.ob-mosaic.v-orbit .orb-n .star{left:min(.9cqw,1.2cqh);top:
 :root[data-theme="dark"] .wf-dot{border-color:color-mix(in srgb,var(--ink) 16%,transparent)}
 :root[data-theme="dark"] .wf-s.done .wf-dot{background:color-mix(in srgb,var(--petrol-3) 70%,var(--paper));border-color:transparent}
 :root[data-theme="dark"] .wf-m,:root[data-theme="dark"] .wf-who{color:color-mix(in srgb,var(--ink) 52%,var(--paper))}
+
+/* ===== غلاف الشراكة صغير الدقة: صورة واضحة بحجمها على جانب + خلفية مموّهة منها ===== */
+.dhead .cover.lowres{background:#0B2A22}
+.dhead .cover .bgblur{position:absolute;inset:-40px;background-size:cover;background-position:center;filter:blur(30px) saturate(1.15) brightness(.62);transform:scale(1.08)}
+.dhead .cover.lowres img.photo{inset:0 auto 0 0;width:auto;max-width:64%;height:100%;object-fit:cover;object-position:50% 50%;-webkit-mask-image:linear-gradient(to left,transparent 0,#000 22%);mask-image:linear-gradient(to left,transparent 0,#000 22%)}
+@media (max-width:760px){.dhead .cover.lowres img.photo{max-width:100%;inset:0;width:100%;-webkit-mask-image:none;mask-image:none;object-fit:contain}}
+
+/* ===== التصنيف والقيمة والتقييم: بطاقات أوضح (المعبأ يُعرض، والفارغ يُجمع في سطر) ===== */
+.pf-sec>h2 .pf-prog{width:110px;height:6px;border-radius:999px;background:var(--paper-3);overflow:hidden;display:inline-block;margin-inline-start:6px}
+.pf-sec>h2 .pf-prog i{display:block;height:100%;background:linear-gradient(270deg,var(--petrol-3),var(--gold));border-radius:999px}
+.pf-sec>h2 .pf-progl{font-size:12.5px;font-weight:600;color:var(--muted);font-family:inherit}
+.pf-grid{gap:14px}
+.pf-card{display:flex;flex-direction:column;gap:12px;padding:16px 18px}
+.pf-card.is-empty{background:color-mix(in srgb,var(--paper-2) 55%,var(--paper))}
+.pf-ch{display:flex;align-items:center;gap:10px}
+.pf-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--gold) 13%,transparent);color:var(--gold)}
+.pf-ic .ic{width:17px;height:17px}
+.pf-ch h4{margin:0;font-size:15px;font-weight:700;color:var(--ink);flex:1}
+.pf-cnt{font-size:11.5px;font-weight:600;color:var(--muted);background:var(--paper-3);border-radius:999px;padding:2px 9px;font-variant-numeric:tabular-nums}
+.pf-cnt.ok{color:var(--ok,#1E6B4A);background:color-mix(in srgb,var(--petrol-3) 14%,transparent)}
+.pf-kv2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;margin:0}
+.pf-kv2>div.full{grid-column:1/-1}
+.pf-kv2 dt{font-size:12px;color:var(--muted);margin-bottom:4px}
+.pf-kv2 dd{margin:0;font-size:14.5px;color:var(--ink);font-weight:500;line-height:1.6}
+.pf-big{font-size:20px;color:var(--petrol)}
+.pf-miss{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+.pf-card.is-empty .pf-miss{border-top:0;padding-top:0}
+.pf-miss>span{margin-inline-end:2px}
+.pf-miss em{font-style:normal;font-size:12px;color:var(--ink-2);background:var(--paper);border:1px dashed var(--line-2);border-radius:999px;padding:2px 10px}
+.pf-add{margin-inline-start:auto;display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--petrol-3);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 4px}
+.pf-add .ic{width:13px;height:13px}
+.pf-add:hover{text-decoration:underline}
+.pf-quote{margin:0;padding:10px 14px;border-inline-start:3px solid var(--gold);background:color-mix(in srgb,var(--gold) 7%,transparent);border-radius:6px;font-size:13.5px;line-height:1.8;color:var(--ink-2)}
+.pf-quote small{display:block;font-size:11.5px;color:var(--muted);margin-bottom:2px}
+.pf-evempty{display:flex;align-items:center;gap:14px}
+.pf-evempty>div{display:flex;flex-direction:column;gap:3px}
+.pf-evempty b{font-size:15px;color:var(--ink)}
+.pf-evempty span{font-size:12.5px;color:var(--muted);line-height:1.7}
+.pf-ring.mute .bg{stroke:var(--paper-3)}.pf-ring.mute text{fill:var(--faint)}
+.pf-crit{display:flex;flex-wrap:wrap;gap:6px}
+.pf-crit em{font-style:normal;font-size:11.5px;color:var(--ink-2);background:var(--paper-3);border-radius:999px;padding:3px 10px}
+.pf-card .btn.primary{align-self:flex-start}
+.pf-spendw small{display:block;margin-top:4px}
+@media (max-width:560px){.pf-kv2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -21880,6 +21924,7 @@ function renderPartnership(el, r) {
       <p class="xs muted" style="margin-top:10px">لا تظهر بيانات التواصل والمستندات الداخلية في الواجهة التعريفية.</p></div>` : ''}
   </aside></div>`;
   hydrateFiles(el);
+  heroFit(el.querySelector('.dhead .cover img.photo'));
   bindLogoUpload(el, () => rerenderKeep());
   bindWf(el, 'partnership', p);
   bindProfile(el, p);
@@ -22021,6 +22066,22 @@ async function uploadToPartnership(p, cat, files) {
   await Repo.log('partnership.files', 'partnership', p.id, p.code, `رفع ${added.length} إلى «${cat}»: ${added.map((a) => a.name).join('، ')}`);
   toast(`رُفع ${plural(added.length, 'ملف واحد', 'ملفان', 'ملفات', 'ملفًا')} إلى «${cat}»${coverMsg}`);
   return true;
+}
+/* غلاف صغير الدقة (مثل صورة مقتطعة من بوستر): لا يُمطّ على عرض الصفحة؛ يُعرض بحجمه الحقيقي على جانب
+   مع خلفية مموّهة من الصورة نفسها، فيبقى واضحًا ولا تُقصّ الوجوه */
+function heroFit(img) {
+  if (!img) return;
+  const check = () => {
+    const cv = img.closest('.cover'); if (!cv || !img.naturalWidth) return;
+    const r = cv.getBoundingClientRect(), need = r.width * (window.devicePixelRatio > 1 ? 1.2 : 0.9);
+    const shown = img.naturalWidth * Math.max(r.height / img.naturalHeight, 1);
+    const low = img.naturalWidth < need && shown < r.width * 0.92;
+    cv.classList.toggle('lowres', low);
+    let bg = cv.querySelector('.bgblur');
+    if (low) { if (!bg) { bg = document.createElement('i'); bg.className = 'bgblur'; cv.prepend(bg); } bg.style.backgroundImage = `url("${img.currentSrc || img.src}")`; } else if (bg) bg.remove();
+  };
+  img.addEventListener('load', check);
+  if (img.complete && img.naturalWidth) check();
 }
 const rerenderKeep = () => { const y = scrollY; route(); window.scrollTo(0, y); };
 const AUDIT_LABELS = {
@@ -29575,16 +29636,43 @@ function profileSectionHTML(p) {
   const money = (x) => (x === 0 || x === '0' ? '0 ⃁' : x ? sar(x) : '');
   const fin = can('view.internal') || wfInvolved(p);
   const ring = (s) => { const r = 26, C = 2 * Math.PI * r; return `<svg viewBox="0 0 64 64" class="pf-ring ${evalTone(s)}" aria-hidden="true"><circle cx="32" cy="32" r="${r}" class="bg"/><circle cx="32" cy="32" r="${r}" class="v" stroke-dasharray="${(s / 100 * C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle">${s}</text></svg>`; };
-  return `<section class="dsec pf-sec" id="profile"><h2>التصنيف والقيمة والتقييم ${edit ? `<button class="btn sm" type="button" data-pfedit>${icon('edit')} تعديل</button>` : ''}</h2>
+  /* بطاقة: الحقول المعبأة تُعرض، والفارغة تُجمع في سطر واحد مع زر إضافة (بدل صفوف «لم يُحدَّد») */
+  const card = (ic, t, items, { extra = '', lead = '' } = {}) => {
+    const has = items.filter((x) => x.v), miss = items.filter((x) => !x.v);
+    const pct = items.length ? Math.round(has.length / items.length * 100) : 0;
+    return `<div class="pf-card ${has.length ? '' : 'is-empty'}"><div class="pf-ch"><span class="pf-ic">${icon(ic)}</span><h4>${t}</h4>${items.length ? `<span class="pf-cnt ${pct === 100 ? 'ok' : ''}" title="الحقول المعبأة">${has.length}/${items.length}</span>` : ''}</div>
+      ${lead}
+      ${has.length ? `<dl class="pf-kv2">${has.map((x) => `<div class="${x.full ? 'full' : ''}"><dt>${esc(x.l)}</dt><dd>${x.v}</dd></div>`).join('')}</dl>` : ''}
+      ${miss.length ? `<div class="pf-miss">${has.length ? '<span>لم يُحدَّد بعد:</span>' : '<span>لم تُعبَّأ بعد:</span>'}${miss.map((x) => `<em>${esc(x.l)}</em>`).join('')}${edit ? `<button type="button" class="pf-add" data-pfedit>${icon('plus')} إضافة</button>` : ''}</div>` : ''}
+      ${extra}</div>`;
+  };
+  const filled = [P.ptype, P.domain, P.origin, P.originBy, (P.valueTypes || []).length, P.total, P.impactLevel || (ev && ev.data.impactLevel), ev && ev.score !== null, ...(fin ? [f.model, f.status, f.partnerSar, f.murojSar, f.inkindSar, f.spentSar] : [])];
+  const fp = Math.round(filled.filter(Boolean).length / filled.length * 100);
+  const impactTxt = (ev && ev.data.impact) || firstItem(p.expectedImpact);
+  const commit = (+f.partnerSar || 0) + (+f.murojSar || 0);
+  return `<section class="dsec pf-sec" id="profile"><h2>التصنيف والقيمة والتقييم <span class="pf-prog" title="اكتمال بيانات هذا القسم"><i style="width:${fp}%"></i></span><span class="pf-progl">${fp}%</span>${edit ? `<button class="btn sm" type="button" data-pfedit>${icon('edit')} تعديل</button>` : ''}</h2>
     <div class="pf-grid">
-      <div class="pf-card"><h4>${icon('layers')} التصنيف</h4><dl class="kv pf-kv">${kv('تصنيف الشراكة', P.ptype ? `<span class="chip ${P.ptype.includes('استراتيجي') ? 'ok' : 'gold'}">${esc(P.ptype)}</span>` : '')}${kv('مجال عمل الجهة', esc(P.domain))}${kv('بداية العلاقة', esc(P.origin))}${kv('من فتح الباب', esc(P.originBy))}</dl></div>
-      <div class="pf-card"><h4>${icon('star')} تقييم الشراكة</h4>${ev && ev.score !== null ? `<div class="pf-ev">${ring(ev.score)}<div><b>${evalGrade(ev.score)}</b><span>${esc(ev.data.period || '')} — ${esc(ev.data.rec || '')}</span><small>${esc(ev.no)} · ${esc(ev.by)}</small></div></div>
-          ${evs.length > 1 ? `<div class="pf-hist">${evs.map((e, i) => { const s = evalScore(e.data); return `<button type="button" data-evview="${(p.evals || []).indexOf(e)}" title="${esc(e.data.period)}"><i style="height:${s}%" class="${evalTone(s)}"></i><span>${s}</span></button>`; }).join('')}</div>` : ''}
+      ${card('layers', 'التصنيف', [
+        { l: 'تصنيف الشراكة', v: P.ptype ? `<span class="chip ${P.ptype.includes('استراتيجي') ? 'ok' : 'gold'}">${esc(P.ptype)}</span>` : '' },
+        { l: 'مجال عمل الجهة', v: esc(P.domain) }, { l: 'بداية العلاقة', v: esc(P.origin) }, { l: 'من فتح الباب', v: esc(P.originBy) }])}
+      <div class="pf-card ${ev && ev.score !== null ? '' : 'is-empty'}"><div class="pf-ch"><span class="pf-ic">${icon('star')}</span><h4>تقييم الشراكة</h4>${evs.length ? `<span class="pf-cnt">${plural(evs.length, 'تقييم واحد', 'تقييمان', 'تقييمات', 'تقييمًا')}</span>` : ''}</div>
+        ${ev && ev.score !== null ? `<div class="pf-ev">${ring(ev.score)}<div><b>${evalGrade(ev.score)}</b><span>${esc(ev.data.period || '')} — ${esc(ev.data.rec || '')}</span><small>${esc(ev.no)} · ${esc(ev.by)}</small></div></div>
+          ${evs.length > 1 ? `<div class="pf-hist">${evs.map((e) => { const s = evalScore(e.data); return `<button type="button" data-evview="${(p.evals || []).indexOf(e)}" title="${esc(e.data.period)}"><i style="height:${s}%" class="${evalTone(s)}"></i><span>${s}</span></button>`; }).join('')}</div>` : ''}
           <div class="pf-acts"><button class="btn sm ghost" type="button" data-evview="${(p.evals || []).indexOf(evs.find((e) => e.id === ev.id))}">${icon('file')} عرض النموذج</button>${edit ? `<button class="btn sm" type="button" data-evnew>${icon('plus')} تقييم جديد</button>` : ''}</div>`
-        : `<p class="muted small">لم تُقيَّم الشراكة بعد. يُقيَّم أداء الشراكة دوريًا بـ${plural(EVAL_CRIT.length, 'معيار واحد', 'معيارين', 'معايير', 'معيارًا')} موزونة.</p>${edit ? `<button class="btn sm primary" type="button" data-evnew>${icon('star')} تعبئة نموذج تقييم الشراكة</button>` : ''}`}</div>
-      <div class="pf-card"><h4>${icon('award')} القيمة والأثر</h4><dl class="kv pf-kv">${kv('نوع القيمة', (P.valueTypes || []).map((v) => `<span class="chip plain">${esc(v)}</span>`).join(' '))}${kv('القيمة الإجمالية التقديرية', P.total ? `<b class="num">${sar(P.total)}</b>` : '')}${kv('مستوى الأثر', P.impactLevel ? `<span class="chip ${P.impactLevel === 'مرتفع' ? 'ok' : P.impactLevel === 'متوسط' ? 'gold' : ''}">${esc(P.impactLevel)}</span>` : (ev ? esc(ev.data.impactLevel) : ''))}${kv('الأثر', esc((ev && ev.data.impact) || firstItem(p.expectedImpact)), 'full')}</dl></div>
-      ${fin ? `<div class="pf-card"><h4>${icon('chart')} الوضع المالي</h4><dl class="kv pf-kv">${kv('النموذج المالي', esc(f.model))}${kv('الوضع', f.status ? `<span class="chip ${f.status === 'متأخر' ? 'danger' : f.status === 'مكتمل' ? 'ok' : ''}">${esc(f.status)}</span>` : '')}${kv('مساهمة الشريك', money(f.partnerSar))}${kv('مساهمة المؤسسة', money(f.murojSar))}${kv('القيمة العينية والمعرفية', money(f.inkindSar))}${kv('المصروف حتى الآن', money(f.spentSar))}</dl>
-        ${(+f.partnerSar || 0) + (+f.murojSar || 0) ? `<div class="pf-spend"><i style="width:${Math.min(100, Math.round((+f.spentSar || 0) / ((+f.partnerSar || 0) + (+f.murojSar || 0)) * 100))}%"></i></div><small class="faint">نسبة الصرف من الالتزامات المالية</small>` : ''}</div>` : ''}
+        : `<div class="pf-evempty"><svg viewBox="0 0 64 64" class="pf-ring mute" aria-hidden="true"><circle cx="32" cy="32" r="26" class="bg"/><text x="32" y="37" text-anchor="middle">—</text></svg><div><b>لم تُقيَّم بعد</b><span>يُقيَّم أداء الشراكة دوريًا بـ${plural(EVAL_CRIT.length, 'معيار واحد', 'معيارين', 'معايير', 'معيارًا')} موزونة، وتظهر النتيجة هنا مع تطورها.</span></div></div>
+          <div class="pf-crit">${EVAL_CRIT.map((c) => `<em>${esc(c.l || c.t || c.k)}</em>`).join('')}</div>
+          ${edit ? `<button class="btn sm primary" type="button" data-evnew>${icon('star')} تعبئة نموذج تقييم الشراكة</button>` : ''}`}</div>
+      ${card('award', 'القيمة والأثر', [
+        { l: 'نوع القيمة', v: (P.valueTypes || []).map((v) => `<span class="chip plain">${esc(v)}</span>`).join(' ') },
+        { l: 'القيمة الإجمالية التقديرية', v: P.total ? `<b class="num pf-big">${sar(P.total)}</b>` : '' },
+        { l: 'مستوى الأثر', v: P.impactLevel ? `<span class="chip ${P.impactLevel === 'مرتفع' ? 'ok' : P.impactLevel === 'متوسط' ? 'gold' : ''}">${esc(P.impactLevel)}</span>` : (ev ? esc(ev.data.impactLevel) : '') }],
+        { lead: impactTxt ? `<blockquote class="pf-quote"><small>${ev && ev.data.impact ? 'الأثر المتحقق' : 'الأثر المتوقع'}</small>${esc(impactTxt)}</blockquote>` : '' })}
+      ${fin ? card('chart', 'الوضع المالي', [
+        { l: 'النموذج المالي', v: esc(f.model) },
+        { l: 'الوضع', v: f.status ? `<span class="chip ${f.status === 'متأخر' ? 'danger' : f.status === 'مكتمل' ? 'ok' : ''}">${esc(f.status)}</span>` : '' },
+        { l: 'مساهمة الشريك', v: money(f.partnerSar) }, { l: 'مساهمة المؤسسة', v: money(f.murojSar) },
+        { l: 'القيمة العينية والمعرفية', v: money(f.inkindSar) }, { l: 'المصروف حتى الآن', v: money(f.spentSar) }],
+        { extra: commit ? `<div class="pf-spendw"><div class="pf-spend"><i style="width:${Math.min(100, Math.round((+f.spentSar || 0) / commit * 100))}%"></i></div><small class="faint">صُرف ${Math.min(100, Math.round((+f.spentSar || 0) / commit * 100))}% من الالتزامات المالية</small></div>` : '' }) : ''}
     </div></section>`;
 }
 function profileDialog(p, onDone) {

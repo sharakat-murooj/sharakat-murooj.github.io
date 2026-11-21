@@ -101,6 +101,7 @@ function renderPartnership(el, r) {
       <p class="xs muted" style="margin-top:10px">لا تظهر بيانات التواصل والمستندات الداخلية في الواجهة التعريفية.</p></div>` : ''}
   </aside></div>`;
   hydrateFiles(el);
+  heroFit(el.querySelector('.dhead .cover img.photo'));
   bindLogoUpload(el, () => rerenderKeep());
   bindWf(el, 'partnership', p);
   bindProfile(el, p);
@@ -242,6 +243,22 @@ async function uploadToPartnership(p, cat, files) {
   await Repo.log('partnership.files', 'partnership', p.id, p.code, `رفع ${added.length} إلى «${cat}»: ${added.map((a) => a.name).join('، ')}`);
   toast(`رُفع ${plural(added.length, 'ملف واحد', 'ملفان', 'ملفات', 'ملفًا')} إلى «${cat}»${coverMsg}`);
   return true;
+}
+/* غلاف صغير الدقة (مثل صورة مقتطعة من بوستر): لا يُمطّ على عرض الصفحة؛ يُعرض بحجمه الحقيقي على جانب
+   مع خلفية مموّهة من الصورة نفسها، فيبقى واضحًا ولا تُقصّ الوجوه */
+function heroFit(img) {
+  if (!img) return;
+  const check = () => {
+    const cv = img.closest('.cover'); if (!cv || !img.naturalWidth) return;
+    const r = cv.getBoundingClientRect(), need = r.width * (window.devicePixelRatio > 1 ? 1.2 : 0.9);
+    const shown = img.naturalWidth * Math.max(r.height / img.naturalHeight, 1);
+    const low = img.naturalWidth < need && shown < r.width * 0.92;
+    cv.classList.toggle('lowres', low);
+    let bg = cv.querySelector('.bgblur');
+    if (low) { if (!bg) { bg = document.createElement('i'); bg.className = 'bgblur'; cv.prepend(bg); } bg.style.backgroundImage = `url("${img.currentSrc || img.src}")`; } else if (bg) bg.remove();
+  };
+  img.addEventListener('load', check);
+  if (img.complete && img.naturalWidth) check();
 }
 const rerenderKeep = () => { const y = scrollY; route(); window.scrollTo(0, y); };
 const AUDIT_LABELS = {

@@ -589,16 +589,43 @@ function profileSectionHTML(p) {
   const money = (x) => (x === 0 || x === '0' ? '0 ⃁' : x ? sar(x) : '');
   const fin = can('view.internal') || wfInvolved(p);
   const ring = (s) => { const r = 26, C = 2 * Math.PI * r; return `<svg viewBox="0 0 64 64" class="pf-ring ${evalTone(s)}" aria-hidden="true"><circle cx="32" cy="32" r="${r}" class="bg"/><circle cx="32" cy="32" r="${r}" class="v" stroke-dasharray="${(s / 100 * C).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle">${s}</text></svg>`; };
-  return `<section class="dsec pf-sec" id="profile"><h2>التصنيف والقيمة والتقييم ${edit ? `<button class="btn sm" type="button" data-pfedit>${icon('edit')} تعديل</button>` : ''}</h2>
+  /* بطاقة: الحقول المعبأة تُعرض، والفارغة تُجمع في سطر واحد مع زر إضافة (بدل صفوف «لم يُحدَّد») */
+  const card = (ic, t, items, { extra = '', lead = '' } = {}) => {
+    const has = items.filter((x) => x.v), miss = items.filter((x) => !x.v);
+    const pct = items.length ? Math.round(has.length / items.length * 100) : 0;
+    return `<div class="pf-card ${has.length ? '' : 'is-empty'}"><div class="pf-ch"><span class="pf-ic">${icon(ic)}</span><h4>${t}</h4>${items.length ? `<span class="pf-cnt ${pct === 100 ? 'ok' : ''}" title="الحقول المعبأة">${has.length}/${items.length}</span>` : ''}</div>
+      ${lead}
+      ${has.length ? `<dl class="pf-kv2">${has.map((x) => `<div class="${x.full ? 'full' : ''}"><dt>${esc(x.l)}</dt><dd>${x.v}</dd></div>`).join('')}</dl>` : ''}
+      ${miss.length ? `<div class="pf-miss">${has.length ? '<span>لم يُحدَّد بعد:</span>' : '<span>لم تُعبَّأ بعد:</span>'}${miss.map((x) => `<em>${esc(x.l)}</em>`).join('')}${edit ? `<button type="button" class="pf-add" data-pfedit>${icon('plus')} إضافة</button>` : ''}</div>` : ''}
+      ${extra}</div>`;
+  };
+  const filled = [P.ptype, P.domain, P.origin, P.originBy, (P.valueTypes || []).length, P.total, P.impactLevel || (ev && ev.data.impactLevel), ev && ev.score !== null, ...(fin ? [f.model, f.status, f.partnerSar, f.murojSar, f.inkindSar, f.spentSar] : [])];
+  const fp = Math.round(filled.filter(Boolean).length / filled.length * 100);
+  const impactTxt = (ev && ev.data.impact) || firstItem(p.expectedImpact);
+  const commit = (+f.partnerSar || 0) + (+f.murojSar || 0);
+  return `<section class="dsec pf-sec" id="profile"><h2>التصنيف والقيمة والتقييم <span class="pf-prog" title="اكتمال بيانات هذا القسم"><i style="width:${fp}%"></i></span><span class="pf-progl">${fp}%</span>${edit ? `<button class="btn sm" type="button" data-pfedit>${icon('edit')} تعديل</button>` : ''}</h2>
     <div class="pf-grid">
-      <div class="pf-card"><h4>${icon('layers')} التصنيف</h4><dl class="kv pf-kv">${kv('تصنيف الشراكة', P.ptype ? `<span class="chip ${P.ptype.includes('استراتيجي') ? 'ok' : 'gold'}">${esc(P.ptype)}</span>` : '')}${kv('مجال عمل الجهة', esc(P.domain))}${kv('بداية العلاقة', esc(P.origin))}${kv('من فتح الباب', esc(P.originBy))}</dl></div>
-      <div class="pf-card"><h4>${icon('star')} تقييم الشراكة</h4>${ev && ev.score !== null ? `<div class="pf-ev">${ring(ev.score)}<div><b>${evalGrade(ev.score)}</b><span>${esc(ev.data.period || '')} — ${esc(ev.data.rec || '')}</span><small>${esc(ev.no)} · ${esc(ev.by)}</small></div></div>
-          ${evs.length > 1 ? `<div class="pf-hist">${evs.map((e, i) => { const s = evalScore(e.data); return `<button type="button" data-evview="${(p.evals || []).indexOf(e)}" title="${esc(e.data.period)}"><i style="height:${s}%" class="${evalTone(s)}"></i><span>${s}</span></button>`; }).join('')}</div>` : ''}
+      ${card('layers', 'التصنيف', [
+        { l: 'تصنيف الشراكة', v: P.ptype ? `<span class="chip ${P.ptype.includes('استراتيجي') ? 'ok' : 'gold'}">${esc(P.ptype)}</span>` : '' },
+        { l: 'مجال عمل الجهة', v: esc(P.domain) }, { l: 'بداية العلاقة', v: esc(P.origin) }, { l: 'من فتح الباب', v: esc(P.originBy) }])}
+      <div class="pf-card ${ev && ev.score !== null ? '' : 'is-empty'}"><div class="pf-ch"><span class="pf-ic">${icon('star')}</span><h4>تقييم الشراكة</h4>${evs.length ? `<span class="pf-cnt">${plural(evs.length, 'تقييم واحد', 'تقييمان', 'تقييمات', 'تقييمًا')}</span>` : ''}</div>
+        ${ev && ev.score !== null ? `<div class="pf-ev">${ring(ev.score)}<div><b>${evalGrade(ev.score)}</b><span>${esc(ev.data.period || '')} — ${esc(ev.data.rec || '')}</span><small>${esc(ev.no)} · ${esc(ev.by)}</small></div></div>
+          ${evs.length > 1 ? `<div class="pf-hist">${evs.map((e) => { const s = evalScore(e.data); return `<button type="button" data-evview="${(p.evals || []).indexOf(e)}" title="${esc(e.data.period)}"><i style="height:${s}%" class="${evalTone(s)}"></i><span>${s}</span></button>`; }).join('')}</div>` : ''}
           <div class="pf-acts"><button class="btn sm ghost" type="button" data-evview="${(p.evals || []).indexOf(evs.find((e) => e.id === ev.id))}">${icon('file')} عرض النموذج</button>${edit ? `<button class="btn sm" type="button" data-evnew>${icon('plus')} تقييم جديد</button>` : ''}</div>`
-        : `<p class="muted small">لم تُقيَّم الشراكة بعد. يُقيَّم أداء الشراكة دوريًا بـ${plural(EVAL_CRIT.length, 'معيار واحد', 'معيارين', 'معايير', 'معيارًا')} موزونة.</p>${edit ? `<button class="btn sm primary" type="button" data-evnew>${icon('star')} تعبئة نموذج تقييم الشراكة</button>` : ''}`}</div>
-      <div class="pf-card"><h4>${icon('award')} القيمة والأثر</h4><dl class="kv pf-kv">${kv('نوع القيمة', (P.valueTypes || []).map((v) => `<span class="chip plain">${esc(v)}</span>`).join(' '))}${kv('القيمة الإجمالية التقديرية', P.total ? `<b class="num">${sar(P.total)}</b>` : '')}${kv('مستوى الأثر', P.impactLevel ? `<span class="chip ${P.impactLevel === 'مرتفع' ? 'ok' : P.impactLevel === 'متوسط' ? 'gold' : ''}">${esc(P.impactLevel)}</span>` : (ev ? esc(ev.data.impactLevel) : ''))}${kv('الأثر', esc((ev && ev.data.impact) || firstItem(p.expectedImpact)), 'full')}</dl></div>
-      ${fin ? `<div class="pf-card"><h4>${icon('chart')} الوضع المالي</h4><dl class="kv pf-kv">${kv('النموذج المالي', esc(f.model))}${kv('الوضع', f.status ? `<span class="chip ${f.status === 'متأخر' ? 'danger' : f.status === 'مكتمل' ? 'ok' : ''}">${esc(f.status)}</span>` : '')}${kv('مساهمة الشريك', money(f.partnerSar))}${kv('مساهمة المؤسسة', money(f.murojSar))}${kv('القيمة العينية والمعرفية', money(f.inkindSar))}${kv('المصروف حتى الآن', money(f.spentSar))}</dl>
-        ${(+f.partnerSar || 0) + (+f.murojSar || 0) ? `<div class="pf-spend"><i style="width:${Math.min(100, Math.round((+f.spentSar || 0) / ((+f.partnerSar || 0) + (+f.murojSar || 0)) * 100))}%"></i></div><small class="faint">نسبة الصرف من الالتزامات المالية</small>` : ''}</div>` : ''}
+        : `<div class="pf-evempty"><svg viewBox="0 0 64 64" class="pf-ring mute" aria-hidden="true"><circle cx="32" cy="32" r="26" class="bg"/><text x="32" y="37" text-anchor="middle">—</text></svg><div><b>لم تُقيَّم بعد</b><span>يُقيَّم أداء الشراكة دوريًا بـ${plural(EVAL_CRIT.length, 'معيار واحد', 'معيارين', 'معايير', 'معيارًا')} موزونة، وتظهر النتيجة هنا مع تطورها.</span></div></div>
+          <div class="pf-crit">${EVAL_CRIT.map((c) => `<em>${esc(c.l || c.t || c.k)}</em>`).join('')}</div>
+          ${edit ? `<button class="btn sm primary" type="button" data-evnew>${icon('star')} تعبئة نموذج تقييم الشراكة</button>` : ''}`}</div>
+      ${card('award', 'القيمة والأثر', [
+        { l: 'نوع القيمة', v: (P.valueTypes || []).map((v) => `<span class="chip plain">${esc(v)}</span>`).join(' ') },
+        { l: 'القيمة الإجمالية التقديرية', v: P.total ? `<b class="num pf-big">${sar(P.total)}</b>` : '' },
+        { l: 'مستوى الأثر', v: P.impactLevel ? `<span class="chip ${P.impactLevel === 'مرتفع' ? 'ok' : P.impactLevel === 'متوسط' ? 'gold' : ''}">${esc(P.impactLevel)}</span>` : (ev ? esc(ev.data.impactLevel) : '') }],
+        { lead: impactTxt ? `<blockquote class="pf-quote"><small>${ev && ev.data.impact ? 'الأثر المتحقق' : 'الأثر المتوقع'}</small>${esc(impactTxt)}</blockquote>` : '' })}
+      ${fin ? card('chart', 'الوضع المالي', [
+        { l: 'النموذج المالي', v: esc(f.model) },
+        { l: 'الوضع', v: f.status ? `<span class="chip ${f.status === 'متأخر' ? 'danger' : f.status === 'مكتمل' ? 'ok' : ''}">${esc(f.status)}</span>` : '' },
+        { l: 'مساهمة الشريك', v: money(f.partnerSar) }, { l: 'مساهمة المؤسسة', v: money(f.murojSar) },
+        { l: 'القيمة العينية والمعرفية', v: money(f.inkindSar) }, { l: 'المصروف حتى الآن', v: money(f.spentSar) }],
+        { extra: commit ? `<div class="pf-spendw"><div class="pf-spend"><i style="width:${Math.min(100, Math.round((+f.spentSar || 0) / commit * 100))}%"></i></div><small class="faint">صُرف ${Math.min(100, Math.round((+f.spentSar || 0) / commit * 100))}% من الالتزامات المالية</small></div>` : '' }) : ''}
     </div></section>`;
 }
 function profileDialog(p, onDone) {
