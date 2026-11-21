@@ -32,6 +32,7 @@ function renderPartnership(el, r) {
     <button class="icon-btn da-btn" data-print title="طباعة صفحة الشراكة" aria-label="طباعة">${icon('print')}</button>
     <button class="btn sm da-lbl" data-dossier data-tour="detail-dossier" title="الملف الشامل: ملف واحد يجمع التفاصيل والنماذج والصور والمستندات" aria-label="الملف الشامل">${icon('file')}<span>الملف الشامل</span></button>
     ${can('view.reports') ? `<a class="btn sm ghost da-lbl" href="#/reports?ids=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" data-tour="detail-report" title="تقرير الشراكة" aria-label="تقرير الشراكة">${icon('chart')}<span>تقرير</span></a><a class="btn sm ghost da-lbl" href="#/reports/marketing?p=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" title="العرض المرئي لهذه الشراكة: شرائح متحركة بصورها وأرقامها" aria-label="العرض المرئي">${icon('play')}<span>العرض المرئي</span></a>` : ''}
+    ${internal ? `<button class="icon-btn da-btn" data-memopen title="ذاكرة الجهة: جهّزني للاجتماع" aria-label="ذاكرة الجهة">${icon('msg')}</button>` : ''}
     ${canEdit ? `<button class="icon-btn da-btn" data-ptxl title="نموذج Excel: تنزيل بيانات الشراكة أو رفع نموذج محدَّث" aria-label="نموذج Excel">${icon('table')}</button>` : ''}
     ${canEdit ? `<a class="icon-btn da-btn primary" href="#/partnerships/${p.id}/edit" title="تعديل" aria-label="تعديل">${icon('edit')}</a>` : ''}
     ${can('delete.partnership') ? `<button class="icon-btn da-btn danger" data-del title="حذف" aria-label="حذف">${icon('trash')}</button>` : ''}
@@ -70,7 +71,7 @@ function renderPartnership(el, r) {
       <dl class="kv" style="grid-template-columns:1fr">
         <div><dt>الملاحظات</dt><dd>${richHTML(p.notes, { empty: 'لا توجد ملاحظات.' })}</dd></div>
         <div><dt>التوصيات</dt><dd>${richHTML(p.recommendations, { empty: 'لم تُسجَّل توصيات.' })}</dd></div>
-        <div style="border-bottom:0"><dt>التحديات</dt><dd>${richHTML(p.challenges, { empty: 'لم تُسجَّل تحديات.' })}</dd></div></dl></section>` : ''}
+        <div style="border-bottom:0"><dt>التحديات</dt><dd>${richHTML(p.challenges, { empty: 'لم تُسجَّل تحديات.' })}</dd></div></dl>${meetingsSectionHTML(p)}</section>` : ''}
     <section class="dsec" id="contact"><h2>ضابط الاتصال لدى الشريك <span class="src">من ملف الحصر</span></h2>
       ${can('view.contacts') ? `<dl class="kv">${kv('الاسم', esc(p.contactName))}${kv('البريد الإلكتروني', p.contactEmail ? `<a href="mailto:${esc(p.contactEmail)}" dir="ltr">${esc(p.contactEmail)}</a>` : '')}${kv('رقم الجوال', p.contactPhone ? `<a href="tel:${esc(p.contactPhone)}" class="num">${esc(p.contactPhone)}</a>` : '')}</dl>`
         : `<div class="locked">${icon('lock')}<span>بيانات التواصل متاحة لفريق إدارة الشراكات فقط.</span></div>`}</section>
@@ -123,6 +124,8 @@ function renderPartnership(el, r) {
     if (e.target.closest('[data-print]')) return printPartnershipCard(p); // بطاقة مصممة للطباعة بدل واجهة الصفحة
     if (e.target.closest('[data-dossier]')) return dossierDialog(p);
     if (e.target.closest('[data-ptxl]')) return ptXlsxDialog(p);
+    if (e.target.closest('[data-memopen]')) return partnerMemoryDialog(p);
+    if (e.target.closest('[data-mtnew]')) return meetingDialog(p, D.partnerships.filter((x) => x.partnerId === p.partnerId && !x.isDraft));
     const dg = e.target.closest('[data-dgal]'); if (dg) return openGallery(photos, +dg.dataset.dgal);
     const vf = e.target.closest('[data-viewf]'); if (vf) return viewStored(vf.dataset.viewf);
     const sc = e.target.closest('[data-setcover]');
@@ -186,6 +189,7 @@ function pFactsHTML(p) {
       const live = ['active', 'soon'].includes(st), end = p.endDate;
       const sub = live && dl !== null ? `متبقٍ ${plural(dl, 'يوم واحد', 'يومان', 'أيام', 'يومًا')} · تنتهي ${fmtDate(end)}` : live && !end ? 'تاريخ الانتهاء غير مسجّل' : end ? (st === 'ended' ? 'انتهت ' : 'حتى ') + fmtDate(end, 'short') : '';
       return cell('flag', 'الحالة', esc(statusLabel(st)), sub, '#ov', st === 'soon' || (live && !end) ? 'warn' : ''); })()}
+    ${can('view.internal') ? pulseFactHTML(p) : ''}
     ${wf ? cell('layers', 'مسار المذكرة', `${done} من ${WF_STEPS.length}`, wf.cur ? `${wf.cur.n}. ${esc(wf.cur.t)}` : 'اكتمل المسار', '#wf') : ''}
     ${cell('star', 'آخر تقييم', P.ev && P.ev.score !== null ? `${P.ev.score} <span class="pfx-u">من 100</span>` : 'لم تُقيَّم', P.ev && P.ev.score !== null ? evalGrade(P.ev.score) : 'نموذج تقييم الشراكة', '#profile', P.ev && P.ev.score !== null ? evalTone(P.ev.score) : 'mute')}
     ${can('view.internal') ? cell('chart', 'القيمة التقديرية', P.total ? sarShort(P.total) + ' <span class="pfx-u">⃁</span>' : '—', P.ptype || 'تصنيف غير محدد', '#profile') : ''}
@@ -265,7 +269,7 @@ const AUDIT_LABELS = {
   'partnership.create': 'إنشاء سجل الشراكة', 'partnership.update': 'تعديل البيانات', 'partnership.delete': 'حذف سجل الشراكة', 'partnership.confirm': 'تأكيد قيمة مستوردة', 'partnership.publish': 'تغيير الظهور في الواجهة',
   'home.featured': 'تغيير العرض المميز', 'partnership.golden': 'الشراكات الذهبية', 'list.request': 'اقتراح خيار جديد', 'list.decision': 'قرار على خيار مقترح', 'workflow.direct': 'تسجيل مباشر', 'partnership.files': 'تحديث ملفات الشراكة', 'list.add': 'إضافة قيمة إلى قائمة', 'proposal.create': 'إنشاء مقترح', 'proposal.submit': 'تقديم مقترح', 'proposal.status': 'تغيير حالة مقترح', 'proposal.note': 'ملاحظة على مقترح', 'proposal.update': 'تحديث مقترح',
   'partner.create': 'إضافة جهة', 'partner.update': 'تعديل جهة', 'partner.merge': 'دمج جهتين', 'partner.delete': 'حذف جهة', 'settings.update': 'تعديل الإعدادات', 'content.save': 'حفظ محتوى', 'content.delete': 'حذف محتوى',
-  'partnership.dossier': 'تجهيز الملف الشامل', 'partnership.export': 'تنزيل نموذج Excel', seed: 'تهيئة المنصة', backup: 'نسخة احتياطية', restore: 'استعادة نسخة احتياطية', 'demo.toggle': 'إظهار/إخفاء البيانات التجريبية', 'role.switch': 'معاينة بحساب آخر', 'auth.login': 'تسجيل دخول', 'notify.read': 'قراءة الإشعارات', 'auth.logout': 'تسجيل خروج', 'auth.password': 'تغيير كلمة مرور',
+  'partnership.dossier': 'تجهيز الملف الشامل', 'partnership.meeting': 'اجتماع مع الجهة', 'partnership.export': 'تنزيل نموذج Excel', seed: 'تهيئة المنصة', backup: 'نسخة احتياطية', restore: 'استعادة نسخة احتياطية', 'demo.toggle': 'إظهار/إخفاء البيانات التجريبية', 'role.switch': 'معاينة بحساب آخر', 'auth.login': 'تسجيل دخول', 'notify.read': 'قراءة الإشعارات', 'auth.logout': 'تسجيل خروج', 'auth.password': 'تغيير كلمة مرور',
 };
 
 /* ===== نموذج الإدخال والتعديل ===== */
