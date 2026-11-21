@@ -138,7 +138,7 @@ async def main():
         ok('Esc closes viewer', await E("!document.querySelector('#rptShow')"))
         # from partnership & register
         pid = await E("D.partnerships.find(p=>p.title==='المديرية العامة لحرس الحدود').id")
-        await go(f'#/partnerships/{pid}'); await pg.click('[data-tour="detail-report"]'); await pg.wait_for_timeout(1000)
+        await go(f'#/partnerships/{pid}'); await pg.click('[data-pmore]'); await pg.click('[data-tour="detail-report"]'); await pg.wait_for_timeout(1000)
         ok('report button on partnership opens it preselected', await E("App.ui.rpt.ids.length===1") and (await E("location.hash")).startswith('#/reports'))
         await go('#/partnerships?status=ended'); await pg.click('[data-rep]'); await pg.wait_for_timeout(1000)
         ok('register report uses displayed list', await E("App.ui.rpt.ids.length") == await E("visiblePartnerships().filter(p=>pStatus(p)==='ended').length"))

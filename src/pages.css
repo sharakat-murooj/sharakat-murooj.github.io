@@ -5345,3 +5345,19 @@ html.live-on,html.live-on body{overflow:hidden}
 .lv-sign{align-items:start}
 .lv-body.s-sign,.lv-body.s-field{align-items:flex-start}
 .lv-map{max-height:60vh;overflow:visible}
+
+/* ===== قائمة أدوات الشراكة ⋮ ===== */
+.pm-wrap{position:relative}
+.pm-menu{position:fixed;top:0;left:0;z-index:900;min-width:280px;list-style:none;margin:0;padding:6px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px -14px rgba(0,0,0,.28);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s}
+.pm-wrap.open .pm-menu{opacity:1;visibility:visible;transform:none}
+.pm-wrap.open [data-pmore]{background:var(--paper-2);border-color:var(--gold)}
+.pm-i{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:9px;background:none;font:inherit;font-size:13.5px;color:var(--ink);text-decoration:none;cursor:pointer;text-align:start}
+.pm-i:hover,.pm-i:focus-visible{background:var(--paper-2);outline:none}
+.pm-i .ic{width:17px;height:17px;color:var(--muted);flex:none}
+.pm-i span{flex:1}
+.pm-i kbd{font-family:inherit;font-size:11px;font-weight:600;color:var(--muted);background:var(--paper-3);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;min-width:22px;text-align:center}
+.pm-i.danger,.pm-i.danger .ic{color:var(--danger)}
+.pm-sep{height:1px;background:var(--line);margin:5px 4px}
+[data-pmore] .ic{fill:currentColor;stroke:none}
+@media print{.pm-wrap{display:none!important}}
+.pm-menu a.pm-i,.pm-menu a.pm-i:visited{color:var(--ink);opacity:1}

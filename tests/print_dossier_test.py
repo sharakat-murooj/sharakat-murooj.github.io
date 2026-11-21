@@ -70,7 +70,7 @@ async def main():
         await go(f'#/partnerships/{pid}')
         ok('facts strip under partnership header', await E("document.querySelectorAll('.pfacts .pfx').length>=4"))
         await pg.set_input_files('[data-fup="الاتفاقية"]', [OUT+'/mou.pdf', OUT+'/notes.docx']); await pg.wait_for_timeout(1200)
-        await pg.click('[data-dossier]'); await pg.wait_for_timeout(400)
+        await pg.click('[data-pmore]'); await pg.click('[data-dossier]'); await pg.wait_for_timeout(400)
         ok('dossier options dialog', await E("document.querySelectorAll('.dos-opts input').length===15 && !!document.querySelector('.dos-opts input[value=story], .dos-opts [data-sec=story], .dos-opts input') && !document.querySelector('#dosPdf').disabled"))
         await pg.click('[data-dosgo]')
         await pg.wait_for_function("document.querySelector('[data-dsprint]') && !document.querySelector('[data-dsprint]').disabled", timeout=60000)
@@ -89,13 +89,13 @@ async def main():
         # with forms: fill an evaluation partnership
         gp = await E("D.partnerships.find(p=>partnerName(p).includes('الأفق')).id")
         await go(f'#/partnerships/{gp}')
-        await pg.click('[data-dossier]'); await pg.wait_for_timeout(300); await pg.click('[data-dosgo]')
+        await pg.click('[data-pmore]'); await pg.click('[data-dossier]'); await pg.wait_for_timeout(300); await pg.click('[data-dosgo]')
         await pg.wait_for_function("document.querySelector('[data-dsprint]') && !document.querySelector('[data-dsprint]').disabled", timeout=60000)
         ok('dossier includes the official evaluation form', await E("document.querySelectorAll('#ds-evals .ds-form .fdoc').length>=1"))
         await pg.click('[data-dsclose]'); await pg.wait_for_timeout(300)
         # zip
         await go(f'#/partnerships/{pid}')
-        await pg.click('[data-dossier]'); await pg.wait_for_timeout(300)
+        await pg.click('[data-pmore]'); await pg.click('[data-dossier]'); await pg.wait_for_timeout(300)
         async with pg.expect_download(timeout=60000) as dl:
             await pg.click('[data-doszip]')
         d = await dl.value; await d.save_as(OUT+'/pack.zip')

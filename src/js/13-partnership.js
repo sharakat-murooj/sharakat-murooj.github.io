@@ -29,13 +29,21 @@ function renderPartnership(el, r) {
   ${pFactsHTML(p)}
   <div class="dbar"><div class="dbar-in"><nav class="dbar-nav" aria-label="أقسام الشراكة">${secs.map(([id, l], i) => `<a href="#${id}" data-anchor="${id}" class="${i === 0 ? 'on' : ''}">${l}</a>`).join('')}</nav>
     <div class="dbar-acts">
-    <button class="icon-btn da-btn" data-print title="طباعة صفحة الشراكة" aria-label="طباعة">${icon('print')}</button>
-    <button class="btn sm da-lbl" data-dossier data-tour="detail-dossier" title="الملف الشامل: ملف واحد يجمع التفاصيل والنماذج والصور والمستندات" aria-label="الملف الشامل">${icon('file')}<span>الملف الشامل</span></button>
-    ${can('view.reports') ? `<a class="btn sm ghost da-lbl" href="#/reports?ids=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" data-tour="detail-report" title="تقرير الشراكة" aria-label="تقرير الشراكة">${icon('chart')}<span>تقرير</span></a><a class="btn sm ghost da-lbl" href="#/reports/marketing?p=${p.id}" data-ret="${esc(pr ? pr.name : p.title)}" title="العرض المرئي لهذه الشراكة: شرائح متحركة بصورها وأرقامها" aria-label="العرض المرئي">${icon('play')}<span>العرض المرئي</span></a>` : ''}
-    ${internal ? `<button class="icon-btn da-btn" data-memopen title="ذاكرة الجهة: جهّزني للاجتماع" aria-label="ذاكرة الجهة">${icon('msg')}</button>` : ''}
-    ${canEdit ? `<button class="icon-btn da-btn" data-ptxl title="نموذج Excel: تنزيل بيانات الشراكة أو رفع نموذج محدَّث" aria-label="نموذج Excel">${icon('table')}</button>` : ''}
-    ${canEdit ? `<a class="icon-btn da-btn primary" href="#/partnerships/${p.id}/edit" title="تعديل" aria-label="تعديل">${icon('edit')}</a>` : ''}
-    ${can('delete.partnership') ? `<button class="icon-btn da-btn danger" data-del title="حذف" aria-label="حذف">${icon('trash')}</button>` : ''}
+    ${(() => { /* قائمة ⋮: كل أدوات الشراكة باسمها واختصارها من لوحة المفاتيح */
+      const ret = esc(pr ? pr.name : p.title);
+      const it = (inner, ic, l, k, cls = '') => `<li>${inner.replace('%C%', `class="pm-i ${cls}" role="menuitem"`).replace('%B%', `${icon(ic)}<span>${l}</span>${k ? `<kbd>${k}</kbd>` : ''}`)}</li>`;
+      const items = [
+        it('<button type="button" data-print %C%>%B%</button>', 'print', 'طباعة صفحة الشراكة', 'P'),
+        it('<button type="button" data-dossier data-tour="detail-dossier" %C%>%B%</button>', 'file', 'الملف الشامل', 'D'),
+        ...(can('view.reports') ? [it(`<a href="#/reports?ids=${p.id}" data-ret="${ret}" data-tour="detail-report" %C%>%B%</a>`, 'chart', 'تقرير الشراكة', 'R'),
+          it(`<a href="#/reports/marketing?p=${p.id}" data-ret="${ret}" data-pmvis %C%>%B%</a>`, 'play', 'العرض المرئي', 'V')] : []),
+        ...(internal ? [it('<button type="button" data-memopen %C%>%B%</button>', 'msg', 'ذاكرة الجهة — جهّزني للاجتماع', 'M')] : []),
+        ...(canEdit ? [it('<button type="button" data-ptxl %C%>%B%</button>', 'table', 'نموذج Excel للشراكة', 'X')] : []),
+        ...(can('delete.partnership') ? ['<li class="pm-sep" role="separator"></li>', it('<button type="button" data-del %C%>%B%</button>', 'trash', 'حذف الشراكة', '', 'danger')] : []),
+      ];
+      return `<div class="pm-wrap"><button type="button" class="icon-btn da-btn" data-pmore aria-haspopup="menu" aria-expanded="false" title="أدوات الشراكة" aria-label="أدوات الشراكة"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></button><ul class="pm-menu" role="menu">${items.join('')}</ul></div>`;
+    })()}
+    ${canEdit ? `<a class="icon-btn da-btn primary" href="#/partnerships/${p.id}/edit" title="تعديل (E)" aria-label="تعديل">${icon('edit')}</a>` : ''}
     <button class="icon-btn da-btn" data-asidet title="إخفاء أو إظهار الشريط الجانبي" aria-label="الشريط الجانبي">${icon('sidebar')}</button></div></div></div>
   <div class="dbody ${(() => { try { return localStorage.getItem('shk_aside_off') ? 'aside-off' : ''; } catch (_) { return ''; } })()}"><div>
     ${printHead('بطاقة شراكة — ' + (pr ? pr.name : p.title), '', { compact: true })}
@@ -121,6 +129,11 @@ function renderPartnership(el, r) {
     if (fx) { e.preventDefault(); const t = $('#' + fx.dataset.anchorTo, el); if (t) window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - 124, behavior: 'smooth' }); return; }
     const an = e.target.closest('[data-anchor]');
     if (an) { e.preventDefault(); if (el.classList.contains('tabbed')) { showTab(an.dataset.anchor); return; } const s = $('#' + an.dataset.anchor, el); s && window.scrollTo({ top: s.getBoundingClientRect().top + scrollY - 124, behavior: 'smooth' }); return; }
+    const pmb = e.target.closest('[data-pmore]');
+    if (pmb) { const w = pmb.closest('.pm-wrap'), o = !w.classList.contains('open'); w.classList.toggle('open', o); pmb.setAttribute('aria-expanded', o);
+      if (o) { const r = pmb.getBoundingClientRect(), m = w.querySelector('.pm-menu'); m.style.top = (r.bottom + 8) + 'px'; m.style.left = Math.max(8, r.left) + 'px'; }
+      return; }
+    if (e.target.closest('.pm-menu')) { const w = e.target.closest('.pm-wrap'); w.classList.remove('open'); w.querySelector('[data-pmore]').setAttribute('aria-expanded', 'false'); }
     if (e.target.closest('[data-print]')) return printPartnershipCard(p); // بطاقة مصممة للطباعة بدل واجهة الصفحة
     if (e.target.closest('[data-dossier]')) return dossierDialog(p);
     if (e.target.closest('[data-ptxl]')) return ptXlsxDialog(p);
@@ -264,6 +277,18 @@ function heroFit(img) {
   img.addEventListener('load', check);
   if (img.complete && img.naturalWidth) check();
 }
+/* قائمة أدوات الشراكة: الإغلاق بالنقر خارجها أو Esc، واختصارات لوحة المفاتيح (بحرف لاتيني أيًّا كانت لغة اللوحة) */
+const pmCloseAll = () => document.querySelectorAll('.pm-wrap.open').forEach((w) => { w.classList.remove('open'); const b = w.querySelector('[data-pmore]'); if (b) b.setAttribute('aria-expanded', 'false'); });
+document.addEventListener('click', (e) => { if (!e.target.closest('.pm-wrap')) pmCloseAll(); });
+window.addEventListener('scroll', () => { if (document.querySelector('.pm-wrap.open')) pmCloseAll(); }, { passive: true });
+const PM_KEYS = { KeyP: '[data-print]', KeyD: '[data-dossier]', KeyR: '[data-tour="detail-report"]', KeyV: '[data-pmvis]', KeyM: '.dbar-acts [data-memopen]', KeyX: '[data-ptxl]', KeyE: '.dbar-acts a[href$="/edit"]' };
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.querySelector('.pm-wrap.open')) { pmCloseAll(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || !App.route || App.route.name !== 'partnership') return;
+  if (Modal.top() || document.querySelector('.lightbox') || (e.target.closest && e.target.closest('input,textarea,select,[contenteditable="true"],.cb'))) return;
+  const sel = PM_KEYS[e.code]; if (!sel) return; const b = document.querySelector(sel); if (!b) return;
+  e.preventDefault(); pmCloseAll(); b.click();
+});
 const rerenderKeep = () => { const y = scrollY; route(); window.scrollTo(0, y); };
 const AUDIT_LABELS = {
   'partnership.create': 'إنشاء سجل الشراكة', 'partnership.update': 'تعديل البيانات', 'partnership.delete': 'حذف سجل الشراكة', 'partnership.confirm': 'تأكيد قيمة مستوردة', 'partnership.publish': 'تغيير الظهور في الواجهة',

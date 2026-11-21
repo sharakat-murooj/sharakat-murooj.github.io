@@ -39,7 +39,7 @@ async def main():
         ok('meeting logged in audit', 'تسجيل اجتماع' in await E(f"JSON.stringify(D.audit.filter(a=>a.entityId==='{pid}').slice(0,3))"))
         ok('meeting shown in follow section with next steps', await E("document.querySelectorAll('#follow .mt-list>li').length===1 && document.querySelectorAll('#follow .mt-list ul li').length===2"))
         # — ذاكرة الجهة —
-        await pg.click('.dbar-acts [data-memopen]'); await pg.wait_for_timeout(600)
+        await pg.click('[data-pmore]'); await pg.click('.dbar-acts [data-memopen]'); await pg.wait_for_timeout(600)
         t = await E("document.querySelector('.mem-dlg').innerText")
         ok('brief shows last agreement, open commitments, activity', 'خطة تشجير مشتركة' in t and 'إرسال خطة التشجير' in t and 'آخر النشاط' in t)
         ok('open commitments counter = 2', await E("document.querySelectorAll('.mem-open li').length") == 2)
