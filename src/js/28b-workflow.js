@@ -126,6 +126,7 @@ function wfForm(kind, rec, key) {
 const wfDocOk = (kind, rec, d, docs) => docs.some((a) => a.doc === d.k) || (d.form && ((wfForm(kind, rec, d.form) || {}).status === 'done'));
 function wfDocsOf(kind, rec, stepId) {
   const own = (rec.attachments || []).filter((a) => a.wf === stepId);
+  if (stepId === 'draft' && !own.some((a) => a.doc === 'draft')) (rec.attachments || []).filter((a) => a.wf === 'signed' && a.doc === 'signedMoU').forEach((a) => own.push({ ...a, doc: 'draft', viaSigned: true }));
   if (kind === 'partnership' && rec.proposalId) { const x = D.proposals.find((y) => y.id === rec.proposalId); if (x) own.push(...(x.attachments || []).filter((a) => a.wf === stepId && !own.some((o) => o.fileId === a.fileId))); }
   return own;
 }
@@ -270,6 +271,7 @@ function wfStepDialog(kind, rec, sid, rerender) {
   });
   const box = m.el;
   const store = async (dk, files) => {
+    let replaceAuto = '';
     /* مستند موجود لنفس الخانة: إضافة بجانبه أو استبداله */
     const dd = s.docs.find((d) => d.k === dk) || {};
     const old = (rec.attachments || []).filter((a) => a.wf === sid && a.doc === dk);
@@ -277,6 +279,8 @@ function wfStepDialog(kind, rec, sid, rerender) {
       const ch = await choiceDlg(`يوجد لمستند «${esc(dd.l || '')}» ${old.length === 1 ? 'ملف محفوظ' : 'ملفات محفوظة'}: <b>${old.map((a) => esc(a.name)).join('، ')}</b>.<br>هل تريد إضافة الملف الجديد بجانبه، أم استبداله؟`, [['add', 'إضافة بجانبه'], ['replace', 'استبدال', 'danger']], { title: 'ملف موجود' });
       if (!ch) return;
       if (ch === 'replace') { const ids = new Set(old.map((a) => a.id)); rec.attachments = rec.attachments.filter((a) => !ids.has(a.id)); }
+    } else if (dd.form && (rec.forms || {})[dd.form] && rec.forms[dd.form].auto) {
+      replaceAuto = dd.form; /* نموذج أعدّته المنظومة تلقائيًا: يحل الملف المرفوع محله */
     } else if (dd.form && wfForm(kind, rec, dd.form)) {
       if (!(await confirmDlg(`لمستند «${esc(dd.l || '')}» نموذج محفوظ في ملف الشراكة (${esc(FORMS[dd.form].title)}). سيُضاف الملف المرفوع بجانبه ويبقى النموذج محفوظًا.`, { title: 'يوجد نموذج لهذا المستند', ok: 'إضافة الملف' }))) return;
     }
@@ -287,9 +291,10 @@ function wfStepDialog(kind, rec, sid, rerender) {
         rec.attachments.push({ id: uid('att'), fileId: up.id, name: up.name, type: up.type, size: up.size, category: WF_CAT, wf: sid, doc: dk, byDept: role === 'dept' ? myDept : D.settings.org.dept, addedAt: nowISO(), by: Session.userName() });
       } catch (err) { toast(err.message, 'err'); return; }
     }
+    if (replaceAuto) delete rec.forms[replaceAuto];
     await Repo.save(kind === 'proposal' ? 'proposals' : 'partnerships', rec);
-    await Repo.log('workflow.doc', kind, rec.id, kind === 'proposal' ? rec.ref : rec.code, `الخطوة ${s.n}: رفع «${(s.docs.find((d) => d.k === dk) || {}).l}»`);
-    toast('رُفع المستند'); m.close(); rerender(); setTimeout(() => wfStepDialog(kind, rec, sid, rerender), 60);
+    await Repo.log('workflow.doc', kind, rec.id, kind === 'proposal' ? rec.ref : rec.code, `الخطوة ${s.n}: رفع «${(s.docs.find((d) => d.k === dk) || {}).l}»${replaceAuto ? ' بدل النموذج المُعدّ تلقائيًا' : ''}`);
+    toast(replaceAuto ? 'رُفع المستند واستُبدل به النموذج الذي أعدّته المنظومة' : 'رُفع المستند'); m.close(); rerender(); setTimeout(() => wfStepDialog(kind, rec, sid, rerender), 60);
   };
   box.addEventListener('change', (e) => { const i = e.target.closest('[data-wfup]'); if (i && i.files.length) store(i.dataset.wfup, [...i.files]); });
   $$('[data-wfdrop]', box).forEach((dz) => { ['dragenter', 'dragover'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('over'); })); ['dragleave', 'drop'].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('over'); })); dz.addEventListener('drop', (e) => store(dz.dataset.wfdrop, [...e.dataTransfer.files])); });
