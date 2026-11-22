@@ -5499,3 +5499,4 @@ html.live-on,html.live-on body{overflow:hidden}
 .tz-snd svg path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tz-snd svg path:first-child{fill:currentColor;fill-opacity:.15}
 .tz-snd span{display:none}.tz-snd{padding-inline:12px!important}
+html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root){animation-duration:.32s;animation-timing-function:ease}

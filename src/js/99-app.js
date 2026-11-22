@@ -121,8 +121,11 @@ function bindShell(app) {
     if (e.target.closest('[data-themetoggle]')) {
       if (design() === 'board') D.settings.boardTheme = (D.settings.boardTheme || 'light') === 'dark' ? 'light' : 'dark';
       else D.settings.theme = D.settings.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.classList.add('theme-anim'); applyTheme(); setTimeout(() => document.documentElement.classList.remove('theme-anim'), 450);
-      if (!App.share) await Repo.saveSettings(); renderShell(); if (App.route && ['dashboard', 'home'].includes(App.route.name)) route(); return;
+      /* تبديل فوري بتلاشٍ واحد للشاشة كلها (View Transitions) بدل تحريك ألوان آلاف العناصر، والحفظ في الخلفية */
+      const swap = () => { applyTheme(); renderShell(); if (App.route && ['dashboard', 'home'].includes(App.route.name)) route(); };
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (document.startViewTransition && !reduce) { try { document.documentElement.classList.add('theme-vt'); const vt = document.startViewTransition(swap); vt.finished.finally(() => document.documentElement.classList.remove('theme-vt')); } catch (_) { swap(); } } else swap();
+      if (!App.share) Repo.saveSettings().catch(() => {}); return;
     }
     if (e.target.closest('[data-palette]')) { openPalette(); return; }
     if (e.target.closest('[data-menu]')) { app.classList.toggle('nav-open'); return; }
