@@ -25,11 +25,12 @@ function stratMapHTML(S) {
     return `<section class="sgv-g ${g.ps.length ? '' : 'gap'}" style="--gc:${c}">
       <header class="sgv-gh">
         <span class="sgv-code">${esc(g.k)}</span>
-        <div class="sgv-gt"><h3>${esc(g.t)}</h3><small>${g.inits.length ? `${on} من ${g.inits.length} مبادرات تخدمها شراكات` : ''}${g.noInit.length ? ` · ${g.noInit.length} مرتبطة بالهدف كاملًا` : ''}</small></div>
+        <div class="sgv-gt"><h3>${esc(g.t)}</h3><small>${g.inits.length ? `${on} من ${g.inits.length} مبادرات تخدمها شراكات` : ''}${g.noInit.length ? ` · ${g.noInit.length} مرتبطة بالهدف كاملًا` : ''}${g.own !== undefined && g.ps.length > g.own ? ` · ${g.own} ربط أساسي و${g.ps.length - g.own} بحكم قطاع الشريك أو التقييم` : ''}</small></div>
         <div class="sgv-gn"><div class="sgv-mring">${sgRing(g.inits.length ? on / g.inits.length : 0, 56, 6, c, 'var(--line)')}<span>${on}/${g.inits.length}</span></div><div><b>${g.ps.length}</b><small>${g.ps.length === 1 ? 'شراكة' : 'شراكات'}</small></div></div>
       </header>
       <div class="sgv-inits">${g.inits.map((i) => `<div class="sgv-i ${i.ps.length ? '' : 'gap'}">
           <div class="sgv-ih"><em>${esc(i.c.split('.')[1] || '')}</em><b>${esc(i.t)}</b><span class="sgv-in">${i.ps.length || ''}</span></div>
+          ${i.extra && i.extra.length ? `<small class="sgv-x" title="${esc(i.note)}">${i.own ? `${i.own} ربط أساسي · ` : ''}${i.extra.length} ${esc(i.note.replace(/^بحكم قطاع الشريك: .*/, 'بحكم قطاع الشريك'))}</small>` : ''}
           ${i.ps.length ? `<div class="sgv-lgs">${i.ps.slice(0, 8).map(sgLogo).join('')}${i.ps.length > 8 ? `<span class="sgv-more">+${i.ps.length - 8}</span>` : ''}</div>` : `<div class="sgv-gap">${icon('alert')} فجوة — لا توجد شراكة تخدم هذه المبادرة</div>`}
         </div>`).join('')}</div>
       ${g.noInit.length ? `<div class="sgv-whole"><small>تخدم الهدف كاملًا</small><div class="sgv-lgs">${g.noInit.map(sgLogo).join('')}</div></div>` : ''}
