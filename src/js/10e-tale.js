@@ -42,7 +42,8 @@ function taleData() {
   /* الجهات حسب القطاع */
   const SEC = ['حكومي', 'خاص', 'غير ربحي', 'تعليمي']; const bySec = {};
   logos.forEach((pr) => { const k = SEC.includes(pr.sector) ? pr.sector : 'أخرى'; bySec[k] = (bySec[k] || 0) + 1; });
-  const sectors = [...SEC, 'أخرى'].filter((k) => bySec[k]).map((k) => [k, bySec[k]]);
+  const secOf = (pr) => (SEC.includes(pr.sector) ? pr.sector : 'أخرى');
+  const sectors = [...SEC, 'أخرى'].filter((k) => bySec[k]).map((k) => [k, bySec[k], logos.filter((pr) => secOf(pr) === k && pr.logoFileId).slice(0, 8)]);
   return { nums, logos, photos, signed: signed.length, projects, years, sectors: sectors.length >= 2 ? sectors : [] };
 }
 
@@ -50,7 +51,7 @@ function taleData() {
 function taleChapters(nums, signed = 0) {
   const N = [];
   const st = 0.105 / Math.max(1, nums.length);
-  nums.forEach((n, i) => N.push({ a: 0.775 + i * st + 0.004, b: 0.775 + (i + 1) * st + 0.002, cls: 'num', eye: '', h: n[1], s: n[2] }));
+  nums.forEach((n, i) => N.push({ a: 0.775 + i * st + 0.004, b: Math.min(0.775 + (i + 1) * st + 0.002, 0.872), cls: 'num', eye: '', h: n[1], s: n[2] }));
   return [
     { a: 0.000, b: 0.062, cls: 'open', eye: 'مؤسسة مروج الأهلية · إدارة الشراكات', h: '', s: 'حكاية الشراكة' },
     { a: 0.080, b: 0.185, cls: 'sd', eye: '', h: 'أرضٌ واسعة، وفكرة تبحث عن شريك', s: 'كل شراكة تبدأ بخطوة في مكان لم يُزرع بعد.' },
@@ -135,9 +136,10 @@ function renderTale(el) {
       <div class="tz-proj" id="tzProj">${projects.map(([ic, t, d, n], i) => `<div class="tz-pj" data-i="${i}"><span class="tz-pj-ic">${icon(ic)}</span><div><b>${t}</b><small>${d}</small></div><em data-pjn="${i}" ${n ? '' : 'hidden'}>${n ? plural(n, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة') : ''}</em></div>`).join('')}</div>
       <div class="tz-orbit" id="tzOrbit">${img('murooj-logo-white') ? `<img class="tz-core" src="${img('murooj-logo-white')}" alt="">` : ''}
         ${logos.map((pr, k) => `<span class="tz-pl" data-k="${k}" title="${esc(pr.name)}">${talePlate(pr)}</span>`).join('')}</div>
-      <div class="tz-yrs" id="tzYrs">${years.map(([y, n]) => `<div class="tz-yl"><b>${n}</b><small>${y}</small></div>`).join('')}</div>
-      <div class="tz-scs" id="tzScs">${sectors.map(([k, n]) => `<div class="tz-sl"><b>${n}</b><small>${({ 'حكومي': 'القطاع الحكومي', 'خاص': 'القطاع الخاص', 'غير ربحي': 'القطاع غير الربحي', 'تعليمي': 'القطاع التعليمي' })[k] || 'قطاعات أخرى'}</small></div>`).join('')}</div>
+      <div class="tz-yrs" id="tzYrs">${years.map(([y, n]) => `<div class="tz-yl"><b data-v="${n}">${n}</b><small>${y}</small></div>`).join('')}</div>
+      <div class="tz-scs" id="tzScs">${sectors.map(([k, n, lg]) => `<div class="tz-sl"><span class="tz-slg">${(lg || []).map((pr, j) => `<i style="--j:${j};--n:${lg.length}">${plateHTML(pr, 40)}</i>`).join('')}</span><b data-v="${n}">${n}</b><small>${({ 'حكومي': 'القطاع الحكومي', 'خاص': 'القطاع الخاص', 'غير ربحي': 'القطاع غير الربحي', 'تعليمي': 'القطاع التعليمي' })[k] || 'قطاعات أخرى'}</small></div>`).join('')}</div>
       <div class="tz-xcaps">${years.length ? `<div class="tz-cap top" data-x="years"><h2>عامًا بعد عام</h2><p>المذكرات الموقّعة في كل عام.</p></div>` : ''}${sectors.length ? `<div class="tz-cap top" data-x="sectors"><h2>من كل القطاعات</h2><p>جهات حكومية وخاصة وغير ربحية وتعليمية، يجمعها هدفٌ واحد.</p></div>` : ''}</div>
+      <div class="tz-chap" id="tzChap"><em></em><span></span></div>
       <div class="tz-count" id="tzCount"><b>0</b><span>${logos.length === 1 ? 'جهة شريكة' : 'جهة شريكة'}</span></div>
       <div class="tz-caps">${chs.map((c, i) => `<div class="tz-cap ${c.cls}" data-c="${i}" ${c.k ? `data-k="${c.k}"` : ''}>${c.eye ? `<small>${c.eye}</small>` : ''}${c.h ? `<h2>${c.h}</h2>` : ''}${c.s ? `<p>${c.s}</p>` : ''}</div>`).join('')}</div>
       ${img('murooj-mangrove-seedlings') && img('ksa-farasan-mangrove') ? `<div class="tz-grow" id="tzGrow">
@@ -175,7 +177,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
   const GW = [GS, GS + LG];
   const small = innerWidth < 760;
   const N = small ? 1500 : 2800;
-  let W = 0, H = 0, DPR = 1, shapes = {}, ready = false, mapXY = () => [0, 0], spiral = [], halo = { cx: 0, cy: 0, R: 1 };
+  let W = 0, H = 0, DPR = 1, shapes = {}, ready = false, mapXY = () => [0, 0], spiral = [], halo = { cx: 0, cy: 0, R: 1 }, secGeo = [], secIdx = null;
   const P = { x: new Float32Array(N), y: new Float32Array(N), ph: new Float32Array(N), sp: new Float32Array(N), sz: new Float32Array(N), dl: new Float32Array(N), rx: new Float32Array(N), ry: new Float32Array(N) };
   for (let i = 0; i < N; i++) { P.ph[i] = Math.random() * 6.283; P.sp[i] = 0.4 + Math.random() * 1.2; P.sz[i] = Math.random(); P.dl[i] = Math.random(); P.rx[i] = Math.random(); P.ry[i] = Math.random(); }
   const GOLD = [233, 197, 120], CREAM = [255, 240, 205];
@@ -255,8 +257,10 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
       sectors.forEach(([k, v], j) => { const cx = W / 2 + (j - (n - 1) / 2) * gap * -1, R = Rm * Math.sqrt(v / mx) * 0.85 + Rm * 0.15, c = COL[k] || GOLD;
         for (let i = 0; i < R * R * 0.3; i++) { const a = Math.random() * 6.283, r = R * Math.sqrt(Math.random()); pts.push(cx + Math.cos(a) * r, cy + Math.sin(a) * r); cols.push(c[0] * 0.55, c[1] * 0.55, c[2] * 0.55); }
         for (let ring = 0; ring < 3; ring++) for (let a = 0; a < 6.283; a += 1.1 / R) { const rr = R + 3 + ring * 1.6 + (Math.random() - 0.5) * 1.5; pts.push(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); cols.push(...c); }
-        if (sl[j]) { Object.assign(sl[j].style, { left: cx + 'px', top: cy + 'px' }); sl[j].style.setProperty('--r', R + 'px'); } });
-      shapes.sectors = fit({ pts, cols }); }
+        secGeo.push([cx, cy, R]);
+        if (sl[j]) { Object.assign(sl[j].style, { left: cx + 'px', top: cy + 'px' }); sl[j].style.setProperty('--r', R + 'px'); sl[j].style.setProperty('--rl', Rm + 'px'); sl[j].style.setProperty('--ps', Math.max(26, Math.min(46, R * 0.34)) + 'px'); } });
+      shapes.sectors = fit({ pts, cols });
+      secIdx = new Int8Array(N); for (let i = 0; i < N; i++) { const x = shapes.sectors.p[i * 2], y = shapes.sectors.p[i * 2 + 1]; let bj = 0, bd = 1e12; secGeo.forEach(([cx, cy], j) => { const d = (x - cx) ** 2 + (y - cy) ** 2; if (d < bd) { bd = d; bj = j; } }); secIdx[i] = bj; } }
     ready = true; last = -1; tick(performance.now());
   };
 
@@ -283,6 +287,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
   const K = keys();
   const shapeAt = (name, i, t, out) => {
     if (live[name]) { const v = live[name](i, t); out[0] = v[0]; out[1] = v[1]; const c = liveCol[name]; out[2] = c[0]; out[3] = c[1]; out[4] = c[2]; return; }
+    if (name === 'sectors' && shapes.sectors && secIdx) { const g = secGeo[secIdx[i]], sp = shapes.sectors; const dx = sp.p[i * 2] - g[0], dy = sp.p[i * 2 + 1] - g[1], w = (secIdx[i] % 2 ? -1 : 1) * 0.16 * t, k = 1 + 0.025 * Math.sin(t * 1.3 + secIdx[i]); out[0] = g[0] + (dx * Math.cos(w) - dy * Math.sin(w)) * k; out[1] = g[1] + (dx * Math.sin(w) + dy * Math.cos(w)) * k; out[2] = sp.c[i * 3]; out[3] = sp.c[i * 3 + 1]; out[4] = sp.c[i * 3 + 2]; return; }
     const s = name.startsWith('num') ? shapes.nums[+name.slice(3)] : shapes[name];
     if (!s) { const v = live.dust(i, t); out[0] = v[0]; out[1] = v[1]; out[2] = 255; out[3] = 240; out[4] = 205; return; }
     out[0] = s.p[i * 2] + Math.sin(t * P.sp[i] + P.ph[i]) * 1.3; out[1] = s.p[i * 2 + 1] + Math.cos(t * P.sp[i] * 0.8 + P.ph[i]) * 1.3; out[2] = s.c[i * 3]; out[3] = s.c[i * 3 + 1]; out[4] = s.c[i * 3 + 2];
@@ -360,6 +365,26 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
       if (streak && lt >= 1) { if (i % 3) continue; ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${(al * 0.42).toFixed(3)})`; ctx.fillRect(x, y, 0.8, 6 + P.sp[i] * 14); }
       else { const s = cur[2] === 'bokeh' ? 1.5 + P.sz[i] * 3.5 : (cur[2] === 'title' || cur[2].startsWith('num') || cur[2] === 'logo' || cur[2] === 'years' ? 1.4 : 1) * (1 + P.sz[i] * 1.6); ctx.fillRect(x - s / 2, y - s / 2, s, s); }
     }
+    /* موجة ضوء تنتشر لحظة اكتمال الرقم */
+    if (cur[2].startsWith('num')) {
+      const M = Math.min(W, H);
+      [0, 0.004].forEach((dl, j) => { const k = tlS(u, cur[1] - 0.002 + dl, cur[1] + 0.012 + dl); if (k <= 0 || k >= 1) return;
+        const r = M * (0.12 + 0.55 * tlE(k)), a = (1 - k) * (j ? 0.35 : 0.6);
+        const g = ctx.createRadialGradient(W / 2, H * 0.42, r * 0.92, W / 2, H * 0.42, r); g.addColorStop(0, 'rgba(233,197,120,0)'); g.addColorStop(1, `rgba(255,236,190,${a})`);
+        ctx.strokeStyle = `rgba(255,232,180,${a})`; ctx.lineWidth = j ? 1 : 2.2; ctx.beginPath(); ctx.ellipse(W / 2, H * 0.42, r, r * 0.62, 0, 0, 6.283); ctx.stroke(); });
+    }
+    /* شبكة الكوكبة: خيوط من شعار مروج إلى كل شريك تسري فيها نبضات ضوء */
+    if (cur[2] === 'orbit' && spiral.length) {
+      const shown = p < 0.9 ? 0 : Math.min(spiral.length, Math.ceil(tlS(p, 0.9, 0.93) * spiral.length));
+      for (let k = 0; k < shown; k++) {
+        const [x, y] = spiral[k], a = 0.07 + 0.05 * Math.sin(t * 0.8 + k);
+        const lg = ctx.createLinearGradient(halo.cx, halo.cy, x, y); lg.addColorStop(0, `rgba(233,197,120,${a * 1.6})`); lg.addColorStop(1, `rgba(233,197,120,${a * 0.4})`);
+        ctx.strokeStyle = lg; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(halo.cx, halo.cy); ctx.lineTo(x, y); ctx.stroke();
+        const f = (t * 0.22 + k * 0.1379) % 1, px = halo.cx + (x - halo.cx) * f, py = halo.cy + (y - halo.cy) * f, pa = Math.sin(f * Math.PI) * 0.9;
+        const pg = ctx.createRadialGradient(px, py, 0, px, py, 7); pg.addColorStop(0, `rgba(255,244,214,${pa})`); pg.addColorStop(1, 'rgba(255,244,214,0)');
+        ctx.fillStyle = pg; ctx.fillRect(px - 7, py - 7, 14, 14);
+      }
+    }
     ctx.globalCompositeOperation = 'source-over';
     traveler(p, t);
     if (mapMode) mapPins(p, t);
@@ -391,10 +416,24 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
     gC1.style.opacity = v1.toFixed(3); gC1.style.transform = `translateY(${((1 - v1) * (s < 0.26 ? 40 : -40)).toFixed(1)}px)`;
     gC2.style.opacity = v2.toFixed(3); gC2.style.transform = `translateY(${((1 - v2) * (s < 0.8 ? 40 : -40)).toFixed(1)}px)`;
   };
+  /* مؤشر المشهد في الزاوية: رقم المشهد واسمه */
+  const chapEl = $('#tzChap', el);
+  const chapList = (() => { const L_ = [];
+    chs.forEach((c) => { const t = c.cls === 'open' ? 'البداية' : c.cls === 'logo' ? 'مروج' : c.cls === 'num' ? 'بالأرقام' : c.cls === 'end' ? 'شركاء مروج' : c.h; const a = ext(c.a), b = ext(c.b);
+      const last = L_[L_.length - 1]; if (last && last.t === t) last.b = b; else L_.push({ t, a, b }); });
+    if (LG) L_.push({ t: 'شتلةٌ اليوم… غابةٌ غدًا', a: GW[0], b: GW[1] });
+    if (L1) L_.push({ t: 'عامًا بعد عام', a: XW.years[0] - 0.01, b: XW.years[1] + 0.008 });
+    if (L2) L_.push({ t: 'من كل القطاعات', a: XW.sectors[0] - 0.01, b: XW.sectors[1] + 0.008 });
+    return L_.sort((x, y) => x.a - y.a); })();
+  let chapCur = -1;
+  const chapMark = (u) => { if (!chapEl) return; let k = -1; chapList.forEach((c, i) => { if (u >= c.a && u <= c.b) k = i; }); if (k === chapCur) return; chapCur = k;
+    chapEl.classList.remove('on'); if (k < 0) return; setTimeout(() => { if (chapCur !== k) return; chapEl.querySelector('em').textContent = String(k + 1).padStart(2, '0').replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) + ' / ' + String(chapList.length).padStart(2, '0').replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]); chapEl.querySelector('span').textContent = chapList[k].t; chapEl.classList.add('on'); }, 220); };
   const layersX = (u) => {
     xcaps.forEach((c) => { const [a, b] = XW[c.dataset.x]; capMove(c, tlWin(u, a, b, 0.01), a, b, u); });
-    if (yrs) { const [a, b] = XW.years, v = years.length ? tlWin(u, a, b, 0.01) : 0; capMove(yrs, v, a, b, u); yls.forEach((e, k) => e.classList.toggle('on', u > a + 0.004 + k * 0.003)); }
-    if (scs) { const [a, b] = XW.sectors, v = sectors.length ? tlWin(u, a, b, 0.01) : 0; capMove(scs, v, a, b, u); sls.forEach((e, k) => e.classList.toggle('on', u > a + 0.004 + k * 0.004)); }
+    const countUp = (e) => { const b = e.querySelector('b[data-v]'); if (!b || e.dataset.cu) return; e.dataset.cu = 1; const v = +b.dataset.v, t1 = performance.now(); const f = (now) => { const k = Math.min(1, (now - t1) / 1300); b.textContent = Math.round(v * (1 - Math.pow(1 - k, 3))).toLocaleString('ar-SA-u-nu-latn'); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+    if (yrs) { const [a, b] = XW.years, v = years.length ? tlWin(u, a, b, 0.01) : 0; capMove(yrs, v, a, b, u); yls.forEach((e, k) => { const on = u > a + 0.004 + k * 0.003; e.classList.toggle('on', on); if (on) countUp(e); else delete e.dataset.cu; }); }
+    if (scs) { const [a, b] = XW.sectors, v = sectors.length ? tlWin(u, a, b, 0.01) : 0; capMove(scs, v, a, b, u); sls.forEach((e, k) => { const on = u > a + 0.004 + k * 0.004; e.classList.toggle('on', on); if (on) countUp(e); else delete e.dataset.cu; }); }
+    chapMark(u);
   };
   const layers = (p) => {
     bgs.dunes.style.opacity = (Math.min(tlWin(p, 0.06, 0.315, 0.03), 1) * 0.62).toFixed(3);
