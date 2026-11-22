@@ -44,7 +44,12 @@ function taleData() {
   logos.forEach((pr) => { const k = SEC.includes(pr.sector) ? pr.sector : 'أخرى'; bySec[k] = (bySec[k] || 0) + 1; });
   const secOf = (pr) => (SEC.includes(pr.sector) ? pr.sector : 'أخرى');
   const sectors = [...SEC, 'أخرى'].filter((k) => bySec[k]).map((k) => [k, bySec[k], logos.filter((pr) => secOf(pr) === k && pr.logoFileId).slice(0, 8)]);
-  return { nums, logos, photos, signed: signed.length, projects, years, sectors: sectors.length >= 2 ? sectors : [] };
+  const feat = new Set((D.settings.home && D.settings.home.featured) || []);
+  const rank = (p) => (p.golden ? 0 : feat.has(p.id) ? 1 : 2);
+  const spots = signed.filter((p) => partnershipPhotos(p).some((x) => !String(x.fileId).startsWith('lib:')))
+    .sort((a, b) => rank(a) - rank(b) || String(b.startDate || '').localeCompare(String(a.startDate || ''))).slice(0, 3)
+    .map((p) => ({ p, ph: partnershipPhotos(p).find((x) => !String(x.fileId).startsWith('lib:')).fileId, pr: partnerById(p.partnerId), area: firstItem(p.cooperationAreas), gold: !!p.golden }));
+  return { nums, logos, photos, signed: signed.length, projects, years, sectors: sectors.length >= 2 ? sectors : [], spots };
 }
 
 /* الفصول: النص المعروض ونافذته على محور التقدم */
@@ -117,7 +122,7 @@ async function pickTaleGreens() {
 const taleShort = (n) => String(n || '').replace(/^(شركة|مؤسسة|جمعية|هيئة|الهيئة العامة ل|وزارة|المديرية العامة ل|المركز الوطني ل|المركز الوطني|الجمعية السعودية ل|الجمعية الوطنية ل|الجمعية)\s*/, '').split(/\s+/).slice(0, 3).join(' ');
 const talePlate = (pr) => (pr.logoFileId ? plateHTML(pr, 48) : `<div class="plate tz-nm" title="${esc(pr.name)}"><span>${esc(taleShort(pr.name))}</span></div>`);
 function renderTale(el) {
-  const { nums, logos, photos, signed, projects, years, sectors } = taleData();
+  const { nums, logos, photos, signed, projects, years, sectors, spots } = taleData();
   const chs = taleChapters(nums, signed);
   const mapMode = !taleGreens().length;
   const lib = (k) => (IMG_LIB[k] || {}).src || '', img = (k) => (ASSET_IMG[k] || {}).src || '';
@@ -138,7 +143,8 @@ function renderTale(el) {
         ${logos.map((pr, k) => `<span class="tz-pl" data-k="${k}" title="${esc(pr.name)}">${talePlate(pr)}</span>`).join('')}</div>
       <div class="tz-yrs" id="tzYrs">${years.map(([y, n]) => `<div class="tz-yl"><b data-v="${n}">${n}</b><small>${y}</small></div>`).join('')}</div>
       <div class="tz-scs" id="tzScs">${sectors.map(([k, n, lg]) => `<div class="tz-sl"><span class="tz-slg">${(lg || []).map((pr, j) => `<i style="--j:${j};--n:${lg.length}">${plateHTML(pr, 40)}</i>`).join('')}</span><b data-v="${n}">${n}</b><small>${({ 'حكومي': 'القطاع الحكومي', 'خاص': 'القطاع الخاص', 'غير ربحي': 'القطاع غير الربحي', 'تعليمي': 'القطاع التعليمي' })[k] || 'قطاعات أخرى'}</small></div>`).join('')}</div>
-      <div class="tz-xcaps">${years.length ? `<div class="tz-cap top" data-x="years"><h2>عامًا بعد عام</h2><p>المذكرات الموقّعة في كل عام.</p></div>` : ''}${sectors.length ? `<div class="tz-cap top" data-x="sectors"><h2>من كل القطاعات</h2><p>جهات حكومية وخاصة وغير ربحية وتعليمية، يجمعها هدفٌ واحد.</p></div>` : ''}</div>
+      <div class="tz-spot" id="tzSpot">${spots.map((x, i) => `<article class="tz-sp" style="--i:${i}"><div class="tz-spm"><img data-file="${esc(x.ph)}" alt=""></div>${x.gold ? '<span class="tz-spg">★ شراكة ذهبية</span>' : ''}<div class="tz-spb">${plateHTML(x.pr, 56)}<div><b>${esc(partnerName(x.p))}</b><small>${esc(x.p.classification || 'شراكة')}${x.p.startDate ? ' · ' + String(x.p.startDate).slice(0, 4) : ''}</small></div></div>${x.area ? `<p>${esc(trimP(x.area).slice(0, 110))}</p>` : ''}</article>`).join('')}</div>
+      <div class="tz-xcaps">${years.length ? `<div class="tz-cap top" data-x="years"><h2>عامًا بعد عام</h2><p>المذكرات الموقّعة في كل عام.</p></div>` : ''}${sectors.length ? `<div class="tz-cap top" data-x="sectors"><h2>من كل القطاعات</h2><p>جهات حكومية وخاصة وغير ربحية وتعليمية، يجمعها هدفٌ واحد.</p></div>` : ''}${spots.length ? `<div class="tz-cap top" data-x="spot"><h2>شراكاتٌ تصنع الفرق</h2><p>من أبرز الشراكات الموقّعة.</p></div>` : ''}</div>
       <div class="tz-chap" id="tzChap"><em></em><span></span></div>
       <div class="tz-count" id="tzCount"><b>0</b><span>${logos.length === 1 ? 'جهة شريكة' : 'جهة شريكة'}</span></div>
       <div class="tz-caps">${chs.map((c, i) => `<div class="tz-cap ${c.cls}" data-c="${i}" ${c.k ? `data-k="${c.k}"` : ''}>${c.eye ? `<small>${c.eye}</small>` : ''}${c.h ? `<h2>${c.h}</h2>` : ''}${c.s ? `<p>${c.s}</p>` : ''}</div>`).join('')}</div>
@@ -152,28 +158,62 @@ function renderTale(el) {
       </div>` : ''}
       <div class="tz-cta" id="tzCta">${can('proposal.create') ? `<a class="btn gold lg" href="#/share">${icon('send')} شارك بمقترح شراكة</a>` : ''}<a class="btn lg" href="#/partnerships">${icon('layers')} سجل الشراكات</a><button class="btn lg" type="button" data-tzreplay>${icon('history')} من البداية</button></div>
       <div class="tz-vig"></div><div class="tz-grain"></div>
-      <div class="tz-ui"><button type="button" class="tz-play" data-tzplay>${icon('play')}<span>تشغيل</span></button><div class="tz-prog"><i id="tzProg"></i></div>${can('manage.content') && !App.share ? `<button type="button" class="tz-fs tz-pics" data-tzpics title="اختيار صور «ثم تخضرّ الأرض»">${icon('image')}<span>صور العرض</span></button>` : ''}<button type="button" class="tz-fs" data-tzfs title="ملء الشاشة (F)">${icon('expand')}<span>ملء الشاشة</span></button></div>
+      <div class="tz-ui"><button type="button" class="tz-play" data-tzplay>${icon('play')}<span>تشغيل</span></button><div class="tz-prog"><i id="tzProg"></i></div>${can('manage.content') && !App.share ? `<button type="button" class="tz-fs tz-pics" data-tzpics title="اختيار صور «ثم تخضرّ الأرض»">${icon('image')}<span>صور العرض</span></button>` : ''}<button type="button" class="tz-fs tz-snd" data-tzsnd title="الموسيقى (M)" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="w1" d="M16 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path class="x" d="M16 9l5 6M21 9l-5 6"/></svg><span>الموسيقى</span></button><button type="button" class="tz-fs" data-tzfs title="ملء الشاشة (F)">${icon('expand')}<span>ملء الشاشة</span></button></div>
       <button type="button" class="tz-next" data-tznext title="المشهد التالي (↓)" aria-label="المشهد التالي">${icon('chevD')}</button><div class="tz-hint" id="tzHint"><i></i><span>مرّر أو اضغط ↓ للمشهد التالي، أو «تشغيل» للعرض بملء الشاشة</span></div>
     </div>
   </div>`;
   hydrateFiles(el);
-  taleRun(el, { nums, chs, projects, mapMode, nPartners: logos.length, years, sectors });
+  taleRun(el, { nums, chs, projects, mapMode, nPartners: logos.length, years, sectors, spots });
 }
 
+/* ===== موسيقى «حكاية الشراكة»: تُولَّد في المتصفح (Web Audio) بلا ملفات صوتية =====
+   وسادة نغمية هادئة بمقام قريب من الحجاز، تتبدّل مع كل مشهد، ونغمة جرس عند اكتمال كل رقم. */
+const taleAudio = {
+  on: false, ac: null, out: null, rev: null, voices: [],
+  CH: [[146.83, 220.0, 293.66, 369.99], [130.81, 196.0, 261.63, 311.13], [116.54, 174.61, 233.08, 293.66], [146.83, 220.0, 277.18, 349.23], [98.0, 146.83, 196.0, 233.08], [110.0, 164.81, 220.0, 277.18]],
+  init() {
+    if (this.ac) return true;
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+    const ac = this.ac = new AC(), out = this.out = ac.createGain(); out.gain.value = 0; out.connect(ac.destination);
+    const rev = this.rev = ac.createConvolver(), len = ac.sampleRate * 3.2, buf = ac.createBuffer(2, len, ac.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
+    rev.buffer = buf; const wet = ac.createGain(); wet.gain.value = 0.55; rev.connect(wet); wet.connect(out);
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 820; lp.Q.value = 0.4; lp.connect(out); lp.connect(rev);
+    const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 260; lfo.connect(lg); lg.connect(lp.frequency); lfo.start();
+    this.voices = this.CH[0].map((f, i) => { const g = ac.createGain(); g.gain.value = 0.055 / (1 + i * 0.25); g.connect(lp);
+      const o1 = ac.createOscillator(), o2 = ac.createOscillator(); o1.type = 'sawtooth'; o2.type = 'triangle'; o1.frequency.value = f; o2.frequency.value = f * 1.004; o1.connect(g); o2.connect(g); o1.start(); o2.start(); return { o1, o2 }; });
+    return true;
+  },
+  toggle(on) {
+    if (on && !this.init()) return;
+    this.on = !!on; if (!this.ac) return;
+    const t = this.ac.currentTime; if (on) this.ac.resume();
+    this.out.gain.cancelScheduledValues(t); this.out.gain.setTargetAtTime(on ? 0.5 : 0, t, on ? 1.2 : 0.35);
+  },
+  chord(k) {
+    if (!this.on || !this.ac) return; const ch = this.CH[k % this.CH.length], t = this.ac.currentTime;
+    this.voices.forEach((v, i) => { v.o1.frequency.setTargetAtTime(ch[i], t, 1.1); v.o2.frequency.setTargetAtTime(ch[i] * 1.004, t, 1.1); });
+  },
+  chime() {
+    if (!this.on || !this.ac) return; const ac = this.ac, t = ac.currentTime, f = [587.33, 659.25, 739.99, 880.0][Math.floor(Math.random() * 4)];
+    [1, 2.01].forEach((m, j) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.value = f * m; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(j ? 0.035 : 0.09, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.2); o.connect(g); g.connect(this.out); g.connect(this.rev); o.start(t); o.stop(t + 3.3); });
+  },
+};
+
 /* ===== محرك الجزيئات ===== */
-function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sectors = [] }) {
+function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sectors = [], spots = [] }) {
   const root = $('#tale', el), cv = $('#tzCv', el), ctx = cv.getContext('2d'), logoImg = $('#tzLogoImg', el);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   /* المشاهد المضافة تُدرج قبل الكوكبة: الخط الزمني الأصلي (q) يتوقف عندها، والممتد (u) يستمر */
   const grow = $('#tzGrow', el);
   const GS = 0.6915, LG = grow ? 0.13 : 0;
-  const XS0 = 0.880, L1 = years.length ? 0.08 : 0, L2 = sectors.length ? 0.08 : 0, XL = L1 + L2, TT = 1 + LG + XL;
+  const XS0 = 0.880, L1 = years.length ? 0.08 : 0, L2 = sectors.length ? 0.08 : 0, L3 = spots.length ? 0.09 : 0, XL = L1 + L2 + L3, TT = 1 + LG + XL;
   const INS = [[GS, LG], [XS0, XL]].filter((x) => x[1] > 0);
   const ext = (a) => a + INS.reduce((t, [at, len]) => t + (a >= at ? len : 0), 0);
   const toQ = (u) => { let off = 0; for (const [at, len] of INS) { const st0 = at + off; if (u < st0) return u - off; if (u < st0 + len) return at; off += len; } return u - off; };
   const XS = XS0 + LG; /* بداية مشهدي الأعوام والقطاعات على المحور الممتد */
   root.style.height = (1500 * TT).toFixed(0) + 'vh';
-  const XW = { years: [XS + 0.012, XS + L1 - 0.008], sectors: [XS + L1 + 0.012, XS + XL - 0.008] };
+  const XW = { years: [XS + 0.012, XS + L1 - 0.008], sectors: [XS + L1 + 0.012, XS + L1 + L2 - 0.008], spot: [XS + L1 + L2 + 0.012, XS + XL - 0.008] };
   const GW = [GS, GS + LG];
   const small = innerWidth < 760;
   const N = small ? 1500 : 2800;
@@ -282,6 +322,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
     const out = k.map(([a, b, n]) => (LG && a < GS && b > GS ? [GS + LG, GS + LG + (b - GS) * 0.6, n] : [ext(a), ext(b), n]));
     if (L1) out.push([XS + 0.002, XS + 0.03, 'years']);
     if (L2) out.push([XS + L1 + 0.002, XS + L1 + 0.03, 'sectors']);
+    if (L3) out.push([XS + L1 + L2 + 0.002, XS + L1 + L2 + 0.03, 'bokeh']);
     return out.sort((a, b) => a[0] - b[0]);
   };
   const K = keys();
@@ -292,7 +333,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
     if (!s) { const v = live.dust(i, t); out[0] = v[0]; out[1] = v[1]; out[2] = 255; out[3] = 240; out[4] = 205; return; }
     out[0] = s.p[i * 2] + Math.sin(t * P.sp[i] + P.ph[i]) * 1.3; out[1] = s.p[i * 2 + 1] + Math.cos(t * P.sp[i] * 0.8 + P.ph[i]) * 1.3; out[2] = s.c[i * 3]; out[3] = s.c[i * 3 + 1]; out[4] = s.c[i * 3 + 2];
   };
-  const A = new Float32Array(5), B = new Float32Array(5);
+  const A = new Float32Array(5), B = new Float32Array(5); let chimed = '';
   let last = -1, prog = 0, raf = 0, t0 = performance.now();
   const getP = () => { const r = root.getBoundingClientRect(), Hh = root.offsetHeight - innerHeight; return tlC(-r.top / Math.max(1, Hh)); };
   /* انتقالات «النزول إلى قسم جديد»: الشكل القديم يصعد خارج الشاشة والجديد يتكوّن من الأسفل */
@@ -354,8 +395,9 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
         else { const k2 = tlE((lt - 0.5) * 2); y = B[1] + (1 - k2) * H * 0.8; }
       } else if (lt < 1) {
         shapeAt(prev[2], i, t, A);
-        const sw = Math.sin(lt * Math.PI) * (40 + P.sz[i] * 60);
-        x = A[0] + (B[0] - A[0]) * lt + Math.cos(P.ph[i]) * sw; y = A[1] + (B[1] - A[1]) * lt + Math.sin(P.ph[i]) * sw;
+        /* انفجار: تندفع الجزيئات بعيدًا عن مركز الشاشة ثم تتجمّع في الشكل الجديد */
+        const bl = Math.sin(lt * Math.PI), dx0 = A[0] - W / 2, dy0 = A[1] - H * 0.48, dd = Math.hypot(dx0, dy0) || 1, ex = Math.min(W, H) * (0.18 + P.sz[i] * 0.42) * bl * bl;
+        x = A[0] + (B[0] - A[0]) * lt + (dx0 / dd) * ex + Math.cos(P.ph[i]) * bl * 30; y = A[1] + (B[1] - A[1]) * lt + (dy0 / dd) * ex + Math.sin(P.ph[i]) * bl * 30;
         r = A[2] + (B[2] - A[2]) * lt; g = A[3] + (B[3] - A[3]) * lt; b = A[4] + (B[4] - A[4]) * lt;
       }
       P.x[i] = x; P.y[i] = y;
@@ -365,7 +407,10 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
       if (streak && lt >= 1) { if (i % 3) continue; ctx.fillStyle = `rgba(${r | 0},${g | 0},${b | 0},${(al * 0.42).toFixed(3)})`; ctx.fillRect(x, y, 0.8, 6 + P.sp[i] * 14); }
       else { const s = cur[2] === 'bokeh' ? 1.5 + P.sz[i] * 3.5 : (cur[2] === 'title' || cur[2].startsWith('num') || cur[2] === 'logo' || cur[2] === 'years' ? 1.4 : 1) * (1 + P.sz[i] * 1.6); ctx.fillRect(x - s / 2, y - s / 2, s, s); }
     }
-    /* موجة ضوء تنتشر لحظة اكتمال الرقم */
+    /* وميض في مركز الانفجار عند بداية كل تحوّل */
+    if (morphing && !scr && ki > 0) { const fk = tlS(mt, 0, 0.35); if (fk > 0 && fk < 1) { const r = Math.min(W, H) * (0.05 + 0.5 * fk), g = ctx.createRadialGradient(W / 2, H * 0.48, 0, W / 2, H * 0.48, r); g.addColorStop(0, `rgba(255,240,205,${0.22 * (1 - fk)})`); g.addColorStop(1, 'rgba(255,240,205,0)'); ctx.fillStyle = g; ctx.fillRect(W / 2 - r, H * 0.48 - r, r * 2, r * 2); } }
+    /* موجة ضوء تنتشر لحظة اكتمال الرقم (ونغمة جرس إن كانت الموسيقى مفعّلة) */
+    if (cur[2].startsWith('num') && u >= cur[1] && chimed !== cur[2]) { chimed = cur[2]; taleAudio.chime(); } else if (!cur[2].startsWith('num')) chimed = '';
     if (cur[2].startsWith('num')) {
       const M = Math.min(W, H);
       [0, 0.004].forEach((dl, j) => { const k = tlS(u, cur[1] - 0.002 + dl, cur[1] + 0.012 + dl); if (k <= 0 || k >= 1) return;
@@ -393,6 +438,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
   /* طبقات الصور والنصوص */
   const bgs = {}; $$('[data-bg]', el).forEach((b) => { bgs[b.dataset.bg] = b; });
   const plates = $$('.tz-pl', el), countEl = $('#tzCount', el), countB = $('#tzCount b', el), proj = $('#tzProj', el), pjs = $$('.tz-pj', el), caps = $$('.tz-caps .tz-cap', el), phs = $$('.tz-ph', el), gs = $$('.tz-g', el), mline = $('#tzMLine', el), meth = $('#tzMethod', el), orbit = $('#tzOrbit', el), cta = $('#tzCta', el);
+  const spotEl = $('#tzSpot', el), spEls = $$('.tz-sp', el);
   const yrs = $('#tzYrs', el), scs = $('#tzScs', el), xcaps = $$('.tz-xcaps .tz-cap', el), yls = $$('.tz-yl', el), sls = $$('.tz-sl', el);
   /* النص يدخل من الأسفل ويخرج إلى الأعلى كأن الصفحة تنزل */
   const capMove = (c, v, a, b, p) => { c.style.opacity = v.toFixed(3); c.style.transform = `translateY(${((1 - v) * (p < (a + b) / 2 ? 56 : -56)).toFixed(1)}px)`; c.style.filter = v < 1 ? `blur(${((1 - v) * 6).toFixed(1)}px)` : ''; c.style.visibility = v > 0 ? 'visible' : 'hidden'; };
@@ -424,15 +470,17 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
     if (LG) L_.push({ t: 'شتلةٌ اليوم… غابةٌ غدًا', a: GW[0], b: GW[1] });
     if (L1) L_.push({ t: 'عامًا بعد عام', a: XW.years[0] - 0.01, b: XW.years[1] + 0.008 });
     if (L2) L_.push({ t: 'من كل القطاعات', a: XW.sectors[0] - 0.01, b: XW.sectors[1] + 0.008 });
+    if (L3) L_.push({ t: 'شراكاتٌ تصنع الفرق', a: XW.spot[0] - 0.01, b: XW.spot[1] + 0.008 });
     return L_.sort((x, y) => x.a - y.a); })();
   let chapCur = -1;
-  const chapMark = (u) => { if (!chapEl) return; let k = -1; chapList.forEach((c, i) => { if (u >= c.a && u <= c.b) k = i; }); if (k === chapCur) return; chapCur = k;
+  const chapMark = (u) => { if (!chapEl) return; let k = -1; chapList.forEach((c, i) => { if (u >= c.a && u <= c.b) k = i; }); if (k === chapCur) return; chapCur = k; if (k >= 0) taleAudio.chord(k);
     chapEl.classList.remove('on'); if (k < 0) return; setTimeout(() => { if (chapCur !== k) return; chapEl.querySelector('em').textContent = String(k + 1).padStart(2, '0').replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]) + ' / ' + String(chapList.length).padStart(2, '0').replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]); chapEl.querySelector('span').textContent = chapList[k].t; chapEl.classList.add('on'); }, 220); };
   const layersX = (u) => {
     xcaps.forEach((c) => { const [a, b] = XW[c.dataset.x]; capMove(c, tlWin(u, a, b, 0.01), a, b, u); });
     const countUp = (e) => { const b = e.querySelector('b[data-v]'); if (!b || e.dataset.cu) return; e.dataset.cu = 1; const v = +b.dataset.v, t1 = performance.now(); const f = (now) => { const k = Math.min(1, (now - t1) / 1300); b.textContent = Math.round(v * (1 - Math.pow(1 - k, 3))).toLocaleString('ar-SA-u-nu-latn'); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
     if (yrs) { const [a, b] = XW.years, v = years.length ? tlWin(u, a, b, 0.01) : 0; capMove(yrs, v, a, b, u); yls.forEach((e, k) => { const on = u > a + 0.004 + k * 0.003; e.classList.toggle('on', on); if (on) countUp(e); else delete e.dataset.cu; }); }
     if (scs) { const [a, b] = XW.sectors, v = sectors.length ? tlWin(u, a, b, 0.01) : 0; capMove(scs, v, a, b, u); sls.forEach((e, k) => { const on = u > a + 0.004 + k * 0.004; e.classList.toggle('on', on); if (on) countUp(e); else delete e.dataset.cu; }); }
+    if (spotEl) { const [a, b] = XW.spot, v = L3 ? tlWin(u, a, b, 0.01) : 0; capMove(spotEl, v, a, b, u); spEls.forEach((e, k) => e.classList.toggle('on', u > a + 0.004 + k * 0.012)); }
     chapMark(u);
   };
   const layers = (p) => {
@@ -489,7 +537,7 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
   };
   /* ↓ / ↑: انزل إلى المشهد التالي بحركة نزول ناعمة */
   const nextBtn = $('[data-tznext]', el);
-  const stops = () => [...chs.map((c) => (c.cls === 'open' ? 0 : ext(c.a + 0.014))), ...Object.keys(XW).filter((k) => (k === 'years' ? L1 : L2)).map((k) => XW[k][0] + 0.02), ...(LG ? [GS + LG * 0.3, GS + LG * 0.8] : []), ext(0.93), ext(0.985)].map((u) => u / TT).sort((a, b) => a - b);
+  const stops = () => [...chs.map((c) => (c.cls === 'open' ? 0 : ext(c.a + 0.014))), ...Object.keys(XW).filter((k) => ({ years: L1, sectors: L2, spot: L3 })[k]).map((k) => XW[k][0] + 0.02), ...(LG ? [GS + LG * 0.3, GS + LG * 0.8] : []), ext(0.93), ext(0.985)].map((u) => u / TT).sort((a, b) => a - b);
   let glide = 0;
   const goStop = (dir) => {
     stop(); cancelAnimationFrame(glide);
@@ -519,6 +567,11 @@ function taleRun(el, { nums, chs, projects, mapMode, nPartners, years = [], sect
   const fsBtn = $('[data-tzfs]', el);
   const picsBtn = $('[data-tzpics]', el); if (picsBtn) picsBtn.onclick = () => pickTaleGreens();
   fsBtn.onclick = toggleCinema;
+  const sndBtn = $('[data-tzsnd]', el);
+  const sndSet = (on) => { taleAudio.toggle(on); sndBtn.classList.toggle('on', on); sndBtn.setAttribute('aria-pressed', on); if (on && chapCur >= 0) taleAudio.chord(chapCur); };
+  sndBtn.onclick = () => sndSet(!taleAudio.on);
+  document.addEventListener('keydown', function tzSnd(e) { if (!document.body.contains(root)) { taleAudio.toggle(false); return document.removeEventListener('keydown', tzSnd); } if ((e.key === 'm' || e.key === 'M' || e.key === 'ة') && !(e.target.closest && e.target.closest('input,textarea,select'))) sndSet(!taleAudio.on); });
+  addEventListener('hashchange', () => taleAudio.toggle(false), { once: true });
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && document.documentElement.classList.contains('tz-cinema')) { cinema(false); fsBtn.classList.remove('on'); $('span', fsBtn).textContent = 'ملء الشاشة'; } });
   addEventListener('hashchange', () => document.documentElement.classList.remove('tz-cinema'), { once: true });
   /* تحديث حي: إن تغيّرت أرقام المنصة أثناء العرض تتبدّل الأرقام في مكانها دون إعادة الفيلم */
