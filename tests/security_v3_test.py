@@ -94,17 +94,67 @@ check('share link file list hides documents', 'sv3-f-doc' not in ids and 'sv3-f-
 check('share link cannot read document chunks', q("select shk_file_chunk_get(%s, 'sv3-f-doc', 0)", share) is None)
 check('team still reads chunks', q("select shk_file_chunk_get(%s, 'sv3-f-doc', 0)", team) == 'SECRET')
 check('share link cannot push', str(push(share, [{'col': 'news', 'id': 'sv3-n', 'data': {}}])).startswith('ERR'))
-# 8) الدخول
-n0 = q("select count(*) from shk_login_fails")
+# 8) الدخول: القفل لكل عنوان على حدة
+def ip(x): q("select set_config('request.headers', %s, false)", json.dumps({'cf-connecting-ip': x}))
+n0 = q("select count(*) from shk_login_fails_ip")
 q("select shk_login(%s, 'x')", 'team:' + 'A' * 5000); q("select shk_login('team:غير-موجود', 'x')")
-check('login with huge/unknown id adds no rows', q("select count(*) from shk_login_fails") == n0)
-q("delete from shk_login_fails where account_id='viewer'")
+check('login with huge/unknown id adds no rows', q("select count(*) from shk_login_fails_ip") == n0)
+q("delete from shk_login_fails_ip where account_id='viewer'")
+ip('6.6.6.6')
 for _ in range(5): q("select shk_login('viewer', 'wrong')")
-check('5 wrong attempts lock', (q("select shk_login('viewer', 'wrong')") or {}).get('error') == 'locked')
-q("update shk_login_fails set locked_until = now() - interval '1 second' where account_id='viewer'")
+check('5 wrong attempts lock the attacker address', (q("select shk_login('viewer', 'wrong')") or {}).get('error') == 'locked')
+ip('10.0.0.7')
+r = q("select shk_login('viewer', 'wrong')") or {}
+check('owner on another address is NOT locked out', r.get('error') == 'bad_login')
+vpw = json.load(open(os.environ['SHK_TEST_PW'])).get('viewer') if os.environ.get('SHK_TEST_PW') else None
+if vpw:
+    r = q("select shk_login('viewer', %s)", vpw) or {}
+    check('owner logs in with the right password while attacker is locked', bool(r.get('token')))
+    if r.get('token'): q("select shk_logout(%s)", r['token'])
+ip('6.6.6.6')
+q("update shk_login_fails_ip set locked_until = now() - interval '1 second' where account_id='viewer' and ip='6.6.6.6'")
 q("select shk_login('viewer', 'wrong')")
-check('one wrong attempt after lock expiry does not re-lock', q("select locked_until from shk_login_fails where account_id='viewer'") is None)
-q("delete from shk_login_fails where account_id='viewer'")
+check('one wrong attempt after lock expiry does not re-lock', q("select locked_until from shk_login_fails_ip where account_id='viewer' and ip='6.6.6.6'") is None)
+q("insert into shk_login_fails_ip (account_id, ip, fails, last_at) select 'viewer', 'd' || g, 3, now() from generate_series(1, 100) g on conflict do nothing")
+ip('10.0.0.8')
+check('distributed attack (300+ fails/hour) triggers the global lock', (q("select shk_login('viewer', 'wrong')") or {}).get('error') == 'locked')
+q("delete from shk_login_fails_ip where account_id='viewer'"); q("select set_config('request.headers', '', false)")
+
+# 9) روابط الاطلاع: الأقسام على الخادم
+q("insert into shk_shares (id, token_hash, sections, expires_at) values ('sv3s', 'h-sv3s', '[\"dashboard\",\"partnerships\"]', now() + interval '1 day') on conflict (id) do update set sections = excluded.sections")
+shs = sess('share:sv3s', 'viewer')
+q("select shk_push(%s, %s::jsonb)", adm, json.dumps([
+    {'col': 'partnerships', 'id': 'sv3-q', 'data': {'id': 'sv3-q', 'title': 'ش', 'forms': {'mou': {'data': {'x': 'نص المذكرة'}}}, 'meetings': [{'t': 'اجتماع سري'}],
+        'wf': {'steps': {'s1': {'status': 'done', 'by': 'فلان', 'note': 'ملاحظة داخلية', 'depts': {'إدارة': {'at': 't', 'by': 'ب', 'note': 'ن'}}}}}}},
+    {'col': 'proposals', 'id': 'sv3-y', 'data': {'id': 'sv3-y', 'status': 'review', 'department': 'د', 'reasons': 'أسباب داخلية', 'events': [{'type': 'status', 'by': 'فلان', 'note': 'x', 'at': 't'}, {'type': 'note', 'vis': 'internal', 'at': 't'}]}},
+    {'col': 'news', 'id': 'sv3-nw', 'data': {'id': 'sv3-nw', 't': 'خبر'}}]))
+rows = {(r['col'], r['id']): r for r in q("select shk_pull(%s, 0)", shs)['rows']}
+pq = rows[('partnerships', 'sv3-q')]['data']; st1 = pq['wf']['steps']['s1']
+check('share: no forms (MOU texts) and no meetings', 'forms' not in pq and 'meetings' not in pq)
+check('share: workflow keeps status, drops names and notes', st1.get('status') == 'done' and 'by' not in st1 and 'note' not in st1 and st1['depts']['إدارة'] == {'at': 't'})
+py = rows[('proposals', 'sv3-y')]['data']
+check('share: proposals without text, names or internal events', 'reasons' not in py and py['events'] == [{'type': 'status', 'at': 't'}])
+check('share: news not sent when its sections are off', rows[('news', 'sv3-nw')]['deleted'] is True)
+check('share: audit and notifications never sent', all(r['deleted'] for k, r in rows.items() if k[0] == 'audit') and 'notifs' not in (rows.get(('settings', 'main')) or {}).get('data', {}))
+q("update shk_shares set sections='[\"calendar\"]' where id='sv3s'")
+pq2 = {(r['col'], r['id']): r for r in q("select shk_pull(%s, 0)", shs)['rows']}[('partnerships', 'sv3-q')]['data']
+check('share: meetings only with the calendar section', pq2.get('meetings') == [{'t': 'اجتماع سري'}])
+q("update shk_shares set sections='[\"process\"]' where id='sv3s'")
+check('share: process-only link gets no partnerships', {(r['col'], r['id']): r for r in q("select shk_pull(%s, 0)", shs)['rows']}[('partnerships', 'sv3-q')]['deleted'] is True)
+check('normal account still gets full record', 'forms' in {(r['col'], r['id']): r for r in q("select shk_pull(%s, 0)", team)['rows']}[('partnerships', 'sv3-q')]['data'])
+q("delete from shk_shares where id='sv3s'")
+
+# 10) الرفع الخارجي: سقف المساحة وتنظيف اليتيم
+q("insert into shk_invites (id, token_hash, kind, expires_at, max_uses) values ('sv3i', shk_hash_token('sv3-key'), 'private', now() + interval '1 day', 5) on conflict (id) do nothing")
+big = 'A' * 6900000
+res = [q("select shk_ext_file_put('sv3-key', %s, '{}'::jsonb, %s)", f'f-ext-sv3q{i:03d}', big).get('error') for i in range(10)]
+check('per-link daily byte cap stops large uploads', 'busy' in res and res[0] is None)
+q("insert into shk_files (id, meta, data, created_by, created_at) values ('f-ext-sv3old1', '{}', 'x', 'ext-inv:zz', now() - interval '5 days'), ('f-ext-sv3old2', '{}', 'x', 'ext-inv:zz', now() - interval '5 days')")
+q("select shk_push(%s, %s::jsonb)", adm, json.dumps([{'col': 'proposals', 'id': 'sv3-z', 'data': {'id': 'sv3-z', 'attachments': [{'fileId': 'f-ext-sv3old2'}]}}]))
+q("select shk_ext_file_put('sv3-key', 'f-ext-sv3tiny1', '{}'::jsonb, 'x')")
+check('orphan external files older than 3 days are cleaned', q("select count(*) from shk_files where id='f-ext-sv3old1'") == 0)
+check('attached external file is kept', q("select count(*) from shk_files where id='f-ext-sv3old2'") == 1)
+q("delete from shk_files where id like 'f-ext-sv3%%'"); q("delete from shk_invites where id='sv3i'")
 
 # تنظيف
 q("delete from shk_records where id like 'sv3-%%'"); q("delete from shk_files where id like 'sv3-%%'"); q("delete from shk_file_chunks where id like 'sv3-%%'")
