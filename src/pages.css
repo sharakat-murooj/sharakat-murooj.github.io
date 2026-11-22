@@ -5465,3 +5465,15 @@ html.live-on,html.live-on body{overflow:hidden}
 .tz-chap span{font-size:clamp(13px,1.1vw,16px);color:rgba(251,244,226,.8);font-weight:600;padding-top:6px;border-top:1px solid rgba(233,197,120,.45);min-width:120px}
 @media (max-width:760px){.tz-chap{display:none}}
 @media (prefers-reduced-motion:reduce){.tz-slg,.tz-slg .plate,.tz-glow::after{animation:none}}
+
+/* ===== كروت التقويم: بلا الخط الجانبي، بأيقونة وأقرب موعد ===== */
+.cal-kpi{flex-direction:row!important;align-items:center;gap:14px!important;padding:16px 18px!important;border-radius:16px!important;transition:border-color .2s,box-shadow .2s,transform .2s}
+.cal-kpi::before{display:none!important}
+.cal-kpi:hover{border-color:color-mix(in srgb,var(--kc) 40%,var(--line));box-shadow:0 10px 26px -18px color-mix(in srgb,var(--kc) 70%,transparent);transform:translateY(-1px)}
+.cal-kic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--kc) 13%,transparent);color:var(--kc)}
+.cal-kic .ic{width:22px;height:22px}
+.cal-kb{display:flex;flex-direction:column;min-width:0}
+.cal-kb b{font-size:30px!important;font-weight:800;line-height:1.05;color:var(--ink)}
+.cal-kb span{font-size:13.5px!important;color:var(--ink-2)!important;font-weight:600}
+.cal-kb small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cal-kpi.zero .cal-kic{background:var(--paper-3);color:var(--faint)}.cal-kpi.zero b{color:var(--faint)}

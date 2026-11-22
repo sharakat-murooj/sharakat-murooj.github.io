@@ -9110,6 +9110,18 @@ html.live-on,html.live-on body{overflow:hidden}
 .tz-chap span{font-size:clamp(13px,1.1vw,16px);color:rgba(251,244,226,.8);font-weight:600;padding-top:6px;border-top:1px solid rgba(233,197,120,.45);min-width:120px}
 @media (max-width:760px){.tz-chap{display:none}}
 @media (prefers-reduced-motion:reduce){.tz-slg,.tz-slg .plate,.tz-glow::after{animation:none}}
+
+/* ===== كروت التقويم: بلا الخط الجانبي، بأيقونة وأقرب موعد ===== */
+.cal-kpi{flex-direction:row!important;align-items:center;gap:14px!important;padding:16px 18px!important;border-radius:16px!important;transition:border-color .2s,box-shadow .2s,transform .2s}
+.cal-kpi::before{display:none!important}
+.cal-kpi:hover{border-color:color-mix(in srgb,var(--kc) 40%,var(--line));box-shadow:0 10px 26px -18px color-mix(in srgb,var(--kc) 70%,transparent);transform:translateY(-1px)}
+.cal-kic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--kc) 13%,transparent);color:var(--kc)}
+.cal-kic .ic{width:22px;height:22px}
+.cal-kb{display:flex;flex-direction:column;min-width:0}
+.cal-kb b{font-size:30px!important;font-weight:800;line-height:1.05;color:var(--ink)}
+.cal-kb span{font-size:13.5px!important;color:var(--ink-2)!important;font-weight:600}
+.cal-kb small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cal-kpi.zero .cal-kic{background:var(--paper-3);color:var(--faint)}.cal-kpi.zero b{color:var(--faint)}
 </style>
 </head>
 <body>
@@ -31305,7 +31317,11 @@ function renderCalendar(el, r) {
         <button type="button" class="nav-a" data-m="" data-ics="all">${icon('calendar')}<span><b>كل المواعيد القادمة</b><small>ملف ‎.ics‎ — ${upcoming.length} موعدًا</small></span></button>
         <button type="button" class="nav-a" data-m="" data-ics="month">${icon('calendar')}<span><b>مواعيد ${MONTHS[st.m]}</b><small>الشهر المعروض فقط</small></span></button>
         <div class="cal-exp-n">${icon('info')}<span>افتح الملف بعد تنزيله: يُضاف تلقائيًا إلى Outlook أو تقويم Google أو تقويم الجوال، مع تذكير قبل الانتهاء والتجديد بأسبوع.</span></div></div></div></div></div>
-      <div class="cal-kpis">${[['in30', 'خلال 30 يومًا', in30.length], ['renew', 'تقييمات تجديد قادمة', upcoming.filter((e) => e.type === 'renew').length], ['end', 'شراكات تنتهي', upcoming.filter((e) => e.type === 'end').length], ['meet', 'اجتماعات قادمة', upcoming.filter((e) => e.type === 'meet').length]].map(([k, l, n]) => `<div class="cal-kpi k-${k}"><b>${n}</b><span>${l}</span></div>`).join('')}</div>
+      <div class="cal-kpis">${(() => { /* بطاقات: أيقونة بلون النوع، والرقم، وأقرب موعد */
+        const near = (L_) => { const e = L_[0]; if (!e) return ''; const d = daysBetween(today(), parseDate(e.date)); return `${d === 0 ? 'اليوم' : d === 1 ? 'غدًا' : `بعد ${d} يومًا`} · ${esc(String(e.t).slice(0, 34))}`; };
+        const by = (t) => upcoming.filter((e) => e.type === t);
+        return [['in30', 'calendar', '#2F7A5E', 'خلال 30 يومًا', in30], ['renew', 'history', '#B88A3B', 'تقييمات تجديد قادمة', by('renew')], ['end', 'flag', '#B5543C', 'شراكات تنتهي', by('end')], ['meet', 'users', '#5B5BA8', 'اجتماعات قادمة', by('meet')]]
+          .map(([k, ic, c, l, L_]) => `<div class="cal-kpi k-${k} ${L_.length ? '' : 'zero'}" style="--kc:${c}"><span class="cal-kic">${icon(ic)}</span><div class="cal-kb"><b>${L_.length}</b><span>${l}</span><small>${L_.length ? near(L_) : 'لا مواعيد'}</small></div></div>`).join(''); })()}</div>
       <div class="cal-bar"><div class="cal-nav">${st.view === 'month' ? `<button class="icon-btn" type="button" data-mv="-1" title="الشهر السابق">${icon('chevR')}</button><button class="btn sm" type="button" data-mv="0">اليوم</button><button class="icon-btn" type="button" data-mv="1" title="الشهر التالي">${icon('chevL')}</button>
         <h2>${MONTHS[st.m]} ${st.y} <small>${calHijriMonth(new Date(st.y, st.m, 15))}</small></h2>` : '<h2>المواعيد القادمة</h2>'}</div>
         <div class="cal-types">${Object.entries(CAL_TYPES).map(([k, t]) => `<button type="button" class="cal-ty ${st.off.has(k) ? 'off' : ''}" data-ty="${k}" style="--c:${t.c}"><i></i>${t.l}</button>`).join('')}</div>
