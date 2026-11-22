@@ -56,7 +56,7 @@ async def main():
         rec = await E(f"(()=>{{const p=D.partnerships.find(x=>x.id==='{ptid}');return [p.ptype,p.origin,p.originBy,(partnerById(p.partnerId)||{{}}).domain,Object.keys(p.forms||{{}}).sort().join(',')]}})()")
         ok('classification, origin, domain and forms carry over to the partnership', rec == ['شريك استراتيجي','علاقة شخصية','عضو مجلس الأمناء','سياحة','initialEval,methodology'], rec)
         ok('partnership page shows the completed forms in the track', await E("document.querySelectorAll('.wf-sec .wf-doc.form.done').length") == 2)
-        await pg.click('.wf-sec .wf-doc.form[data-wfform="methodology"]'); await pg.wait_for_selector('.fdoc-modal')
+        await pg.evaluate("(()=>{const b=document.querySelector('.wf-sec .wf-doc.form[data-wfform=\"methodology\"]'); const pn=b.closest('[data-wfpn]'); document.querySelector('[data-wfph=\"'+pn.dataset.wfpn+'\"]').click()})()"); await pg.click('.wf-sec .wf-doc.form[data-wfform="methodology"]'); await pg.wait_for_selector('.fdoc-modal')
         ok('completed form opens as the designed document with print and Word', await E("!!document.querySelector('.fdoc-modal .fxdoc .fx-steps') && !!document.querySelector('[data-ffprint]') && !!document.querySelector('[data-ffword]')"))
         async with pg.expect_download() as dl: await pg.click('[data-ffword]')
         d = await dl.value
