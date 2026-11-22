@@ -12,7 +12,7 @@ function overlapsPeriod(p, per) {
 }
 const HOME_KPIS = {
   active: { label: 'شراكة سارية', sub: 'حتى اليوم', calc: (L_, per) => L_.filter((p) => ['active', 'soon'].includes(pStatus(p))).length, href: () => '#/partnerships?status=active|soon' },
-  partners: { label: 'جهة شريكة', sub: 'لها شراكات مسجّلة', calc: (L_) => new Set(L_.filter((p) => !p.isDraft).map((p) => p.partnerId)).size, href: () => '#/partners' },
+  partners: { label: 'جهة شريكة', sub: 'لها شراكات مسجّلة', calc: (L_) => partnerCountOf(L_), href: () => '#/partners' },
   signedInPeriod: { label: 'شراكة بدأ سريانها', sub: 'خلال الفترة', calc: (L_, per) => L_.filter((p) => p.stage === 'signed' && parseDate(p.startDate) && parseDate(p.startDate) >= per.from && parseDate(p.startDate) <= per.to).length, href: () => '#/partnerships' },
   outputs: { label: 'مخرجًا مستهدفًا', sub: 'في الشراكات الموقّعة', calc: (L_) => L_.filter((p) => !p.isDraft && p.stage === 'signed').reduce((a, p) => a + richItems(p.outputs).length, 0), href: () => '#/partnerships' },
   departments: { label: 'إدارة تتقاطع مع الشراكات', sub: 'في الشراكات الموقّعة', calc: (L_) => new Set(L_.filter((p) => !p.isDraft && p.stage === 'signed').flatMap((p) => p.departments || [])).size, href: () => '#/dashboard' },

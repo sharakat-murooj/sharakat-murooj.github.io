@@ -221,6 +221,6 @@ function dashMetrics(list) {
   const props = visibleProposals(), inProc = props.filter((x) => ['submitted', 'review', 'info'].includes(x.status));
   const cells = nd.length * CORE_FIELDS.length, filled = cells - nd.reduce((t, p) => t + missingFields(p).length, 0);
   const y = String(today().getFullYear());
-  return { nd, signed, act, ser, past, delta: past.length > 1 ? past[past.length - 1] - past[0] : 0, partnersBy, nPartners: new Set(nd.map((p) => p.partnerId)).size, soon, props, inProc,
+  return { nd, signed, act, ser, past, delta: past.length > 1 ? past[past.length - 1] - past[0] : 0, partnersBy, nPartners: partnerCountOf(nd), soon, props, inProc,
     oldest: inProc.length ? Math.max(...inProc.map(propAgeDays)) : 0, score: cells ? Math.round(filled / cells * 100) : 0, startedYear: signed.filter((p) => (p.startDate || '').startsWith(y)).length, acts: dashActions(list) };
 }

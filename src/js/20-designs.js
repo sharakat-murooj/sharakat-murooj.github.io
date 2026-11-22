@@ -81,11 +81,11 @@ function heroMediaHTML(extraCls = '') {
 /* أرقام حيّة محسوبة لحظة العرض من السجلات: تتغير فور إضافة جهة أو شراكة أو انتهاء شراكة */
 const nounFor = (n, f) => (n === 1 ? f[0] : n === 2 ? f[1] : n >= 3 && n <= 10 ? f[2] : f[3]);
 function liveCounts() {
-  const list = visiblePartnerships({ includeDrafts: false });
+  const list = livePs(visiblePartnerships({ includeDrafts: false }));
   const st = (k) => list.filter((p) => k.includes(pStatus(p))).length;
   const linked = new Set(list.map((p) => p.partnerId));
   const anyLinked = new Set(D.partnerships.map((p) => p.partnerId));
-  const partners = D.partners.filter((pr) => linked.has(pr.id) || (!anyLinked.has(pr.id) && !pr.target && (showDemo() || !pr.demo))).length; // الجهات المستهدفة لا تُعد جهات شريكة
+  const partners = D.partners.filter((pr) => linked.has(pr.id) || (!anyLinked.has(pr.id) && !pr.target && (showDemo() || !pr.demo))).length; // جهة مسجّلة بلا شراكة بعد تُعد فور إضافتها؛ المستهدفة والملغاة شراكاتها لا تُعد // الجهات المستهدفة لا تُعد جهات شريكة
   return { active: st(['active', 'soon']), soon: st(['soon']), ended: st(['ended']), partners, total: list.length };
 }
 function heroBeacons() {

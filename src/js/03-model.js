@@ -183,6 +183,11 @@ function visiblePartnerships({ includeDrafts } = {}) {
 function visibleProposals() {
   return D.proposals.filter((x) => (showDemo() || !x.demo));
 }
+/* — مقاييس موحدة تستخدمها كل التقارير — */
+const livePs = (L_) => (L_ || visiblePartnerships({ includeDrafts: false })).filter((p) => !p.isDraft && p.stage !== 'cancel');
+const partnerCountOf = (L_) => new Set(livePs(L_).map((p) => p.partnerId).filter(Boolean)).size;
+const signedOn = (p) => p.signDate || p.startDate || '';
+const realSectors = (L_) => new Set(livePs(L_).map(pSector).filter((s) => s && s !== 'غير محدد'));
 function publicPartnerships() { return D.partnerships.filter((p) => p.public && !p.isDraft && (showDemo() || !p.demo) && p.stage !== 'cancel'); }
 function publicStories() { return D.achievements.filter((a) => a.public && (showDemo() || !a.demo)); }
 function publicNews() { return D.news.filter((n) => n.public && (showDemo() || !n.demo)); }
@@ -318,7 +323,7 @@ async function convertProposal(x, { partnerId, newPartner }) {
    فيبدأ العمل من «الاجتماع المبدئي»؛ وتخرج الجهة من قائمة المستهدفة. */
 async function startPartnershipFor(pr) {
   const ex = D.partnerships.filter((p) => p.partnerId === pr.id && !p.isDraft && pStatus(p) !== 'ended');
-  const ok = await confirmDlg(`${ex.length ? `لهذه الجهة ${ex.length === 1 ? 'شراكة قائمة' : ex.length + ' شراكات قائمة'}. ` : ''}سيُفتح ملف شراكة جديد مع «${pr.name}» في مرحلة الإعداد، ويبدأ المسار من «الاجتماع المبدئي» كمبادرة من إدارة الشراكات دون مقترح من إدارة. متابعة؟`, { title: 'بدء إجراءات شراكة', ok: 'بدء الإجراءات' });
+  const ok = await confirmDlg(`${ex.length ? `لهذه الجهة ${ex.length === 1 ? 'شراكة قائمة' : ex.length + ' شراكات قائمة'}. ` : ''}سيُفتح ملف شراكة جديد مع «${esc(pr.name)}» في مرحلة الإعداد، ويبدأ المسار من «الاجتماع المبدئي» كمبادرة من إدارة الشراكات دون مقترح من إدارة. متابعة؟`, { title: 'بدء إجراءات شراكة', ok: 'بدء الإجراءات' });
   if (!ok) return null;
   const at = nowISO(), by = Session.userName(), note = 'مبادرة من إدارة الشراكات (دون مقترح من إدارة)';
   const rec = {

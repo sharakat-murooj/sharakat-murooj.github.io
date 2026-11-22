@@ -154,7 +154,7 @@ function renderTale(el) {
         <div class="tz-gw-b"><img src="${img('ksa-farasan-mangrove')}" alt=""></div>
         <div class="tz-gw-shade"></div>
         <div class="tz-gw-cap c1"><small>من مشاريع مروج على سواحل المملكة</small><h2>شتلةٌ اليوم…</h2></div>
-        <div class="tz-gw-cap c2"><h2>…وغابةٌ غدًا</h2><p>نحو ٢٫٤ مليون شجرة مانجروف زرعتها مروج على سواحل المملكة.</p><small class="cr">غابة القندل في جزر فرسان · تصوير واس · CC BY-SA 4.0</small></div>
+        <div class="tz-gw-cap c2"><h2>…وغابةٌ غدًا</h2>${D.settings.taleGrowLine ? `<p>${esc(D.settings.taleGrowLine)}</p>` : '<p>زراعة المانجروف على سواحل المملكة… أثرٌ يكبر مع كل شراكة.</p>'}<small class="cr">غابة القندل في جزر فرسان · تصوير واس · CC BY-SA 4.0</small></div>
       </div>` : ''}
       <div class="tz-cta" id="tzCta">${can('proposal.create') ? `<a class="btn gold lg" href="#/share">${icon('send')} شارك بمقترح شراكة</a>` : ''}<a class="btn lg" href="#/partnerships">${icon('layers')} سجل الشراكات</a><button class="btn lg" type="button" data-tzreplay>${icon('history')} من البداية</button></div>
       <div class="tz-vig"></div><div class="tz-grain"></div>

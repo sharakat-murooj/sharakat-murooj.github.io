@@ -147,7 +147,7 @@ function splashSync(live = true) {
   try {
     const s = (D.settings && D.settings.splash) || {};
     const nd = visiblePartnerships().filter((p) => !p.isDraft);
-    const statsVals = { act: nd.filter((p) => ['active', 'soon'].includes(pStatus(p))).length, partners: new Set(nd.map((p) => p.partnerId)).size, sectors: new Set(nd.filter((p) => p.stage === 'signed').map(pSector).filter(Boolean)).size };
+    const statsVals = { act: nd.filter((p) => ['active', 'soon'].includes(pStatus(p))).length, partners: partnerCountOf(nd), sectors: realSectors(nd.filter((p) => p.stage === 'signed')).size };
     localStorage.setItem('shk_splash', JSON.stringify({ ...SPLASH_DEF, ...s, statsVals }));
     if (!live) return; // شاشة الدخول: البيانات لم تُسحب من المنصة بعد
     const el = document.getElementById('shkSplash');

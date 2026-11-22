@@ -194,6 +194,8 @@ Cloud.flush = async function () {
         if (r.col === 'settings') { this.sRev = r.rev; this.sBase = sentSettings; cloudRaw('put', 'settings', { id: '__base', rev: r.rev, data: sentSettings }).catch(() => {}); }
         if (this.out[k] && this.out[k].v === sent[k]) delete this.out[k];
       }
+      /* رفضه الخادم لأنه خارج صلاحيات الحساب: لا يبقى معلّقًا يُعاد رفعه */
+      if ((res.rejected || []).length) { res.rejected.forEach((r) => { const k = r.col + '|' + r.id; if (this.out[k] && this.out[k].v === sent[k]) delete this.out[k]; }); toast('بعض التعديلات خارج صلاحيات حسابك ولم تُحفظ على المنصة', 'err'); }
       this.save();
       if ((res.conflicts || []).length) await this.pull(); // أحد عدّل الإعدادات قبلنا: نسحب وندمج ثم نعيد الرفع
     }

@@ -11,8 +11,8 @@ function boPrintHTML(list) {
   /* المؤشرات */
   const kpis = [
     [X.act.length, 'شراكة سارية', `من ${X.signed.length} موقّعة`],
-    [X.partners.size, 'جهة شريكة', `${Object.keys(X.secMap).length} قطاعات`],
-    [X.soon.length, 'تنتهي خلال 90 يومًا', 'قرار تجديد'],
+    [X.partners.size, 'جهة شريكة', plural(Object.keys(X.secMap).length, 'قطاع واحد', 'قطاعان', 'قطاعات', 'قطاعًا')],
+    [X.soon.length, `تنتهي خلال ${D.settings.expiryDays} يومًا`, 'قرار تجديد'],
     [PL.items.length, 'قيد الإجراء', `${PL.late.length} متأخرة`],
     [X.score + '%', 'سلامة المحفظة', ''],
     [V.avg !== null ? V.avg + '/100' : '—', 'متوسط التقييم', `${V.ev.length} مقيّمة`],

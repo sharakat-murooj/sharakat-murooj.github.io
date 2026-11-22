@@ -160,12 +160,17 @@ begin
   if d is null or coalesce(d->>'external', '') <> 'true' then return false; end if;
   em := trim(coalesce(d->>'requesterEmail', d->>'contactEmail', ''));
   if em !~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$' then return false; end if;
+  -- حماية من استخدام الرابط العام لإرسال رسائل لعناوين الآخرين: 3 رسائل «استلام» يوميًا للعنوان الواحد و50 للجميع
+  if p_kind = 'received' and ((select count(*) from shk_mail_queue where kind = 'received' and lower(to_email) = lower(em) and created_at > now() - interval '1 day') >= 3
+     or (select count(*) from shk_mail_queue where kind = 'received' and created_at > now() - interval '1 day') >= 50) then return false; end if;
   if tk is null then
     tk := encode(extensions.gen_random_bytes(24), 'hex');
     insert into shk_ext_tracks (track_hash, proposal_id) values (shk_hash_token(tk), p_pid);
   end if;
   insert into shk_mail_queue (kind, to_email, payload) values (p_kind, em, jsonb_build_object(
-    'ref', d->>'ref', 'partnerName', d->>'partnerName', 'requesterName', d->>'requesterName', 'status', p_status, 'message', left(coalesce(p_message, ''), 3000),
+    'ref', d->>'ref',
+    -- رسالة الاستلام قالب ثابت لا يحمل نصًا كتبه المرسِل؛ الأسماء تظهر في رسائل التحديث بعد مراجعة الفريق فقط
+    'partnerName', case when p_kind = 'received' then '' else d->>'partnerName' end, 'requesterName', case when p_kind = 'received' then '' else d->>'requesterName' end, 'status', p_status, 'message', left(coalesce(p_message, ''), 3000),
     'link', case when c.site_url <> '' then c.site_url || case when position('?' in c.site_url) > 0 then '&' else '?' end || 'track=' || tk else '' end,
     'org', (select data->'org'->>'name' from shk_records where col = 'settings' and id = 'main')));
   return true;

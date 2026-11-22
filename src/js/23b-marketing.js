@@ -28,7 +28,7 @@ function mkData() {
   const L_ = mkPool().filter(sc[2]);
   const signed = L_.filter((p) => p.stage === 'signed');
   const act = L_.filter((p) => ['active', 'soon'].includes(pStatus(p)));
-  const partners = [...new Set(L_.map((p) => p.partnerId))].map(partnerById).filter(Boolean);
+  const partners = [...new Set(livePs(L_).map((p) => p.partnerId))].map(partnerById).filter(Boolean);
   const secCount = {}; L_.forEach((p) => { const s = pSector(p) || 'غير محدد'; secCount[s] = (secCount[s] || 0) + 1; });
   const sectors = Object.entries(secCount).filter(([k]) => k !== 'غير محدد').sort((a, b) => b[1] - a[1]);
   const years = {}; L_.forEach((p) => { const d = parseDate(p.startDate); if (d) years[d.getFullYear()] = (years[d.getFullYear()] || 0) + 1; });
@@ -46,7 +46,7 @@ function mkData() {
   const activated = act.filter((p) => p.activation === 'مفعّلة').length;
   const stars = (L_.filter((p) => p.golden).length ? L_.filter((p) => p.golden) : [...L_].sort((a, b) => ((pProfile(b).ev || {}).score || 0) - ((pProfile(a).ev || {}).score || 0) || (pProfile(b).total - pProfile(a).total))).slice(0, 3);
   const ids = new Set(L_.map((p) => p.id));
-  const stories = D.achievements.filter((a) => (showDemo() || !a.demo) && (MK.scope === 'all' || !a.partnershipId || ids.has(a.partnershipId))).sort((a, b) => ((b.date || '') > (a.date || '') ? 1 : -1));
+  const stories = D.achievements.filter((a) => a.public && (showDemo() || !a.demo) && (MK.scope === 'all' || !a.partnershipId || ids.has(a.partnershipId))).sort((a, b) => ((b.date || '') > (a.date || '') ? 1 : -1));
   const photos = [];
   const seen = new Set(); const add = (id, cap) => { if (id && !seen.has(id)) { seen.add(id); photos.push({ id, cap }); } };
   L_.forEach((p) => { add(p.coverFileId, partnerName(p)); (p.attachments || []).filter((a) => isImg(a)).forEach((a) => add(a.fileId, partnerName(p))); });
@@ -365,7 +365,7 @@ function mkSlides() {
     <div class="mx-seed-t">
       <span class="mx-mast">${esc(org.name)} · تقرير الأثر ${yr}</span>
       <h1 class="mx-title"><span>${mkE('cover.t1', 'تقرير الشراكات')}</span> <em>${mkE('cover.t2', 'والأثر')}</em></h1>
-      <p>${mkE('cover.s', `${X.signed.length} شراكة موقّعة مع ${X.partners.length} جهة في ${X.sectors.length || 1} قطاعات.${MK.cover === 'tree' ? ' كل ورقة في الشكل تمثّل شراكة.' : ''}`)}</p>
+      <p>${mkE('cover.s', `${X.signed.length} شراكة موقّعة مع ${X.partners.length} جهة في ${plural(X.sectors.length, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}.${MK.cover === 'tree' ? ' كل ورقة في الشكل تمثّل شراكة.' : ''}`)}</p>
       ${MK.cover === 'tree' ? '<div class="mx-key"><span><i class="a"></i>سارية</span><span><i class="g"></i>ذهبية</span><span><i class="u"></i>قادمة أو قيد الإعداد</span><span><i class="e"></i>منتهية</span></div>' : `<div class="mx-cv-stats">${[[X.act.length, 'شراكة سارية'], [X.partners.length, 'جهة شريكة'], [X.value ? sarShort(X.value) : X.outputs.length, X.value ? 'قيمة تقديرية ⃁' : 'مخرجًا']].map(([v, l]) => `<div><b>${typeof v === 'number' ? nf(v) : esc(v)}</b><span>${l}</span></div>`).join('')}</div>`}
     </div>`]);
   /* 2. السطر الواحد: كلمة بكلمة */
@@ -390,7 +390,7 @@ function mkSlides() {
     let k = 0;
     S.push(['wall', 'deep', 'الجهات الشريكة', `
     <h2 class="mx-h">${mkE('pa.h', 'شركاؤنا')}</h2>
-    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${X.sectors.length || 1} قطاعات.`)}</p>
+    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${plural(X.sectors.length, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}.`)}</p>
     <div class="mx-wall" style="--c:${tot}">${grp.map(([sec, l], gi) => `<section class="wl-s" style="grid-column:span ${spans[gi]};--cols:${spans[gi]}"><h3><span>${esc(sec)}</span><b>${nf(l.length)}</b></h3>
       <ul>${l.map((pr) => `<li class="wl-t" style="--i:${k++}"><i>${logoOrMono(pr, pr.name)}</i><span>${esc(pr.name)}</span></li>`).join('')}</ul></section>`).join('')}</div>`]);
   } else {
@@ -398,14 +398,14 @@ function mkSlides() {
   const nodes = PR.map((pr, i) => { const ring = i < 6 ? 0 : i < 12 ? 1 : 2, inRing = PR.filter((_, j) => (j < 6 ? 0 : j < 12 ? 1 : 2) === ring).length, idx = i - ring * 6; const a = (idx / inRing) * Math.PI * 2 + ring * 0.5 - Math.PI / 2; return { pr, x: 640 + Math.cos(a) * rings[ring] * 1.25, y: 400 + Math.sin(a) * rings[ring] * 0.62, i }; });
   S.push(['orbit', 'deep', 'الجهات الشريكة', `
     <h2 class="mx-h">${mkE('pa.h', 'شركاؤنا')}</h2>
-    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${X.sectors.length || 1} قطاعات.`)}</p>
+    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${plural(X.sectors.length, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}.`)}</p>
     <svg class="mx-orb" viewBox="0 0 1280 720" aria-hidden="true">${rings.map((r, k) => `<ellipse cx="640" cy="400" rx="${r * 1.25}" ry="${r * 0.62}" class="ring" style="--k:${k}"/>`).join('')}${nodes.map((n) => `<line x1="640" y1="400" x2="${n.x.toFixed(1)}" y2="${n.y.toFixed(1)}" class="ray" style="--i:${n.i}" pathLength="1"/>`).join('')}</svg>
     <div class="mx-core">${(ASSET_IMG['murooj-logo-white'] || {}).src ? `<img src="${ASSET_IMG['murooj-logo-white'].src}" alt="">` : ''}</div>
     ${nodes.map((n) => `<span class="mx-node" style="left:${n.x.toFixed(0)}px;top:${n.y.toFixed(0)}px;--i:${n.i}" title="${esc(n.pr.name)}"><i>${logoOrMono(n.pr, n.pr.name)}</i><small>${esc(n.pr.name)}</small></span>`).join('')}
     ${X.partners.length > PR.length ? `<span class="mx-more">+${X.partners.length - PR.length} جهة أخرى</span>` : ''}`]);
   }
   /* 5. التسلسل الزمني */
-  const dated = X.L.filter((p) => parseDate(p.startDate)).sort((a, b) => (a.startDate < b.startDate ? -1 : 1));
+  const dated = X.L.filter((p) => p.stage === 'signed' && parseDate(signedOn(p))).sort((a, b) => (signedOn(a) < signedOn(b) ? -1 : 1));
   if (dated.length >= 2) {
     const t0 = parseDate(dated[0].startDate).getTime(), t1 = Math.max(parseDate(dated[dated.length - 1].startDate).getTime(), t0 + 1);
     const P = (f) => { const x = 1180 - f * 1080; const y = 470 + Math.sin(f * Math.PI * 2.2) * 70; return [x, y]; };

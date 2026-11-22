@@ -16324,7 +16324,7 @@ function splashSync(live = true) {
   try {
     const s = (D.settings && D.settings.splash) || {};
     const nd = visiblePartnerships().filter((p) => !p.isDraft);
-    const statsVals = { act: nd.filter((p) => ['active', 'soon'].includes(pStatus(p))).length, partners: new Set(nd.map((p) => p.partnerId)).size, sectors: new Set(nd.filter((p) => p.stage === 'signed').map(pSector).filter(Boolean)).size };
+    const statsVals = { act: nd.filter((p) => ['active', 'soon'].includes(pStatus(p))).length, partners: partnerCountOf(nd), sectors: realSectors(nd.filter((p) => p.stage === 'signed')).size };
     localStorage.setItem('shk_splash', JSON.stringify({ ...SPLASH_DEF, ...s, statsVals }));
     if (!live) return; // شاشة الدخول: البيانات لم تُسحب من المنصة بعد
     const el = document.getElementById('shkSplash');
@@ -17232,6 +17232,8 @@ Cloud.flush = async function () {
         if (r.col === 'settings') { this.sRev = r.rev; this.sBase = sentSettings; cloudRaw('put', 'settings', { id: '__base', rev: r.rev, data: sentSettings }).catch(() => {}); }
         if (this.out[k] && this.out[k].v === sent[k]) delete this.out[k];
       }
+      /* رفضه الخادم لأنه خارج صلاحيات الحساب: لا يبقى معلّقًا يُعاد رفعه */
+      if ((res.rejected || []).length) { res.rejected.forEach((r) => { const k = r.col + '|' + r.id; if (this.out[k] && this.out[k].v === sent[k]) delete this.out[k]; }); toast('بعض التعديلات خارج صلاحيات حسابك ولم تُحفظ على المنصة', 'err'); }
       this.save();
       if ((res.conflicts || []).length) await this.pull(); // أحد عدّل الإعدادات قبلنا: نسحب وندمج ثم نعيد الرفع
     }
@@ -17643,6 +17645,11 @@ function visiblePartnerships({ includeDrafts } = {}) {
 function visibleProposals() {
   return D.proposals.filter((x) => (showDemo() || !x.demo));
 }
+/* — مقاييس موحدة تستخدمها كل التقارير — */
+const livePs = (L_) => (L_ || visiblePartnerships({ includeDrafts: false })).filter((p) => !p.isDraft && p.stage !== 'cancel');
+const partnerCountOf = (L_) => new Set(livePs(L_).map((p) => p.partnerId).filter(Boolean)).size;
+const signedOn = (p) => p.signDate || p.startDate || '';
+const realSectors = (L_) => new Set(livePs(L_).map(pSector).filter((s) => s && s !== 'غير محدد'));
 function publicPartnerships() { return D.partnerships.filter((p) => p.public && !p.isDraft && (showDemo() || !p.demo) && p.stage !== 'cancel'); }
 function publicStories() { return D.achievements.filter((a) => a.public && (showDemo() || !a.demo)); }
 function publicNews() { return D.news.filter((n) => n.public && (showDemo() || !n.demo)); }
@@ -17778,7 +17785,7 @@ async function convertProposal(x, { partnerId, newPartner }) {
    فيبدأ العمل من «الاجتماع المبدئي»؛ وتخرج الجهة من قائمة المستهدفة. */
 async function startPartnershipFor(pr) {
   const ex = D.partnerships.filter((p) => p.partnerId === pr.id && !p.isDraft && pStatus(p) !== 'ended');
-  const ok = await confirmDlg(`${ex.length ? `لهذه الجهة ${ex.length === 1 ? 'شراكة قائمة' : ex.length + ' شراكات قائمة'}. ` : ''}سيُفتح ملف شراكة جديد مع «${pr.name}» في مرحلة الإعداد، ويبدأ المسار من «الاجتماع المبدئي» كمبادرة من إدارة الشراكات دون مقترح من إدارة. متابعة؟`, { title: 'بدء إجراءات شراكة', ok: 'بدء الإجراءات' });
+  const ok = await confirmDlg(`${ex.length ? `لهذه الجهة ${ex.length === 1 ? 'شراكة قائمة' : ex.length + ' شراكات قائمة'}. ` : ''}سيُفتح ملف شراكة جديد مع «${esc(pr.name)}» في مرحلة الإعداد، ويبدأ المسار من «الاجتماع المبدئي» كمبادرة من إدارة الشراكات دون مقترح من إدارة. متابعة؟`, { title: 'بدء إجراءات شراكة', ok: 'بدء الإجراءات' });
   if (!ok) return null;
   const at = nowISO(), by = Session.userName(), note = 'مبادرة من إدارة الشراكات (دون مقترح من إدارة)';
   const rec = {
@@ -19382,7 +19389,7 @@ function overlapsPeriod(p, per) {
 }
 const HOME_KPIS = {
   active: { label: 'شراكة سارية', sub: 'حتى اليوم', calc: (L_, per) => L_.filter((p) => ['active', 'soon'].includes(pStatus(p))).length, href: () => '#/partnerships?status=active|soon' },
-  partners: { label: 'جهة شريكة', sub: 'لها شراكات مسجّلة', calc: (L_) => new Set(L_.filter((p) => !p.isDraft).map((p) => p.partnerId)).size, href: () => '#/partners' },
+  partners: { label: 'جهة شريكة', sub: 'لها شراكات مسجّلة', calc: (L_) => partnerCountOf(L_), href: () => '#/partners' },
   signedInPeriod: { label: 'شراكة بدأ سريانها', sub: 'خلال الفترة', calc: (L_, per) => L_.filter((p) => p.stage === 'signed' && parseDate(p.startDate) && parseDate(p.startDate) >= per.from && parseDate(p.startDate) <= per.to).length, href: () => '#/partnerships' },
   outputs: { label: 'مخرجًا مستهدفًا', sub: 'في الشراكات الموقّعة', calc: (L_) => L_.filter((p) => !p.isDraft && p.stage === 'signed').reduce((a, p) => a + richItems(p.outputs).length, 0), href: () => '#/partnerships' },
   departments: { label: 'إدارة تتقاطع مع الشراكات', sub: 'في الشراكات الموقّعة', calc: (L_) => new Set(L_.filter((p) => !p.isDraft && p.stage === 'signed').flatMap((p) => p.departments || [])).size, href: () => '#/dashboard' },
@@ -20226,7 +20233,7 @@ function renderTale(el) {
         <div class="tz-gw-b"><img src="${img('ksa-farasan-mangrove')}" alt=""></div>
         <div class="tz-gw-shade"></div>
         <div class="tz-gw-cap c1"><small>من مشاريع مروج على سواحل المملكة</small><h2>شتلةٌ اليوم…</h2></div>
-        <div class="tz-gw-cap c2"><h2>…وغابةٌ غدًا</h2><p>نحو ٢٫٤ مليون شجرة مانجروف زرعتها مروج على سواحل المملكة.</p><small class="cr">غابة القندل في جزر فرسان · تصوير واس · CC BY-SA 4.0</small></div>
+        <div class="tz-gw-cap c2"><h2>…وغابةٌ غدًا</h2>${D.settings.taleGrowLine ? `<p>${esc(D.settings.taleGrowLine)}</p>` : '<p>زراعة المانجروف على سواحل المملكة… أثرٌ يكبر مع كل شراكة.</p>'}<small class="cr">غابة القندل في جزر فرسان · تصوير واس · CC BY-SA 4.0</small></div>
       </div>` : ''}
       <div class="tz-cta" id="tzCta">${can('proposal.create') ? `<a class="btn gold lg" href="#/share">${icon('send')} شارك بمقترح شراكة</a>` : ''}<a class="btn lg" href="#/partnerships">${icon('layers')} سجل الشراكات</a><button class="btn lg" type="button" data-tzreplay>${icon('history')} من البداية</button></div>
       <div class="tz-vig"></div><div class="tz-grain"></div>
@@ -20796,13 +20803,13 @@ function sunburstSVG(list) {
     const parts = [...secs.get(s).values()].sort((x, y) => y.n - x.n);
     const sn = parts.reduce((t, e) => t + e.n, 0);
     const a0 = a, a1 = a + sn / total * Math.PI * 2;
-    ring1 += `<path class="sb-seg sb-sec" d="${arcPath(c, c, 66, 106, a0 + gap, a1 - gap)}" fill="${SEC_VAR(s)}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, sector: [s] })}" ${tipAttr(`<b>${s}</b><br>${plural(sn, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')} مع ${plural(parts.length, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}`)}/>`;
+    ring1 += `<path class="sb-seg sb-sec" d="${arcPath(c, c, 66, 106, a0 + gap, a1 - gap)}" fill="${SEC_VAR(s)}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, sector: [s] })}" ${tipAttr(`<b>${esc(s)}</b><br>${plural(sn, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')} مع ${plural(parts.length, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}`)}/>`;
     if (a1 - a0 > 0.55) { const m = (a0 + a1) / 2; labels += `<text x="${(c + 86 * Math.sin(m)).toFixed(1)}" y="${(c - 86 * Math.cos(m) + 4).toFixed(1)}" text-anchor="middle" class="sb-lab">${esc(s)}</text>`; }
     let b = a0;
     parts.forEach((e) => {
       const b0 = b, b1 = b + e.n / total * Math.PI * 2;
       const st = ST_PRIO.find((k) => e.sts.includes(k)) || e.sts[0];
-      ring2 += `<path class="sb-seg" d="${arcPath(c, c, 112, 170, b0 + gap * .6, b1 - gap * .6)}" fill="${ST_VAR(st)}" data-href="${e.n > 1 ? '#/partners/' + e.pr.id : '#/partnerships/' + e.pid}" ${tipAttr(`<b>${e.pr.name}</b><br>${s} — ${plural(e.n, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')}<br>${statusLabel(st)}${e.pr.demo ? ' — تجريبي' : ''}`)}/>`;
+      ring2 += `<path class="sb-seg" d="${arcPath(c, c, 112, 170, b0 + gap * .6, b1 - gap * .6)}" fill="${ST_VAR(st)}" data-href="${e.n > 1 ? '#/partners/' + e.pr.id : '#/partnerships/' + e.pid}" ${tipAttr(`<b>${esc(e.pr.name)}</b><br>${esc(s)} — ${plural(e.n, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')}<br>${statusLabel(st)}${e.pr.demo ? ' — تجريبي' : ''}`)}/>`;
       if (b1 - b0 > 0.24) { const m = (b0 + b1) / 2; labels += `<text x="${(c + 141 * Math.sin(m)).toFixed(1)}" y="${(c - 141 * Math.cos(m) + 6).toFixed(1)}" text-anchor="middle" class="sb-mono">${esc(monogram(e.pr.name))}</text>`; }
       b = b1;
     });
@@ -20828,7 +20835,7 @@ function heatmapHTML(list) {
   const TM = Math.max(1, ...depts.map(dTot));
   return `<div class="hm-wrap"><table class="hm"><thead><tr><th></th>${secs.map((s) => `<th><i style="background:${SEC_VAR(s)}"></i>${esc(s)}</th>`).join('')}<th class="hm-tt">الإجمالي</th></tr></thead><tbody>
     ${depts.sort((x, y) => dTot(y) - dTot(x)).map((d) => `<tr><th>${esc(d)}</th>
-      ${secs.map((s) => { const v = cell(d, s), f = v / M; return `<td><button class="hm-c ${f > .5 ? 'hi' : ''} ${v ? '' : 'z'}" style="--a:${v ? (0.14 + f * 0.8).toFixed(2) : 0}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, department: [d], sector: [s] })}" ${tipAttr(`<b>${d}</b><br>${s}: ${v}`)}>${v || '–'}</button></td>`; }).join('')}
+      ${secs.map((s) => { const v = cell(d, s), f = v / M; return `<td><button class="hm-c ${f > .5 ? 'hi' : ''} ${v ? '' : 'z'}" style="--a:${v ? (0.14 + f * 0.8).toFixed(2) : 0}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, department: [d], sector: [s] })}" ${tipAttr(`<b>${esc(d)}</b><br>${esc(s)}: ${v}`)}>${v || '–'}</button></td>`; }).join('')}
       <td class="hm-t"><span class="hm-tb"><i style="--w:${(dTot(d) / TM * 100).toFixed(0)}%"></i></span><b>${dTot(d)}</b></td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -20850,7 +20857,7 @@ function roadmapHTML(list) {
     ${rows.map((p) => {
       const st = pStatus(p), pr = partnerById(p.partnerId), s = pos(parseDate(p.startDate)), e = pos(parseDate(p.endDate)), dl = daysLeft(p);
       return `<div class="rm-row" data-href="#/partnerships/${p.id}"><div class="rm-name">${plateHTML(pr, 40)}<span>${esc(partnerName(p))}</span></div>
-        <div class="rm-track">${qlines}<span class="rm-bar st-${st}" style="right:${s.toFixed(2)}%;width:${Math.max(0.8, e - s).toFixed(2)}%" ${tipAttr(`<b>${partnerName(p)}</b><br>${fmtDate(p.startDate)} – ${fmtDate(p.endDate)}<br>${statusLabel(st)}${dl !== null && dl >= 0 && ['active', 'soon'].includes(st) ? ` — متبقٍ ${dl} يومًا` : ''}`)}>${st === 'soon' ? `<em>تنتهي ${fmtDate(p.endDate, 'short')}</em>` : ''}</span><span class="rm-today" style="right:${tp}%"></span></div></div>`;
+        <div class="rm-track">${qlines}<span class="rm-bar st-${st}" style="right:${s.toFixed(2)}%;width:${Math.max(0.8, e - s).toFixed(2)}%" ${tipAttr(`<b>${esc(partnerName(p))}</b><br>${fmtDate(p.startDate)} – ${fmtDate(p.endDate)}<br>${statusLabel(st)}${dl !== null && dl >= 0 && ['active', 'soon'].includes(st) ? ` — متبقٍ ${dl} يومًا` : ''}`)}>${st === 'soon' ? `<em>تنتهي ${fmtDate(p.endDate, 'short')}</em>` : ''}</span><span class="rm-today" style="right:${tp}%"></span></div></div>`;
     }).join('')}</div>`;
 }
 
@@ -20917,12 +20924,12 @@ function expiryBars(list) {
 /* — الملخص التنفيذي — */
 function narrative(list, filtered) {
   const nd = list.filter((p) => !p.isDraft);
-  const partners = new Set(nd.map((p) => p.partnerId)).size;
+  const partners = partnerCountOf(nd);
   const act = nd.filter((p) => ['active', 'soon'].includes(pStatus(p))).length;
   const soon = nd.filter((p) => pStatus(p) === 'soon').sort((a, b) => (a.endDate < b.endDate ? -1 : 1));
   const props = visibleProposals().filter((x) => ['submitted', 'review', 'info'].includes(x.status));
   const oldest = props.length ? Math.max(...props.map(propAgeDays)) : 0;
-  let s = `${filtered ? 'ضمن الفلاتر المختارة، ' : ''}تضم المحفظة ${plural(nd.length, 'شراكة واحدة', 'شراكتين', 'شراكات', 'شراكة')} مع ${plural(partners, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}، ${act ? `منها ${nf(act)} سارية حاليًا` : 'ولا توجد بينها شراكة سارية حاليًا'}.`;
+  let s = `${filtered ? 'ضمن الفلاتر المختارة، ' : ''}تضم المحفظة ${plural(livePs(nd).length, 'شراكة واحدة', 'شراكتين', 'شراكات', 'شراكة')} مع ${plural(partners, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}، ${act ? `منها ${nf(act)} سارية حاليًا` : 'ولا توجد بينها شراكة سارية حاليًا'}.`;
   s += soon.length ? ` تنتهي ${plural(soon.length, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')} خلال ${D.settings.expiryDays} يومًا، أقربها مع «${partnerName(soon[0])}» في ${fmtDate(soon[0].endDate)}.` : ` لا توجد شراكات تنتهي خلال ${D.settings.expiryDays} يومًا.`;
   if (props.length) s += ` وتعمل إدارة الشراكات على ${plural(props.length, 'مقترح واحد', 'مقترحين', 'مقترحات', 'مقترحًا')} من الإدارات${oldest > 0 ? `، أقدمها منذ ${plural(oldest, 'يوم واحد', 'يومين', 'أيام', 'يومًا')}` : ''}.`;
   return s;
@@ -20978,7 +20985,7 @@ function dashBand(list, filtered) {
   const past = ser ? ser.rows.filter((r) => !r.future).slice(-12).map((r) => r.total) : [];
   const delta = past.length > 1 ? past[past.length - 1] - past[0] : 0;
   const partnersBy = {}; nd.forEach((p) => { const s = pSector(p) || 'غير محدد'; (partnersBy[s] = partnersBy[s] || new Set()).add(p.partnerId); });
-  const nPartners = new Set(nd.map((p) => p.partnerId)).size;
+  const nPartners = partnerCountOf(nd);
   const soon = nd.filter((p) => pStatus(p) === 'soon').sort((a, b) => (a.endDate < b.endDate ? -1 : 1));
   const props = visibleProposals();
   const inProc = props.filter((x) => ['submitted', 'review', 'info'].includes(x.status));
@@ -21028,7 +21035,7 @@ function dashBody(list) {
   const cmax = Math.max(1, ...cats.map((c) => c.n));
   const omax = Math.max(1, ...owners.map((o) => o.n));
   const cls = countBy(nd, 'classification'), actv = countBy(nd, 'activation');
-  const mini = (title, data, colorFn, dim) => { const tot = data.reduce((t, d) => t + d.n, 0) || 1; let off = 0; const r = 34, C = 2 * Math.PI * r; return `<div class="mini"><svg viewBox="0 0 90 90" width="96" height="96">${data.map((d, i) => { const len = d.n / tot * C; const s = `<circle cx="45" cy="45" r="${r}" fill="none" stroke="${colorFn(d, i)}" stroke-width="11" stroke-dasharray="${Math.max(0, len - 2).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 45 45)" class="donut-seg" data-href="#/partnerships${filtersToQuery({ ...App.dashF, [dim]: [d.k] })}" ${tipAttr(`${d.label}: ${d.n}`)}/>`; off += len; return s; }).join('')}<text x="45" y="51" text-anchor="middle" class="mini-n">${tot}</text></svg>
+  const mini = (title, data, colorFn, dim) => { const tot = data.reduce((t, d) => t + d.n, 0) || 1; let off = 0; const r = 34, C = 2 * Math.PI * r; return `<div class="mini"><svg viewBox="0 0 90 90" width="96" height="96">${data.map((d, i) => { const len = d.n / tot * C; const s = `<circle cx="45" cy="45" r="${r}" fill="none" stroke="${colorFn(d, i)}" stroke-width="11" stroke-dasharray="${Math.max(0, len - 2).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 45 45)" class="donut-seg" data-href="#/partnerships${filtersToQuery({ ...App.dashF, [dim]: [d.k] })}" ${tipAttr(`${esc(d.label)}: ${d.n}`)}/>`; off += len; return s; }).join('')}<text x="45" y="51" text-anchor="middle" class="mini-n">${tot}</text></svg>
     <div class="mini-l"><div class="mini-t">${title}</div>${data.map((d, i) => `<span data-href="#/partnerships${filtersToQuery({ ...App.dashF, [dim]: [d.k] })}"><i style="background:${colorFn(d, i)}"></i>${esc(d.label)}<b>${d.n}</b></span>`).join('')}</div></div>`; };
   return `<div class="dgrid dash-grid">
     <section class="dp c8" data-tour="dash-evolution"><header><div><h3>تطور محفظة الشراكات</h3><p>عدد الشراكات السارية شهريًا حسب قطاع الجهة — فعلي حتى اليوم، ومتوقع بعده وفق تواريخ الانتهاء</p></div>
@@ -21040,7 +21047,7 @@ function dashBody(list) {
     <section class="dp c12"><header><div><h3>خارطة سريان الشراكات</h3><p>من تاريخ البدء إلى تاريخ الانتهاء، مرتبة حسب أقرب انتهاء</p></div>
       <div class="lg"><span><i style="background:var(--st-active)"></i>سارية</span><span><i style="background:var(--st-soon)"></i>تنتهي خلال ${D.settings.expiryDays} يومًا</span><span><i style="background:var(--st-up)"></i>لم يبدأ سريانها</span><span><i style="background:var(--st-ended)"></i>منتهية</span></div></header>${roadmapHTML(list)}</section>
     <section class="dp c8"><header><div><h3>مقترحات الإدارات</h3><p>لكل إدارة حسب مرحلة المراجعة — لا تتأثر بفلاتر الشراكات</p></div></header>
-      ${depts.length ? `<div class="pstack">${depts.sort((a, b) => props.filter((x) => x.department === b).length - props.filter((x) => x.department === a).length).map((d) => { const mine = props.filter((x) => x.department === d); return `<div class="ps-row" data-href="#/proposals?dept=${encodeURIComponent(d)}"><span class="ps-n">${esc(d)}</span><span class="ps-bar"><span style="width:${(mine.length / pmax * 100).toFixed(0)}%">${PST.map((s) => { const n = mine.filter((x) => x.status === s).length; return n ? `<i style="flex:${n};background:${PC[s]}" ${tipAttr(`${d}<br>${propStatusLabel(s)}: ${n}`)}></i>` : ''; }).join('')}</span></span><b>${mine.length}</b></div>`; }).join('')}</div>
+      ${depts.length ? `<div class="pstack">${depts.sort((a, b) => props.filter((x) => x.department === b).length - props.filter((x) => x.department === a).length).map((d) => { const mine = props.filter((x) => x.department === d); return `<div class="ps-row" data-href="#/proposals?dept=${encodeURIComponent(d)}"><span class="ps-n">${esc(d)}</span><span class="ps-bar"><span style="width:${(mine.length / pmax * 100).toFixed(0)}%">${PST.map((s) => { const n = mine.filter((x) => x.status === s).length; return n ? `<i style="flex:${n};background:${PC[s]}" ${tipAttr(`${esc(d)}<br>${propStatusLabel(s)}: ${n}`)}></i>` : ''; }).join('')}</span></span><b>${mine.length}</b></div>`; }).join('')}</div>
         <div class="lg wrap" style="margin-top:14px">${PST.filter((s) => props.some((x) => x.status === s)).map((s) => `<span><i style="background:${PC[s]}"></i>${esc(propStatusLabel(s))}</span>`).join('')}</div>` : '<div class="empty-chart">لم تُقدَّم مقترحات بعد.</div>'}</section>
     <section class="dp c4"><header><div><h3>التصنيف والتفعيل</h3><p>تصنيف المذكرة وحالة تفعيل الشراكة</p></div></header>
       ${mini('تصنيف المذكرة', cls, (d, i) => ['var(--sec-1)', 'var(--sec-2)', 'var(--sec-3)', 'var(--sec-4)'][i % 4], 'classification')}
@@ -21343,7 +21350,7 @@ function dashMetrics(list) {
   const props = visibleProposals(), inProc = props.filter((x) => ['submitted', 'review', 'info'].includes(x.status));
   const cells = nd.length * CORE_FIELDS.length, filled = cells - nd.reduce((t, p) => t + missingFields(p).length, 0);
   const y = String(today().getFullYear());
-  return { nd, signed, act, ser, past, delta: past.length > 1 ? past[past.length - 1] - past[0] : 0, partnersBy, nPartners: new Set(nd.map((p) => p.partnerId)).size, soon, props, inProc,
+  return { nd, signed, act, ser, past, delta: past.length > 1 ? past[past.length - 1] - past[0] : 0, partnersBy, nPartners: partnerCountOf(nd), soon, props, inProc,
     oldest: inProc.length ? Math.max(...inProc.map(propAgeDays)) : 0, score: cells ? Math.round(filled / cells * 100) : 0, startedYear: signed.filter((p) => (p.startDate || '').startsWith(y)).length, acts: dashActions(list) };
 }
 
@@ -24993,11 +25000,11 @@ function heroMediaHTML(extraCls = '') {
 /* أرقام حيّة محسوبة لحظة العرض من السجلات: تتغير فور إضافة جهة أو شراكة أو انتهاء شراكة */
 const nounFor = (n, f) => (n === 1 ? f[0] : n === 2 ? f[1] : n >= 3 && n <= 10 ? f[2] : f[3]);
 function liveCounts() {
-  const list = visiblePartnerships({ includeDrafts: false });
+  const list = livePs(visiblePartnerships({ includeDrafts: false }));
   const st = (k) => list.filter((p) => k.includes(pStatus(p))).length;
   const linked = new Set(list.map((p) => p.partnerId));
   const anyLinked = new Set(D.partnerships.map((p) => p.partnerId));
-  const partners = D.partners.filter((pr) => linked.has(pr.id) || (!anyLinked.has(pr.id) && !pr.target && (showDemo() || !pr.demo))).length; // الجهات المستهدفة لا تُعد جهات شريكة
+  const partners = D.partners.filter((pr) => linked.has(pr.id) || (!anyLinked.has(pr.id) && !pr.target && (showDemo() || !pr.demo))).length; // جهة مسجّلة بلا شراكة بعد تُعد فور إضافتها؛ المستهدفة والملغاة شراكاتها لا تُعد // الجهات المستهدفة لا تُعد جهات شريكة
   return { active: st(['active', 'soon']), soon: st(['soon']), ended: st(['ended']), partners, total: list.length };
 }
 function heroBeacons() {
@@ -26376,7 +26383,7 @@ let RPT_STALE = 0;
 function rptVal(key, def) {
   const o = RPT.ov[key]; def = def == null ? '' : String(def);
   if (!o) return def;
-  if (typeof o === 'string') return o;
+  if (typeof o === 'string') { if (!/[0-9٠-٩]/.test(o) || o === def) return o; delete RPT.ov[key]; RPT_STALE++; return def; }
   if (o.base === def) return o.v;
   delete RPT.ov[key]; RPT_STALE++; return def;
 }
@@ -26498,7 +26505,7 @@ function rptSlides() {
       const evs = (typeof calEvents === 'function' ? calEvents() : []).filter((e) => e.pid === id && e.date >= t0).slice(0, 4);
       add({ t: 'perf', ...head, p, ev, ivs, phases, cur: wf.cur, evs, n: [[(p.meetings || []).length, 'اجتماعات'], [(p.partnerReports || []).length, 'تقارير الشريك'], [stories0(id).length, 'إنجازات'], [news0(id).length, 'مستجدات']] });
     }
-    if (rptOn('partner') && pr) add({ t: 'partner', ...head, p, pr, others: D.partnerships.filter((x) => x.partnerId === pr.id && (showDemo() || !x.demo)), props: D.proposals.filter((x) => x.partnerId === pr.id || (x.partnerName && normAr(x.partnerName) === normAr(pr.name))) });
+    if (rptOn('partner') && pr) add({ t: 'partner', ...head, p, pr, others: livePs(D.partnerships.filter((x) => x.partnerId === pr.id && (showDemo() || !x.demo))), props: D.proposals.filter((x) => (showDemo() || !x.demo) && x.status !== 'draft' && (x.partnerId === pr.id || (x.partnerName && normAr(x.partnerName) === normAr(pr.name)))) });
     if (rptOn('coop') && coop.length) { const per = coop.length <= 3 ? 3 : 6; chunk(coop.map((it, k) => ({ k, s: rptVal(`${id}.coop.${k}`, itemStr(it)) })), per).forEach((part, i, all) => add({ t: 'cards', ...head, title: 'مجالات التعاون' + (all.length > 1 ? ` (${i + 1}/${all.length})` : ''), items: part, key: `${id}.coop`, total: coop.length })); }
     if (rptOn('impact') && (imp.length || outs.length)) {
       const A = imp.map((it, k) => ({ k, s: rptVal(`${id}.impact.${k}`, itemStr(it)) })), B = outs.map((it, k) => ({ k, s: rptVal(`${id}.outputs.${k}`, itemStr(it)) }));
@@ -27185,7 +27192,7 @@ function mkData() {
   const L_ = mkPool().filter(sc[2]);
   const signed = L_.filter((p) => p.stage === 'signed');
   const act = L_.filter((p) => ['active', 'soon'].includes(pStatus(p)));
-  const partners = [...new Set(L_.map((p) => p.partnerId))].map(partnerById).filter(Boolean);
+  const partners = [...new Set(livePs(L_).map((p) => p.partnerId))].map(partnerById).filter(Boolean);
   const secCount = {}; L_.forEach((p) => { const s = pSector(p) || 'غير محدد'; secCount[s] = (secCount[s] || 0) + 1; });
   const sectors = Object.entries(secCount).filter(([k]) => k !== 'غير محدد').sort((a, b) => b[1] - a[1]);
   const years = {}; L_.forEach((p) => { const d = parseDate(p.startDate); if (d) years[d.getFullYear()] = (years[d.getFullYear()] || 0) + 1; });
@@ -27203,7 +27210,7 @@ function mkData() {
   const activated = act.filter((p) => p.activation === 'مفعّلة').length;
   const stars = (L_.filter((p) => p.golden).length ? L_.filter((p) => p.golden) : [...L_].sort((a, b) => ((pProfile(b).ev || {}).score || 0) - ((pProfile(a).ev || {}).score || 0) || (pProfile(b).total - pProfile(a).total))).slice(0, 3);
   const ids = new Set(L_.map((p) => p.id));
-  const stories = D.achievements.filter((a) => (showDemo() || !a.demo) && (MK.scope === 'all' || !a.partnershipId || ids.has(a.partnershipId))).sort((a, b) => ((b.date || '') > (a.date || '') ? 1 : -1));
+  const stories = D.achievements.filter((a) => a.public && (showDemo() || !a.demo) && (MK.scope === 'all' || !a.partnershipId || ids.has(a.partnershipId))).sort((a, b) => ((b.date || '') > (a.date || '') ? 1 : -1));
   const photos = [];
   const seen = new Set(); const add = (id, cap) => { if (id && !seen.has(id)) { seen.add(id); photos.push({ id, cap }); } };
   L_.forEach((p) => { add(p.coverFileId, partnerName(p)); (p.attachments || []).filter((a) => isImg(a)).forEach((a) => add(a.fileId, partnerName(p))); });
@@ -27522,7 +27529,7 @@ function mkSlides() {
     <div class="mx-seed-t">
       <span class="mx-mast">${esc(org.name)} · تقرير الأثر ${yr}</span>
       <h1 class="mx-title"><span>${mkE('cover.t1', 'تقرير الشراكات')}</span> <em>${mkE('cover.t2', 'والأثر')}</em></h1>
-      <p>${mkE('cover.s', `${X.signed.length} شراكة موقّعة مع ${X.partners.length} جهة في ${X.sectors.length || 1} قطاعات.${MK.cover === 'tree' ? ' كل ورقة في الشكل تمثّل شراكة.' : ''}`)}</p>
+      <p>${mkE('cover.s', `${X.signed.length} شراكة موقّعة مع ${X.partners.length} جهة في ${plural(X.sectors.length, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}.${MK.cover === 'tree' ? ' كل ورقة في الشكل تمثّل شراكة.' : ''}`)}</p>
       ${MK.cover === 'tree' ? '<div class="mx-key"><span><i class="a"></i>سارية</span><span><i class="g"></i>ذهبية</span><span><i class="u"></i>قادمة أو قيد الإعداد</span><span><i class="e"></i>منتهية</span></div>' : `<div class="mx-cv-stats">${[[X.act.length, 'شراكة سارية'], [X.partners.length, 'جهة شريكة'], [X.value ? sarShort(X.value) : X.outputs.length, X.value ? 'قيمة تقديرية ⃁' : 'مخرجًا']].map(([v, l]) => `<div><b>${typeof v === 'number' ? nf(v) : esc(v)}</b><span>${l}</span></div>`).join('')}</div>`}
     </div>`]);
   /* 2. السطر الواحد: كلمة بكلمة */
@@ -27547,7 +27554,7 @@ function mkSlides() {
     let k = 0;
     S.push(['wall', 'deep', 'الجهات الشريكة', `
     <h2 class="mx-h">${mkE('pa.h', 'شركاؤنا')}</h2>
-    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${X.sectors.length || 1} قطاعات.`)}</p>
+    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${plural(X.sectors.length, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}.`)}</p>
     <div class="mx-wall" style="--c:${tot}">${grp.map(([sec, l], gi) => `<section class="wl-s" style="grid-column:span ${spans[gi]};--cols:${spans[gi]}"><h3><span>${esc(sec)}</span><b>${nf(l.length)}</b></h3>
       <ul>${l.map((pr) => `<li class="wl-t" style="--i:${k++}"><i>${logoOrMono(pr, pr.name)}</i><span>${esc(pr.name)}</span></li>`).join('')}</ul></section>`).join('')}</div>`]);
   } else {
@@ -27555,14 +27562,14 @@ function mkSlides() {
   const nodes = PR.map((pr, i) => { const ring = i < 6 ? 0 : i < 12 ? 1 : 2, inRing = PR.filter((_, j) => (j < 6 ? 0 : j < 12 ? 1 : 2) === ring).length, idx = i - ring * 6; const a = (idx / inRing) * Math.PI * 2 + ring * 0.5 - Math.PI / 2; return { pr, x: 640 + Math.cos(a) * rings[ring] * 1.25, y: 400 + Math.sin(a) * rings[ring] * 0.62, i }; });
   S.push(['orbit', 'deep', 'الجهات الشريكة', `
     <h2 class="mx-h">${mkE('pa.h', 'شركاؤنا')}</h2>
-    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${X.sectors.length || 1} قطاعات.`)}</p>
+    <p class="mx-sub">${mkE('pa.s', `${X.partners.length} جهة شريكة من ${plural(X.sectors.length, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}.`)}</p>
     <svg class="mx-orb" viewBox="0 0 1280 720" aria-hidden="true">${rings.map((r, k) => `<ellipse cx="640" cy="400" rx="${r * 1.25}" ry="${r * 0.62}" class="ring" style="--k:${k}"/>`).join('')}${nodes.map((n) => `<line x1="640" y1="400" x2="${n.x.toFixed(1)}" y2="${n.y.toFixed(1)}" class="ray" style="--i:${n.i}" pathLength="1"/>`).join('')}</svg>
     <div class="mx-core">${(ASSET_IMG['murooj-logo-white'] || {}).src ? `<img src="${ASSET_IMG['murooj-logo-white'].src}" alt="">` : ''}</div>
     ${nodes.map((n) => `<span class="mx-node" style="left:${n.x.toFixed(0)}px;top:${n.y.toFixed(0)}px;--i:${n.i}" title="${esc(n.pr.name)}"><i>${logoOrMono(n.pr, n.pr.name)}</i><small>${esc(n.pr.name)}</small></span>`).join('')}
     ${X.partners.length > PR.length ? `<span class="mx-more">+${X.partners.length - PR.length} جهة أخرى</span>` : ''}`]);
   }
   /* 5. التسلسل الزمني */
-  const dated = X.L.filter((p) => parseDate(p.startDate)).sort((a, b) => (a.startDate < b.startDate ? -1 : 1));
+  const dated = X.L.filter((p) => p.stage === 'signed' && parseDate(signedOn(p))).sort((a, b) => (signedOn(a) < signedOn(b) ? -1 : 1));
   if (dated.length >= 2) {
     const t0 = parseDate(dated[0].startDate).getTime(), t1 = Math.max(parseDate(dated[dated.length - 1].startDate).getTime(), t0 + 1);
     const P = (f) => { const x = 1180 - f * 1080; const y = 470 + Math.sin(f * Math.PI * 2.2) * 70; return [x, y]; };
@@ -28073,8 +28080,8 @@ function boDates(d = new Date()) {
 const BO_WALL_N = 10;
 /* حقائق الغلاف: مختلفة عن «المنظومة بالأرقام» — حداثة التوقيع وعمق العلاقة؛ ما لا قيمة له لا يظهر */
 function boHeroFacts(signed) {
-  const td = isoDate(today()), dated = signed.filter((p) => p.startDate && String(p.startDate).slice(0, 10) <= td).sort((a, b) => String(b.startDate).localeCompare(String(a.startDate)));
-  const yr = today().getFullYear(), thisYear = dated.filter((p) => String(p.startDate).slice(0, 4) === String(yr)).length;
+  const td = isoDate(today()), dated = signed.filter((p) => signedOn(p) && String(signedOn(p)).slice(0, 10) <= td).sort((a, b) => String(signedOn(b)).localeCompare(String(signedOn(a))));
+  const yr = today().getFullYear(), thisYear = dated.filter((p) => String(signedOn(p)).slice(0, 4) === String(yr)).length;
   const last = dated[0], first = dated[dated.length - 1];
   const F = [];
   if (thisYear) F.push(`<div><dt>وُقّعت في ${yr}</dt><dd><b class="cu" data-v="${thisYear}">${thisYear}</b></dd></div>`);
@@ -28360,8 +28367,8 @@ function boStats(list) {
   const S = (k) => nd.filter((p) => k.includes(pStatus(p)));
   const signed = nd.filter((p) => p.stage === 'signed');
   const act = S(['active', 'soon']), soon = S(['soon']).sort((a, b) => (a.endDate < b.endDate ? -1 : 1)), up = S(['upcoming']), ended = S(['ended']), pipe = S(['prep', 'sign', 'hold']);
-  const partners = new Set(nd.map((p) => p.partnerId));
-  const secMap = {}; nd.forEach((p) => { const s = pSector(p) || 'غير محدد'; (secMap[s] = secMap[s] || new Set()).add(p.partnerId); });
+  const partners = new Set(livePs(nd).map((p) => p.partnerId).filter(Boolean));
+  const secMap = {}; livePs(nd).forEach((p) => { const s = pSector(p); if (s && s !== 'غير محدد') (secMap[s] = secMap[s] || new Set()).add(p.partnerId); });
   const cells = nd.length * CORE_FIELDS.length;
   const complete = cells ? Math.round((cells - nd.reduce((t, p) => t + missingFields(p).length, 0)) / cells * 100) : 0;
   const activated = act.filter((p) => p.activation === 'مفعّلة').length;
@@ -28371,11 +28378,12 @@ function boStats(list) {
   let trend = null;
   if (ser) { const ci = Math.max(0, ser.rows.findIndex((r) => r.current)); trend = { now: act.length, ago: ser.rows[Math.max(0, ci - 12)].total, ahead: ser.rows[Math.min(ser.rows.length - 1, ci + 6)].total }; }
   const health = [
-    { k: 'cont', l: 'الاستمرارية', d: 'الموقّعة غير المنتهية', how: 'جدّد الشراكات الناجحة قبل انتهائها عبر «تقييم التجديد»، ولا تتركها تنتهي دون قرار.', v: signed.length ? Math.round((signed.length - ended.length) / signed.length * 100) : 0 },
-    { k: 'act', l: 'التفعيل', d: 'السارية المفعّلة فعليًا', how: 'أقرّ «خطة تفعيل المذكرة» (الخطوة 12) وحدّث حالة التفعيل إلى «مفعّلة» عند بدء التنفيذ.', v: act.length ? Math.round(activated / act.length * 100) : 0 },
+    { k: 'cont', l: 'الاستمرارية', d: 'الموقّعة غير المنتهية', how: 'جدّد الشراكات الناجحة قبل انتهائها عبر «تقييم التجديد»، ولا تتركها تنتهي دون قرار.', v: signed.length ? Math.round((signed.length - ended.length) / signed.length * 100) : null },
+    { k: 'act', l: 'التفعيل', d: 'السارية المفعّلة فعليًا', how: 'أقرّ «خطة تفعيل المذكرة» (الخطوة 12) وحدّث حالة التفعيل إلى «مفعّلة» عند بدء التنفيذ.', v: act.length ? Math.round(activated / act.length * 100) : null },
     { k: 'data', l: 'اكتمال البيانات', d: 'حقول ملف الحصر المعبأة', how: 'استكمل الحقول الأساسية الناقصة في الشراكات (ضابط الاتصال والبريد والجوال والتواريخ).', v: complete },
-    { k: 'renew', l: 'أمان الاستحقاقات', d: 'السارية غير المهددة بالانتهاء', how: 'اتخذ قرارات التجديد مبكرًا للشراكات التي تنتهي خلال 90 يومًا.', v: act.length ? Math.round((act.length - soon.length) / act.length * 100) : 0 },
-  ];
+    { k: 'renew', l: 'أمان الاستحقاقات', d: 'السارية غير المهددة بالانتهاء', how: 'اتخذ قرارات التجديد مبكرًا للشراكات التي تنتهي خلال ${D.settings.expiryDays} يومًا.', v: act.length ? Math.round((act.length - soon.length) / act.length * 100) : null },
+  ].filter((h) => h.v !== null && !(h.k === 'data' && !cells));
+  if (!health.length) health.push({ k: 'none', l: 'لا بيانات', d: 'لا توجد شراكات كافية للحساب', how: 'سجّل الشراكات الموقّعة لتظهر المؤشرات.', v: 0 });
   const score = Math.round(health.reduce((t, h) => t + h.v, 0) / health.length);
   return { nd, signed, act, soon, up, ended, pipe, partners, secMap, complete, activated, props, inProc, ser, trend, health, score };
 }
@@ -28395,7 +28403,7 @@ function boChSummary(X) {
   const topSec = Object.entries(X.secMap).sort((a, b) => b[1].size - a[1].size)[0];
   const d = X.trend ? X.trend.now - X.trend.ago : 0;
   const msgs = [
-    { ic: 'users', tone: 'g', h: 'منظومة متنوعة', t: `تضم المحفظة ${boB(X.nd.length)} ${nounFor(X.nd.length, ['شراكة', 'شراكة', 'شراكات', 'شراكة'])} مع ${boB(X.partners.size)} ${nounFor(X.partners.size, ['جهة', 'جهة', 'جهات', 'جهة'])} في ${plural(nSec, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}${topSec ? `، أكبرها القطاع ${esc(boSecName(topSec[0]))} بـ${boB(topSec[1].size)}` : ''}.`, viz: boSecStrip(X.nd) },
+    { ic: 'users', tone: 'g', h: 'منظومة متنوعة', t: `تضم المحفظة ${boB(livePs(X.nd).length)} ${nounFor(livePs(X.nd).length, ['شراكة', 'شراكة', 'شراكات', 'شراكة'])} مع ${boB(X.partners.size)} ${nounFor(X.partners.size, ['جهة', 'جهة', 'جهات', 'جهة'])} في ${plural(nSec, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}${topSec ? `، أكبرها القطاع ${esc(boSecName(topSec[0]))} بـ${boB(topSec[1].size)}` : ''}.`, viz: boSecStrip(X.nd) },
     X.soon.length
       ? { ic: 'alert', tone: 'w', h: 'استحقاقات تحتاج قرارًا', t: `${plural(X.soon.length, 'شراكة واحدة تنتهي', 'شراكتان تنتهيان', 'شراكات تنتهي', 'شراكة تنتهي')} خلال ${D.settings.expiryDays} يومًا، أقربها مع «${esc(partnerName(X.soon[0]))}» في ${fmtDate(X.soon[0].endDate)}.`, viz: boCalChips(X.soon) }
       : { ic: 'check', tone: 'g', h: 'لا استحقاقات عاجلة', t: `لا توجد شراكات تنتهي خلال ${D.settings.expiryDays} يومًا.${X.up.length ? ` ويبدأ سريان ${plural(X.up.length, 'شراكة جديدة', 'شراكتين جديدتين', 'شراكات جديدة', 'شراكة جديدة')} قريبًا.` : ''}`, viz: '' },
@@ -28742,8 +28750,8 @@ function boPrintHTML(list) {
   /* المؤشرات */
   const kpis = [
     [X.act.length, 'شراكة سارية', `من ${X.signed.length} موقّعة`],
-    [X.partners.size, 'جهة شريكة', `${Object.keys(X.secMap).length} قطاعات`],
-    [X.soon.length, 'تنتهي خلال 90 يومًا', 'قرار تجديد'],
+    [X.partners.size, 'جهة شريكة', plural(Object.keys(X.secMap).length, 'قطاع واحد', 'قطاعان', 'قطاعات', 'قطاعًا')],
+    [X.soon.length, `تنتهي خلال ${D.settings.expiryDays} يومًا`, 'قرار تجديد'],
     [PL.items.length, 'قيد الإجراء', `${PL.late.length} متأخرة`],
     [X.score + '%', 'سلامة المحفظة', ''],
     [V.avg !== null ? V.avg + '/100' : '—', 'متوسط التقييم', `${V.ev.length} مقيّمة`],
@@ -32753,8 +32761,8 @@ function liveData() {
   const td = isoDate(today()), y = today().getFullYear();
   const L_ = visiblePartnerships({ includeDrafts: false }).filter((p) => p.stage !== 'cancel');
   const c = liveCounts();
-  const signed = L_.filter((p) => p.stage === 'signed' && p.startDate && String(p.startDate).slice(0, 10) <= td).sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
-  const byYear = (yy) => signed.filter((p) => String(p.startDate).slice(0, 4) === String(yy)).length;
+  const signed = L_.filter((p) => p.stage === 'signed' && signedOn(p) && String(signedOn(p)).slice(0, 10) <= td).sort((a, b) => (signedOn(a) < signedOn(b) ? 1 : -1));
+  const byYear = (yy) => signed.filter((p) => String(signedOn(p)).slice(0, 4) === String(yy)).length;
   const S = typeof stratSummary === 'function' ? stratSummary(L_) : null;
   const regions = {}; L_.forEach((p) => { const r = pRegion(p).r || ''; regions[r] = (regions[r] || 0) + 1; });
   const sectors = {}; L_.forEach((p) => { const s = pSector(p) || 'أخرى'; (sectors[s] = sectors[s] || new Set()).add(p.partnerId); });
@@ -32809,7 +32817,7 @@ function liveChapterHTML(k, X, n, total) {
     return `${lxHead(n, total, 'شراكات في الواجهة', 'أحدث الشراكات الموقّعة')}
       <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 3);
         return `<article class="lx-sp ${i === 0 ? 'on' : ''}" data-sp="${i}"><div class="lx-spm">${ph ? `<img data-file="${esc(ph.fileId)}" alt="">` : coverHTML(p.id, null, { W: 900, H: 600 })}</div>
-          <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(p.startDate)}م</small><h3>${esc(partnerName(p))}</h3>
+          <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(signedOn(p))}م</small><h3>${esc(partnerName(p))}</h3>
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
         <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div></div>`;
   }
@@ -32839,7 +32847,7 @@ function liveChapterHTML(k, X, n, total) {
 }
 function liveTicker(X) {
   const items = [
-    ...X.signed.slice(0, 5).map((p) => `وُقّعت ${esc(p.classification || 'شراكة')} مع ${esc(partnerName(p))} — ${fmtDate(p.startDate)}م`),
+    ...X.signed.slice(0, 5).map((p) => `وُقّعت ${esc(p.classification || 'شراكة')} مع ${esc(partnerName(p))} — ${fmtDate(signedOn(p))}م`),
     ...X.awaitMin.slice(0, 3).map((p) => `معاملة ${esc(partnerName(p))} لدى مكتب المعالي`),
     ...X.expiring.slice(0, 3).map(({ p, d }) => `تنتهي الشراكة مع ${esc(partnerName(p))} خلال ${plural(d, 'يوم واحد', 'يومين', 'أيام', 'يومًا')}`),
     ...X.stories.slice(0, 3).map((a) => `إنجاز ميداني: ${esc(a.title)}`),

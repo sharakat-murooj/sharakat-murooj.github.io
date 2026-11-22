@@ -41,7 +41,7 @@ async def main():
         await E("location.hash='#/'"); await pg.wait_for_timeout(400)
         pid = await E("visiblePartnerships().filter(p=>!p.isDraft && pProfile(p).total)[0].id")
         await E(f"location.hash='#/partnerships/{pid}'"); await pg.wait_for_timeout(900)
-        await pg.click('a[href^="#/reports/marketing?p="]'); await pg.wait_for_timeout(1500)
+        await pg.click('[data-pmore]'); await pg.click('a[href^="#/reports/marketing?p="]'); await pg.wait_for_timeout(1500)
         ok('partnership page opens its own marketing report', await E("MK.scope") == 'one' and await E("MK.pid") == pid and await E(f"document.querySelector('.mk-head h1').textContent===partnerName(D.partnerships.find(p=>p.id==='{pid}'))"))
         kinds = await E("[...document.querySelectorAll('#mkDeck .rs2.mk')].map(s=>s.dataset.mk)")
         ok('single-partnership scenes: cover, summary, partner, value, closing', all(k in kinds for k in ['pcover', 'line', 'ppartner', 'mult', 'bond']), kinds)

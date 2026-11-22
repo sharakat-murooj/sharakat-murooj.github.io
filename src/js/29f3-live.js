@@ -23,8 +23,8 @@ function liveData() {
   const td = isoDate(today()), y = today().getFullYear();
   const L_ = visiblePartnerships({ includeDrafts: false }).filter((p) => p.stage !== 'cancel');
   const c = liveCounts();
-  const signed = L_.filter((p) => p.stage === 'signed' && p.startDate && String(p.startDate).slice(0, 10) <= td).sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
-  const byYear = (yy) => signed.filter((p) => String(p.startDate).slice(0, 4) === String(yy)).length;
+  const signed = L_.filter((p) => p.stage === 'signed' && signedOn(p) && String(signedOn(p)).slice(0, 10) <= td).sort((a, b) => (signedOn(a) < signedOn(b) ? 1 : -1));
+  const byYear = (yy) => signed.filter((p) => String(signedOn(p)).slice(0, 4) === String(yy)).length;
   const S = typeof stratSummary === 'function' ? stratSummary(L_) : null;
   const regions = {}; L_.forEach((p) => { const r = pRegion(p).r || ''; regions[r] = (regions[r] || 0) + 1; });
   const sectors = {}; L_.forEach((p) => { const s = pSector(p) || 'أخرى'; (sectors[s] = sectors[s] || new Set()).add(p.partnerId); });
@@ -79,7 +79,7 @@ function liveChapterHTML(k, X, n, total) {
     return `${lxHead(n, total, 'شراكات في الواجهة', 'أحدث الشراكات الموقّعة')}
       <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 3);
         return `<article class="lx-sp ${i === 0 ? 'on' : ''}" data-sp="${i}"><div class="lx-spm">${ph ? `<img data-file="${esc(ph.fileId)}" alt="">` : coverHTML(p.id, null, { W: 900, H: 600 })}</div>
-          <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(p.startDate)}م</small><h3>${esc(partnerName(p))}</h3>
+          <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(signedOn(p))}م</small><h3>${esc(partnerName(p))}</h3>
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
         <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div></div>`;
   }
@@ -109,7 +109,7 @@ function liveChapterHTML(k, X, n, total) {
 }
 function liveTicker(X) {
   const items = [
-    ...X.signed.slice(0, 5).map((p) => `وُقّعت ${esc(p.classification || 'شراكة')} مع ${esc(partnerName(p))} — ${fmtDate(p.startDate)}م`),
+    ...X.signed.slice(0, 5).map((p) => `وُقّعت ${esc(p.classification || 'شراكة')} مع ${esc(partnerName(p))} — ${fmtDate(signedOn(p))}م`),
     ...X.awaitMin.slice(0, 3).map((p) => `معاملة ${esc(partnerName(p))} لدى مكتب المعالي`),
     ...X.expiring.slice(0, 3).map(({ p, d }) => `تنتهي الشراكة مع ${esc(partnerName(p))} خلال ${plural(d, 'يوم واحد', 'يومين', 'أيام', 'يومًا')}`),
     ...X.stories.slice(0, 3).map((a) => `إنجاز ميداني: ${esc(a.title)}`),

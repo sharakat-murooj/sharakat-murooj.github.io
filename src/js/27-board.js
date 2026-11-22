@@ -20,8 +20,8 @@ function boDates(d = new Date()) {
 const BO_WALL_N = 10;
 /* حقائق الغلاف: مختلفة عن «المنظومة بالأرقام» — حداثة التوقيع وعمق العلاقة؛ ما لا قيمة له لا يظهر */
 function boHeroFacts(signed) {
-  const td = isoDate(today()), dated = signed.filter((p) => p.startDate && String(p.startDate).slice(0, 10) <= td).sort((a, b) => String(b.startDate).localeCompare(String(a.startDate)));
-  const yr = today().getFullYear(), thisYear = dated.filter((p) => String(p.startDate).slice(0, 4) === String(yr)).length;
+  const td = isoDate(today()), dated = signed.filter((p) => signedOn(p) && String(signedOn(p)).slice(0, 10) <= td).sort((a, b) => String(signedOn(b)).localeCompare(String(signedOn(a))));
+  const yr = today().getFullYear(), thisYear = dated.filter((p) => String(signedOn(p)).slice(0, 4) === String(yr)).length;
   const last = dated[0], first = dated[dated.length - 1];
   const F = [];
   if (thisYear) F.push(`<div><dt>وُقّعت في ${yr}</dt><dd><b class="cu" data-v="${thisYear}">${thisYear}</b></dd></div>`);
@@ -307,8 +307,8 @@ function boStats(list) {
   const S = (k) => nd.filter((p) => k.includes(pStatus(p)));
   const signed = nd.filter((p) => p.stage === 'signed');
   const act = S(['active', 'soon']), soon = S(['soon']).sort((a, b) => (a.endDate < b.endDate ? -1 : 1)), up = S(['upcoming']), ended = S(['ended']), pipe = S(['prep', 'sign', 'hold']);
-  const partners = new Set(nd.map((p) => p.partnerId));
-  const secMap = {}; nd.forEach((p) => { const s = pSector(p) || 'غير محدد'; (secMap[s] = secMap[s] || new Set()).add(p.partnerId); });
+  const partners = new Set(livePs(nd).map((p) => p.partnerId).filter(Boolean));
+  const secMap = {}; livePs(nd).forEach((p) => { const s = pSector(p); if (s && s !== 'غير محدد') (secMap[s] = secMap[s] || new Set()).add(p.partnerId); });
   const cells = nd.length * CORE_FIELDS.length;
   const complete = cells ? Math.round((cells - nd.reduce((t, p) => t + missingFields(p).length, 0)) / cells * 100) : 0;
   const activated = act.filter((p) => p.activation === 'مفعّلة').length;
@@ -318,11 +318,12 @@ function boStats(list) {
   let trend = null;
   if (ser) { const ci = Math.max(0, ser.rows.findIndex((r) => r.current)); trend = { now: act.length, ago: ser.rows[Math.max(0, ci - 12)].total, ahead: ser.rows[Math.min(ser.rows.length - 1, ci + 6)].total }; }
   const health = [
-    { k: 'cont', l: 'الاستمرارية', d: 'الموقّعة غير المنتهية', how: 'جدّد الشراكات الناجحة قبل انتهائها عبر «تقييم التجديد»، ولا تتركها تنتهي دون قرار.', v: signed.length ? Math.round((signed.length - ended.length) / signed.length * 100) : 0 },
-    { k: 'act', l: 'التفعيل', d: 'السارية المفعّلة فعليًا', how: 'أقرّ «خطة تفعيل المذكرة» (الخطوة 12) وحدّث حالة التفعيل إلى «مفعّلة» عند بدء التنفيذ.', v: act.length ? Math.round(activated / act.length * 100) : 0 },
+    { k: 'cont', l: 'الاستمرارية', d: 'الموقّعة غير المنتهية', how: 'جدّد الشراكات الناجحة قبل انتهائها عبر «تقييم التجديد»، ولا تتركها تنتهي دون قرار.', v: signed.length ? Math.round((signed.length - ended.length) / signed.length * 100) : null },
+    { k: 'act', l: 'التفعيل', d: 'السارية المفعّلة فعليًا', how: 'أقرّ «خطة تفعيل المذكرة» (الخطوة 12) وحدّث حالة التفعيل إلى «مفعّلة» عند بدء التنفيذ.', v: act.length ? Math.round(activated / act.length * 100) : null },
     { k: 'data', l: 'اكتمال البيانات', d: 'حقول ملف الحصر المعبأة', how: 'استكمل الحقول الأساسية الناقصة في الشراكات (ضابط الاتصال والبريد والجوال والتواريخ).', v: complete },
-    { k: 'renew', l: 'أمان الاستحقاقات', d: 'السارية غير المهددة بالانتهاء', how: 'اتخذ قرارات التجديد مبكرًا للشراكات التي تنتهي خلال 90 يومًا.', v: act.length ? Math.round((act.length - soon.length) / act.length * 100) : 0 },
-  ];
+    { k: 'renew', l: 'أمان الاستحقاقات', d: 'السارية غير المهددة بالانتهاء', how: 'اتخذ قرارات التجديد مبكرًا للشراكات التي تنتهي خلال ${D.settings.expiryDays} يومًا.', v: act.length ? Math.round((act.length - soon.length) / act.length * 100) : null },
+  ].filter((h) => h.v !== null && !(h.k === 'data' && !cells));
+  if (!health.length) health.push({ k: 'none', l: 'لا بيانات', d: 'لا توجد شراكات كافية للحساب', how: 'سجّل الشراكات الموقّعة لتظهر المؤشرات.', v: 0 });
   const score = Math.round(health.reduce((t, h) => t + h.v, 0) / health.length);
   return { nd, signed, act, soon, up, ended, pipe, partners, secMap, complete, activated, props, inProc, ser, trend, health, score };
 }
@@ -342,7 +343,7 @@ function boChSummary(X) {
   const topSec = Object.entries(X.secMap).sort((a, b) => b[1].size - a[1].size)[0];
   const d = X.trend ? X.trend.now - X.trend.ago : 0;
   const msgs = [
-    { ic: 'users', tone: 'g', h: 'منظومة متنوعة', t: `تضم المحفظة ${boB(X.nd.length)} ${nounFor(X.nd.length, ['شراكة', 'شراكة', 'شراكات', 'شراكة'])} مع ${boB(X.partners.size)} ${nounFor(X.partners.size, ['جهة', 'جهة', 'جهات', 'جهة'])} في ${plural(nSec, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}${topSec ? `، أكبرها القطاع ${esc(boSecName(topSec[0]))} بـ${boB(topSec[1].size)}` : ''}.`, viz: boSecStrip(X.nd) },
+    { ic: 'users', tone: 'g', h: 'منظومة متنوعة', t: `تضم المحفظة ${boB(livePs(X.nd).length)} ${nounFor(livePs(X.nd).length, ['شراكة', 'شراكة', 'شراكات', 'شراكة'])} مع ${boB(X.partners.size)} ${nounFor(X.partners.size, ['جهة', 'جهة', 'جهات', 'جهة'])} في ${plural(nSec, 'قطاع واحد', 'قطاعين', 'قطاعات', 'قطاعًا')}${topSec ? `، أكبرها القطاع ${esc(boSecName(topSec[0]))} بـ${boB(topSec[1].size)}` : ''}.`, viz: boSecStrip(X.nd) },
     X.soon.length
       ? { ic: 'alert', tone: 'w', h: 'استحقاقات تحتاج قرارًا', t: `${plural(X.soon.length, 'شراكة واحدة تنتهي', 'شراكتان تنتهيان', 'شراكات تنتهي', 'شراكة تنتهي')} خلال ${D.settings.expiryDays} يومًا، أقربها مع «${esc(partnerName(X.soon[0]))}» في ${fmtDate(X.soon[0].endDate)}.`, viz: boCalChips(X.soon) }
       : { ic: 'check', tone: 'g', h: 'لا استحقاقات عاجلة', t: `لا توجد شراكات تنتهي خلال ${D.settings.expiryDays} يومًا.${X.up.length ? ` ويبدأ سريان ${plural(X.up.length, 'شراكة جديدة', 'شراكتين جديدتين', 'شراكات جديدة', 'شراكة جديدة')} قريبًا.` : ''}`, viz: '' },

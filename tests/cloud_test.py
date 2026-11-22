@@ -53,9 +53,10 @@ async def main():
         ok('department on another device sees the shared data', await B.evaluate(f"!!document.querySelector('#main .page') && (D.partnerships.find(p=>p.id==='{old_id}')||{{}}).title==='شراكة محفوظة قبل الربط'"))
         ok('department session applied', await B.evaluate("Session.role()") == 'dept')
         # تعديل من B يظهر في A
-        await B.evaluate(f"(async()=>{{const p=D.partnerships.find(x=>x.id==='{old_id}'); p.title='عُدّلت من جهاز الإدارة'; await Repo.save('partnerships', p);}})()"); await B.wait_for_timeout(1200)
+        await B.evaluate(f"(async()=>{{const p=D.partnerships.find(x=>x.id==='{old_id}'); p.wf=Object.assign(p.wf||{{}},{{mark:'عُدّلت من جهاز الإدارة'}}); p.title='عنوان لا تملك الإدارة تغييره'; await Repo.save('partnerships', p);}})()"); await B.wait_for_timeout(1200)
         await A.evaluate("cloudTick()"); await A.wait_for_timeout(1200)
-        ok("another account's edit reaches this device", await A.evaluate(f"D.partnerships.find(p=>p.id==='{old_id}').title") == 'عُدّلت من جهاز الإدارة')
+        ok("another account's edit reaches this device", await A.evaluate(f"(D.partnerships.find(p=>p.id==='{old_id}').wf||{{}}).mark") == 'عُدّلت من جهاز الإدارة')
+        ok("server keeps fields outside the department's permission", await A.evaluate(f"D.partnerships.find(p=>p.id==='{old_id}').title") == 'شراكة محفوظة قبل الربط')
         # تعديلان متزامنان على الإعدادات من جهازين: يُدمجان
         await A.evaluate("Cloud.stop(); Cloud.ready=true; D.settings.alertDays=45; Repo.saveSettings()")
         await B.evaluate("Cloud.stop(); Cloud.ready=true; notify([{grp:'partnerships'}],{t:'اختبار دمج',b:'من الإدارة'})")

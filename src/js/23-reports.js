@@ -31,7 +31,7 @@ let RPT_STALE = 0;
 function rptVal(key, def) {
   const o = RPT.ov[key]; def = def == null ? '' : String(def);
   if (!o) return def;
-  if (typeof o === 'string') return o;
+  if (typeof o === 'string') { if (!/[0-9٠-٩]/.test(o) || o === def) return o; delete RPT.ov[key]; RPT_STALE++; return def; }
   if (o.base === def) return o.v;
   delete RPT.ov[key]; RPT_STALE++; return def;
 }
@@ -153,7 +153,7 @@ function rptSlides() {
       const evs = (typeof calEvents === 'function' ? calEvents() : []).filter((e) => e.pid === id && e.date >= t0).slice(0, 4);
       add({ t: 'perf', ...head, p, ev, ivs, phases, cur: wf.cur, evs, n: [[(p.meetings || []).length, 'اجتماعات'], [(p.partnerReports || []).length, 'تقارير الشريك'], [stories0(id).length, 'إنجازات'], [news0(id).length, 'مستجدات']] });
     }
-    if (rptOn('partner') && pr) add({ t: 'partner', ...head, p, pr, others: D.partnerships.filter((x) => x.partnerId === pr.id && (showDemo() || !x.demo)), props: D.proposals.filter((x) => x.partnerId === pr.id || (x.partnerName && normAr(x.partnerName) === normAr(pr.name))) });
+    if (rptOn('partner') && pr) add({ t: 'partner', ...head, p, pr, others: livePs(D.partnerships.filter((x) => x.partnerId === pr.id && (showDemo() || !x.demo))), props: D.proposals.filter((x) => (showDemo() || !x.demo) && x.status !== 'draft' && (x.partnerId === pr.id || (x.partnerName && normAr(x.partnerName) === normAr(pr.name)))) });
     if (rptOn('coop') && coop.length) { const per = coop.length <= 3 ? 3 : 6; chunk(coop.map((it, k) => ({ k, s: rptVal(`${id}.coop.${k}`, itemStr(it)) })), per).forEach((part, i, all) => add({ t: 'cards', ...head, title: 'مجالات التعاون' + (all.length > 1 ? ` (${i + 1}/${all.length})` : ''), items: part, key: `${id}.coop`, total: coop.length })); }
     if (rptOn('impact') && (imp.length || outs.length)) {
       const A = imp.map((it, k) => ({ k, s: rptVal(`${id}.impact.${k}`, itemStr(it)) })), B = outs.map((it, k) => ({ k, s: rptVal(`${id}.outputs.${k}`, itemStr(it)) }));

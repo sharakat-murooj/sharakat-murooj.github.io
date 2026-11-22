@@ -133,13 +133,13 @@ function sunburstSVG(list) {
     const parts = [...secs.get(s).values()].sort((x, y) => y.n - x.n);
     const sn = parts.reduce((t, e) => t + e.n, 0);
     const a0 = a, a1 = a + sn / total * Math.PI * 2;
-    ring1 += `<path class="sb-seg sb-sec" d="${arcPath(c, c, 66, 106, a0 + gap, a1 - gap)}" fill="${SEC_VAR(s)}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, sector: [s] })}" ${tipAttr(`<b>${s}</b><br>${plural(sn, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')} مع ${plural(parts.length, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}`)}/>`;
+    ring1 += `<path class="sb-seg sb-sec" d="${arcPath(c, c, 66, 106, a0 + gap, a1 - gap)}" fill="${SEC_VAR(s)}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, sector: [s] })}" ${tipAttr(`<b>${esc(s)}</b><br>${plural(sn, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')} مع ${plural(parts.length, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}`)}/>`;
     if (a1 - a0 > 0.55) { const m = (a0 + a1) / 2; labels += `<text x="${(c + 86 * Math.sin(m)).toFixed(1)}" y="${(c - 86 * Math.cos(m) + 4).toFixed(1)}" text-anchor="middle" class="sb-lab">${esc(s)}</text>`; }
     let b = a0;
     parts.forEach((e) => {
       const b0 = b, b1 = b + e.n / total * Math.PI * 2;
       const st = ST_PRIO.find((k) => e.sts.includes(k)) || e.sts[0];
-      ring2 += `<path class="sb-seg" d="${arcPath(c, c, 112, 170, b0 + gap * .6, b1 - gap * .6)}" fill="${ST_VAR(st)}" data-href="${e.n > 1 ? '#/partners/' + e.pr.id : '#/partnerships/' + e.pid}" ${tipAttr(`<b>${e.pr.name}</b><br>${s} — ${plural(e.n, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')}<br>${statusLabel(st)}${e.pr.demo ? ' — تجريبي' : ''}`)}/>`;
+      ring2 += `<path class="sb-seg" d="${arcPath(c, c, 112, 170, b0 + gap * .6, b1 - gap * .6)}" fill="${ST_VAR(st)}" data-href="${e.n > 1 ? '#/partners/' + e.pr.id : '#/partnerships/' + e.pid}" ${tipAttr(`<b>${esc(e.pr.name)}</b><br>${esc(s)} — ${plural(e.n, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')}<br>${statusLabel(st)}${e.pr.demo ? ' — تجريبي' : ''}`)}/>`;
       if (b1 - b0 > 0.24) { const m = (b0 + b1) / 2; labels += `<text x="${(c + 141 * Math.sin(m)).toFixed(1)}" y="${(c - 141 * Math.cos(m) + 6).toFixed(1)}" text-anchor="middle" class="sb-mono">${esc(monogram(e.pr.name))}</text>`; }
       b = b1;
     });
@@ -165,7 +165,7 @@ function heatmapHTML(list) {
   const TM = Math.max(1, ...depts.map(dTot));
   return `<div class="hm-wrap"><table class="hm"><thead><tr><th></th>${secs.map((s) => `<th><i style="background:${SEC_VAR(s)}"></i>${esc(s)}</th>`).join('')}<th class="hm-tt">الإجمالي</th></tr></thead><tbody>
     ${depts.sort((x, y) => dTot(y) - dTot(x)).map((d) => `<tr><th>${esc(d)}</th>
-      ${secs.map((s) => { const v = cell(d, s), f = v / M; return `<td><button class="hm-c ${f > .5 ? 'hi' : ''} ${v ? '' : 'z'}" style="--a:${v ? (0.14 + f * 0.8).toFixed(2) : 0}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, department: [d], sector: [s] })}" ${tipAttr(`<b>${d}</b><br>${s}: ${v}`)}>${v || '–'}</button></td>`; }).join('')}
+      ${secs.map((s) => { const v = cell(d, s), f = v / M; return `<td><button class="hm-c ${f > .5 ? 'hi' : ''} ${v ? '' : 'z'}" style="--a:${v ? (0.14 + f * 0.8).toFixed(2) : 0}" data-href="#/partnerships${filtersToQuery({ ...App.dashF, department: [d], sector: [s] })}" ${tipAttr(`<b>${esc(d)}</b><br>${esc(s)}: ${v}`)}>${v || '–'}</button></td>`; }).join('')}
       <td class="hm-t"><span class="hm-tb"><i style="--w:${(dTot(d) / TM * 100).toFixed(0)}%"></i></span><b>${dTot(d)}</b></td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -187,7 +187,7 @@ function roadmapHTML(list) {
     ${rows.map((p) => {
       const st = pStatus(p), pr = partnerById(p.partnerId), s = pos(parseDate(p.startDate)), e = pos(parseDate(p.endDate)), dl = daysLeft(p);
       return `<div class="rm-row" data-href="#/partnerships/${p.id}"><div class="rm-name">${plateHTML(pr, 40)}<span>${esc(partnerName(p))}</span></div>
-        <div class="rm-track">${qlines}<span class="rm-bar st-${st}" style="right:${s.toFixed(2)}%;width:${Math.max(0.8, e - s).toFixed(2)}%" ${tipAttr(`<b>${partnerName(p)}</b><br>${fmtDate(p.startDate)} – ${fmtDate(p.endDate)}<br>${statusLabel(st)}${dl !== null && dl >= 0 && ['active', 'soon'].includes(st) ? ` — متبقٍ ${dl} يومًا` : ''}`)}>${st === 'soon' ? `<em>تنتهي ${fmtDate(p.endDate, 'short')}</em>` : ''}</span><span class="rm-today" style="right:${tp}%"></span></div></div>`;
+        <div class="rm-track">${qlines}<span class="rm-bar st-${st}" style="right:${s.toFixed(2)}%;width:${Math.max(0.8, e - s).toFixed(2)}%" ${tipAttr(`<b>${esc(partnerName(p))}</b><br>${fmtDate(p.startDate)} – ${fmtDate(p.endDate)}<br>${statusLabel(st)}${dl !== null && dl >= 0 && ['active', 'soon'].includes(st) ? ` — متبقٍ ${dl} يومًا` : ''}`)}>${st === 'soon' ? `<em>تنتهي ${fmtDate(p.endDate, 'short')}</em>` : ''}</span><span class="rm-today" style="right:${tp}%"></span></div></div>`;
     }).join('')}</div>`;
 }
 
@@ -254,12 +254,12 @@ function expiryBars(list) {
 /* — الملخص التنفيذي — */
 function narrative(list, filtered) {
   const nd = list.filter((p) => !p.isDraft);
-  const partners = new Set(nd.map((p) => p.partnerId)).size;
+  const partners = partnerCountOf(nd);
   const act = nd.filter((p) => ['active', 'soon'].includes(pStatus(p))).length;
   const soon = nd.filter((p) => pStatus(p) === 'soon').sort((a, b) => (a.endDate < b.endDate ? -1 : 1));
   const props = visibleProposals().filter((x) => ['submitted', 'review', 'info'].includes(x.status));
   const oldest = props.length ? Math.max(...props.map(propAgeDays)) : 0;
-  let s = `${filtered ? 'ضمن الفلاتر المختارة، ' : ''}تضم المحفظة ${plural(nd.length, 'شراكة واحدة', 'شراكتين', 'شراكات', 'شراكة')} مع ${plural(partners, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}، ${act ? `منها ${nf(act)} سارية حاليًا` : 'ولا توجد بينها شراكة سارية حاليًا'}.`;
+  let s = `${filtered ? 'ضمن الفلاتر المختارة، ' : ''}تضم المحفظة ${plural(livePs(nd).length, 'شراكة واحدة', 'شراكتين', 'شراكات', 'شراكة')} مع ${plural(partners, 'جهة واحدة', 'جهتين', 'جهات', 'جهة')}، ${act ? `منها ${nf(act)} سارية حاليًا` : 'ولا توجد بينها شراكة سارية حاليًا'}.`;
   s += soon.length ? ` تنتهي ${plural(soon.length, 'شراكة واحدة', 'شراكتان', 'شراكات', 'شراكة')} خلال ${D.settings.expiryDays} يومًا، أقربها مع «${partnerName(soon[0])}» في ${fmtDate(soon[0].endDate)}.` : ` لا توجد شراكات تنتهي خلال ${D.settings.expiryDays} يومًا.`;
   if (props.length) s += ` وتعمل إدارة الشراكات على ${plural(props.length, 'مقترح واحد', 'مقترحين', 'مقترحات', 'مقترحًا')} من الإدارات${oldest > 0 ? `، أقدمها منذ ${plural(oldest, 'يوم واحد', 'يومين', 'أيام', 'يومًا')}` : ''}.`;
   return s;
@@ -315,7 +315,7 @@ function dashBand(list, filtered) {
   const past = ser ? ser.rows.filter((r) => !r.future).slice(-12).map((r) => r.total) : [];
   const delta = past.length > 1 ? past[past.length - 1] - past[0] : 0;
   const partnersBy = {}; nd.forEach((p) => { const s = pSector(p) || 'غير محدد'; (partnersBy[s] = partnersBy[s] || new Set()).add(p.partnerId); });
-  const nPartners = new Set(nd.map((p) => p.partnerId)).size;
+  const nPartners = partnerCountOf(nd);
   const soon = nd.filter((p) => pStatus(p) === 'soon').sort((a, b) => (a.endDate < b.endDate ? -1 : 1));
   const props = visibleProposals();
   const inProc = props.filter((x) => ['submitted', 'review', 'info'].includes(x.status));
@@ -365,7 +365,7 @@ function dashBody(list) {
   const cmax = Math.max(1, ...cats.map((c) => c.n));
   const omax = Math.max(1, ...owners.map((o) => o.n));
   const cls = countBy(nd, 'classification'), actv = countBy(nd, 'activation');
-  const mini = (title, data, colorFn, dim) => { const tot = data.reduce((t, d) => t + d.n, 0) || 1; let off = 0; const r = 34, C = 2 * Math.PI * r; return `<div class="mini"><svg viewBox="0 0 90 90" width="96" height="96">${data.map((d, i) => { const len = d.n / tot * C; const s = `<circle cx="45" cy="45" r="${r}" fill="none" stroke="${colorFn(d, i)}" stroke-width="11" stroke-dasharray="${Math.max(0, len - 2).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 45 45)" class="donut-seg" data-href="#/partnerships${filtersToQuery({ ...App.dashF, [dim]: [d.k] })}" ${tipAttr(`${d.label}: ${d.n}`)}/>`; off += len; return s; }).join('')}<text x="45" y="51" text-anchor="middle" class="mini-n">${tot}</text></svg>
+  const mini = (title, data, colorFn, dim) => { const tot = data.reduce((t, d) => t + d.n, 0) || 1; let off = 0; const r = 34, C = 2 * Math.PI * r; return `<div class="mini"><svg viewBox="0 0 90 90" width="96" height="96">${data.map((d, i) => { const len = d.n / tot * C; const s = `<circle cx="45" cy="45" r="${r}" fill="none" stroke="${colorFn(d, i)}" stroke-width="11" stroke-dasharray="${Math.max(0, len - 2).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 45 45)" class="donut-seg" data-href="#/partnerships${filtersToQuery({ ...App.dashF, [dim]: [d.k] })}" ${tipAttr(`${esc(d.label)}: ${d.n}`)}/>`; off += len; return s; }).join('')}<text x="45" y="51" text-anchor="middle" class="mini-n">${tot}</text></svg>
     <div class="mini-l"><div class="mini-t">${title}</div>${data.map((d, i) => `<span data-href="#/partnerships${filtersToQuery({ ...App.dashF, [dim]: [d.k] })}"><i style="background:${colorFn(d, i)}"></i>${esc(d.label)}<b>${d.n}</b></span>`).join('')}</div></div>`; };
   return `<div class="dgrid dash-grid">
     <section class="dp c8" data-tour="dash-evolution"><header><div><h3>تطور محفظة الشراكات</h3><p>عدد الشراكات السارية شهريًا حسب قطاع الجهة — فعلي حتى اليوم، ومتوقع بعده وفق تواريخ الانتهاء</p></div>
@@ -377,7 +377,7 @@ function dashBody(list) {
     <section class="dp c12"><header><div><h3>خارطة سريان الشراكات</h3><p>من تاريخ البدء إلى تاريخ الانتهاء، مرتبة حسب أقرب انتهاء</p></div>
       <div class="lg"><span><i style="background:var(--st-active)"></i>سارية</span><span><i style="background:var(--st-soon)"></i>تنتهي خلال ${D.settings.expiryDays} يومًا</span><span><i style="background:var(--st-up)"></i>لم يبدأ سريانها</span><span><i style="background:var(--st-ended)"></i>منتهية</span></div></header>${roadmapHTML(list)}</section>
     <section class="dp c8"><header><div><h3>مقترحات الإدارات</h3><p>لكل إدارة حسب مرحلة المراجعة — لا تتأثر بفلاتر الشراكات</p></div></header>
-      ${depts.length ? `<div class="pstack">${depts.sort((a, b) => props.filter((x) => x.department === b).length - props.filter((x) => x.department === a).length).map((d) => { const mine = props.filter((x) => x.department === d); return `<div class="ps-row" data-href="#/proposals?dept=${encodeURIComponent(d)}"><span class="ps-n">${esc(d)}</span><span class="ps-bar"><span style="width:${(mine.length / pmax * 100).toFixed(0)}%">${PST.map((s) => { const n = mine.filter((x) => x.status === s).length; return n ? `<i style="flex:${n};background:${PC[s]}" ${tipAttr(`${d}<br>${propStatusLabel(s)}: ${n}`)}></i>` : ''; }).join('')}</span></span><b>${mine.length}</b></div>`; }).join('')}</div>
+      ${depts.length ? `<div class="pstack">${depts.sort((a, b) => props.filter((x) => x.department === b).length - props.filter((x) => x.department === a).length).map((d) => { const mine = props.filter((x) => x.department === d); return `<div class="ps-row" data-href="#/proposals?dept=${encodeURIComponent(d)}"><span class="ps-n">${esc(d)}</span><span class="ps-bar"><span style="width:${(mine.length / pmax * 100).toFixed(0)}%">${PST.map((s) => { const n = mine.filter((x) => x.status === s).length; return n ? `<i style="flex:${n};background:${PC[s]}" ${tipAttr(`${esc(d)}<br>${propStatusLabel(s)}: ${n}`)}></i>` : ''; }).join('')}</span></span><b>${mine.length}</b></div>`; }).join('')}</div>
         <div class="lg wrap" style="margin-top:14px">${PST.filter((s) => props.some((x) => x.status === s)).map((s) => `<span><i style="background:${PC[s]}"></i>${esc(propStatusLabel(s))}</span>`).join('')}</div>` : '<div class="empty-chart">لم تُقدَّم مقترحات بعد.</div>'}</section>
     <section class="dp c4"><header><div><h3>التصنيف والتفعيل</h3><p>تصنيف المذكرة وحالة تفعيل الشراكة</p></div></header>
       ${mini('تصنيف المذكرة', cls, (d, i) => ['var(--sec-1)', 'var(--sec-2)', 'var(--sec-3)', 'var(--sec-4)'][i % 4], 'classification')}

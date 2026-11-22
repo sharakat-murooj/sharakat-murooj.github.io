@@ -39,7 +39,7 @@ function compose(it: Item) {
     const st = STATUS[p.status] || STATUS.submitted;
     if (it.kind === "received") {
       subject = `وصل مقترحكم ${p.ref} — ${org}`; title = "شكرًا، وصل مقترحكم";
-      lead = `مرحبًا ${esc(p.requesterName)}، وصل مقترح الشراكة الخاص بـ «${esc(p.partnerName)}» إلى إدارة الشراكات برقم <b dir="ltr">${esc(p.ref)}</b>.`;
+      lead = `مرحبًا، وصل مقترح الشراكة الخاص بكم إلى إدارة الشراكات برقم <b dir="ltr">${esc(p.ref)}</b>.`;
       body = "ستصلكم رسالة على هذا البريد عند كل تحديث لحالة المقترح، ويمكنكم متابعته في أي وقت من الرابط أدناه.";
     } else {
       subject = `تحديث مقترحكم ${p.ref}: ${st[0]}`; title = st[0];
