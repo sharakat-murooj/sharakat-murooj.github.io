@@ -206,34 +206,10 @@ function wfSectionHTML(kind, rec) {
         : ((done && !r.legacy) || (s.ongoing && done)) && !s.auto ? `<button class="btn sm ghost wf-go" type="button" data-wfopen="${s.id}">التفاصيل</button>` : ''}
     </li>`;
   };
-  /* المرحلة المعروضة: الحالية تلقائيًا، أو ما اختاره المستخدم */
-  const phState = phases.map(({ ss = null, steps: x }) => ({ n: x.filter((s) => st.S[s.id] && st.S[s.id].status === 'done').length, t: x.length, cur: !!(st.cur && x.includes(st.cur)) || x.includes(nxStep) }));
-  const curPi = phState.findIndex((x) => x.cur);
-  const defPi = curPi > -1 ? curPi : Math.max(0, phState.findIndex((x) => x.n < x.t)) || 0;
-  App.ui.wfPh = App.ui.wfPh || {};
-  const keep = App.ui.wfPh[rec.id], curId = (st.cur || nxStep || {}).id || '';
-  const selPi = Math.min(phases.length - 1, keep && keep.cur === curId ? keep.i : (curPi > -1 ? curPi : (doneN === steps.length ? phases.length - 1 : defPi))); /* الاختيار اليدوي يبقى ما دامت الخطوة الحالية نفسها */
-  const cs = st.cur || nxStep, cr = cs ? st.S[cs.id] || {} : {};
-  const prevAt = cs ? (WF_STEPS.slice(0, WF_STEPS.indexOf(cs)).reverse().map((x) => st.S[x.id] && st.S[x.id].at).find(Boolean)) : null;
-  const waitD = prevAt ? Math.max(0, Math.floor((today() - new Date(prevAt)) / 864e5)) : null;
-  const canCur = st.cur && !(kind === 'proposal' && st.cur.on === 'partnership') && wfCan(st.cur, kind, rec);
-  const hero = `<div class="wf-hd ${st.closed ? 'neg' : doneN === steps.length ? 'fin' : ''}">
-      <div class="wf-ring" style="--p:${pct}"><b>${doneN}</b><small>من ${steps.length}</small></div>
-      <div class="wf-hd-t">${cs && !st.closed ? `<small>${cr.status === 'returned' ? 'أُعيدت بملاحظات' : 'الخطوة الحالية'} · ${cs.n} من ${steps.length}</small><b>${esc(cs.t)}</b>
-        <div class="wf-hd-m"><span>${icon('users')}لدى ${esc(wfActorName(cs.actor))}</span>${cs.ref ? `<span>البند ${cs.ref}</span>` : ''}${waitD !== null ? `<span class="${waitD > 14 ? 'late' : ''}">${icon('clock')}${waitD ? `منذ ${plural(waitD, 'يوم', 'يومين', 'أيام', 'يومًا')}` : 'بدأت اليوم'}</span>` : ''}<span>${esc(WF_PHASES.find((x) => x.id === cs.ph) ? WF_PHASES.find((x) => x.id === cs.ph).t : '')}</span></div>`
-        : `<small>حالة المسار</small><b>${esc(curTxt)}</b>`}</div>
-      ${canCur ? `<button class="btn primary wf-go no-print" type="button" data-wfopen="${st.cur.id}">${icon('arrowL')} فتح الخطوة</button>` : ''}
-    </div>`;
-  const rail = `<div class="wf-rail no-print" role="tablist">${phases.map(({ ph, steps: ss }, i) => { const x = phState[i], all = x.t && x.n === x.t, lockP = kind === 'proposal' && ss.every((s) => s.on === 'partnership');
-      return `<button type="button" role="tab" class="wf-rp ${all ? 'done' : x.cur ? 'cur' : ''} ${i === selPi ? 'sel' : ''} ${lockP ? 'lockp' : ''}" data-wfph="${i}" aria-selected="${i === selPi}">
-        <em>${all ? icon('check') : pad(i + 1)}</em><span class="wf-rp-t"><b>${ph.t}</b><small>${x.n}/${x.t}${x.cur ? ' · الآن' : ''}</small></span>
-        <i class="wf-rp-d">${ss.map((s) => { const r = st.S[s.id] || {}; return `<u class="${r.status === 'done' ? 'ok' : (st.cur && st.cur.id === s.id) ? 'now' : r.status === 'returned' ? 'ret' : ''}"></u>`; }).join('')}</i></button>`; }).join('')}</div>`;
-  const panels = `<div class="wf-pns">${phases.map(({ ph, steps: ss }, i) => `<div class="wf-pn ${i === selPi ? 'on' : ''}" data-wfpn="${i}"><h4 class="wf-pn-h"><em>${pad(i + 1)}</em>${ph.t}<small>${phState[i].n}/${phState[i].t}</small></h4><ol class="wf-list wf-cards">${ss.map(row).join('')}</ol></div>`).join('')}</div>`;
-  return `<section class="dsec wf-sec wf-v2" id="wf"><h2>مسار ${kind === 'proposal' ? 'الطلب' : 'المذكرة'} <span class="src">الإجراء المعتمد لشراكة جديدة</span><button type="button" class="wf-allbtn no-print" data-wfall>${icon('layers')}<span>كل المراحل</span></button></h2>
-    ${hero}
+  return `<section class="dsec wf-sec" id="wf"><h2>مسار ${kind === 'proposal' ? 'الطلب' : 'المذكرة'} <span class="src">الإجراء المعتمد لشراكة جديدة</span></h2>
+    <div class="wf-top"><div class="wf-bar"><i style="width:${pct}%"></i></div><div class="wf-cur ${st.closed ? 'neg' : ''}"><b>${doneN} من ${steps.length}</b><span>${esc(curTxt)}</span></div></div>
     ${wfNextHTML(kind, rec, st)}
-    ${rail}
-    ${panels}</section>`;
+    <div class="wf-phases">${phases.map(({ ph, steps: ss }) => { const all = ss.length && ss.every((s) => st.S[s.id] && st.S[s.id].status === 'done'); const curP = st.cur && ss.includes(st.cur); const lockP = kind === 'proposal' && ss.every((s) => s.on === 'partnership'); return `<div class="wf-ph ${all ? 'done' : curP ? 'cur' : ''} ${lockP ? 'lockp' : ''}"><h4 class="wf-ph-h"><em>${all ? icon('check') : pad(WF_PHASES.indexOf(ph) + 1)}</em><span>${ph.t}</span><small>${ss.filter((s) => st.S[s.id] && st.S[s.id].status === 'done').length}/${ss.length}</small></h4><ol class="wf-list">${ss.map(row).join('')}</ol></div>`; }).join('')}</div></section>`;
 }
 
 /* — نافذة تنفيذ الخطوة — */
@@ -421,8 +397,6 @@ function bindWf(el, kind, rec) {
   el.addEventListener('click', (e) => {
     const fo = e.target.closest('.wf-sec [data-wfform]'); if (fo) { e.stopPropagation(); const k = fo.dataset.wfform; const [k2, o2] = wfFormOwner(kind, rec, k); return openForm(k2, o2, k, { ro: true }); }
     const o = e.target.closest('[data-wfopen]'); if (o) { e.preventDefault(); e.stopPropagation(); return wfStepDialog(kind, rec, o.dataset.wfopen, () => route()); }
-    const ph = e.target.closest('.wf-sec [data-wfph]'); if (ph) { e.stopPropagation(); const sec = ph.closest('.wf-sec'), i = +ph.dataset.wfph; App.ui.wfPh = App.ui.wfPh || {}; const st0 = wfStateOf(kind, rec); App.ui.wfPh[rec.id] = { i, cur: (st0.cur || {}).id || '' }; sec.classList.remove('all'); sec.querySelectorAll('[data-wfph]').forEach((b) => { b.classList.toggle('sel', +b.dataset.wfph === i); b.setAttribute('aria-selected', +b.dataset.wfph === i); }); sec.querySelectorAll('[data-wfpn]').forEach((p) => p.classList.toggle('on', +p.dataset.wfpn === i)); return; }
-    const al = e.target.closest('.wf-sec [data-wfall]'); if (al) { e.stopPropagation(); const sec = al.closest('.wf-sec'); sec.classList.toggle('all'); al.classList.toggle('on', sec.classList.contains('all')); return; }
     const v = e.target.closest('.wf-sec [data-wfview]'); if (v) { e.stopPropagation(); return viewStored(v.dataset.wfview); }
   }, true);
 }
