@@ -23,7 +23,7 @@ async def main():
         ok('pulse computed from real events (signing at least)', P0[2] is not None and P0[0] in ('live', 'calm', 'dorm'), P0)
         ok('field edits do not count as activity', await E(f"(()=>{{const p=D.partnerships.find(x=>x.id==='{pid}');const a=pulseOf(p).days;p.updatedAt=nowISO();return pulseOf(p).days===a}})()"))
         await go('#/partnerships/' + pid)
-        ok('pulse cell in partnership facts', await E("!!document.querySelector('.pfx.pulse b')"))
+        ok('no pulse (خاملة) cell in partnership facts', await E("!document.querySelector('.pfx.pulse')"))
         ok('memory button in toolbar', await E("!!document.querySelector('.dbar-acts [data-memopen]')"))
         ok('meetings log in follow section', await E("!!document.querySelector('#follow .mt-sec')"))
         # — تسجيل اجتماع —
@@ -49,8 +49,8 @@ async def main():
         await E("Modal.top()&&Modal.top().close()"); await pg.wait_for_timeout(300)
         # — السجل —
         await go('#/partnerships')
-        ok('pulse dots in register', await E("document.querySelectorAll('.pulse-dot').length") > 3)
-        ok('sort by pulse available', await E("!!document.querySelector('#regSort option[value=pulse]')"))
+        ok('no pulse dots in register', await E("document.querySelectorAll('.pulse-dot').length") == 0)
+        ok('no pulse sort option', await E("!document.querySelector('#regSort option[value=pulse]')"))
         # — الفجوات —
         await go('#/strategy'); await pg.click('[data-sgv="gaps"]'); await pg.wait_for_timeout(900)
         ok('gaps tab renders summary + sections', await E("document.querySelectorAll('.gp-k').length===4 && !!document.querySelector('.gp-regs') && !!document.querySelector('.gp-secs')"))

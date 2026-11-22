@@ -6,12 +6,11 @@ const SORTS = {
   end: { label: 'تاريخ الانتهاء (الأقرب)', fn: (a, b) => (a.endDate || '9999').localeCompare(b.endDate || '9999') },
   start: { label: 'تاريخ البدء (الأحدث)', fn: (a, b) => (b.startDate || '').localeCompare(a.startDate || '') },
   code: { label: 'الرمز', fn: (a, b) => (a.code || '').localeCompare(b.code || '') },
-  pulse: { label: 'النبض (الأقل نشاطًا أولًا)', fn: (a, b) => { const pa = pulseApplies(a), pb = pulseApplies(b); if (pa !== pb) return pa ? -1 : 1; const da = pulseOf(a).days, db = pulseOf(b).days; return (db === null ? 1e9 : db) - (da === null ? 1e9 : da); } },
 };
 function renderRegister(el, r) {
   const q = r.query || {};
   const st = { f: queryToFilters(q), q: q.q || '', missing: q.missing || '', importnote: q.importnote || '', partner: q.partner || '' };
-  App.ui.regSort = App.ui.regSort || 'updated';
+  App.ui.regSort = SORTS[App.ui.regSort] ? App.ui.regSort : 'updated';
   const vkey = 'regView_' + design();
   App.ui[vkey] = App.ui[vkey] || 'cards';
   const VIEWS = [['cards', 'grid', 'بطاقات'], ['table', 'table', 'جدول']];
@@ -141,7 +140,7 @@ function rtRow(p, st) {
   const term = p.startDate || p.endDate ? `<div class="rt-term">${tp !== null ? `<span class="rt-bar" title="انقضى ${Math.round(tp * 100)}% من المدة"><i style="width:${Math.max(3, Math.round(tp * 100))}%"></i></span>` : ''}<div class="small">${fmtDate(p.startDate, 'short')} – ${fmtDate(p.endDate, 'short')}</div>${rem}</div>` : '<span class="faint">—</span>';
   return `<tr data-row="${p.id}" tabindex="0" class="st-${st} ${p.golden ? 'gold' : ''}" style="--c:${ST_VAR(st)}">
     <td class="rt-c-name"><div class="t-name">${plateHTML(pr, 44)}<div class="rt-nm"><b>${esc(name)} ${demoTag(p)}${p.golden ? `<span class="rt-gold" title="شراكة ذهبية">${STAR_SVG}</span>` : ''}</b>
-      <span class="rt-meta"><span class="code">${esc(p.code || '')}</span>${stratMiniHTML(p)}${can('view.internal') ? pulseDotHTML(p) : ''}${sub ? `<span class="rt-sub">${esc(sub)}</span>` : ''}</span>
+      <span class="rt-meta"><span class="code">${esc(p.code || '')}</span>${stratMiniHTML(p)}${sub ? `<span class="rt-sub">${esc(sub)}</span>` : ''}</span>
       ${(p.categories || []).length ? `<span class="rt-cats">${p.categories.slice(0, 3).map((c) => `<em>${esc(c)}</em>`).join('')}${p.categories.length > 3 ? `<em>+${p.categories.length - 3}</em>` : ''}</span>` : ''}</div></div></td>
     <td><div class="rt-cls"><b>${esc(p.classification || '—')}</b>${pSector(p) ? `<span>${esc(pSector(p))}${p.ptype ? ` · ${esc(p.ptype)}` : ''}</span>` : p.ptype ? `<span>${esc(p.ptype)}</span>` : ''}</div></td>
     <td>${statusChip(p)}</td>
@@ -171,7 +170,7 @@ function pcardHTML(p) {
   const owners = p.owners || [];
   return `<article class="pc st-${st} ${strat ? 'strat' : ''} ${p.golden ? 'gold' : ''}" style="--c:${ST_VAR(st)}">
     <div class="pc-media">${p.golden ? `<span class="pc-gold" title="شراكة ذهبية">${STAR_SVG}<b>شراكة ذهبية</b></span>` : ''}${coverHTML(p.id + (pr ? pr.name : ''), p.coverFileId, { W: 640, H: 300, levels: 10, cols: 40, tone: toneFor(pr) })}<span class="pc-shade" aria-hidden="true"></span>
-      <div class="pc-top">${statusChip(p)}${stratMiniHTML(p)}${can('view.internal') ? pulseDotHTML(p) : ''}${p.ptype ? `<span class="pc-type">${strat ? icon('star') : ''}${esc(p.ptype)}</span>` : ''}</div>
+      <div class="pc-top">${statusChip(p)}${stratMiniHTML(p)}${p.ptype ? `<span class="pc-type">${strat ? icon('star') : ''}${esc(p.ptype)}</span>` : ''}</div>
       ${goal ? `<p class="pc-goal">${esc(goal)}</p>` : ''}
     </div>
     <div class="pc-ring" ${tp !== null ? `title="انقضى ${Math.round(pct * 100)}% من مدة الشراكة"` : ''}>

@@ -62,7 +62,7 @@ function partnerMemoryHTML(pr, list, { print = false } = {}) {
   const sec = (ic, t, body) => `<section class="mem-sec"><h4>${icon(ic)} ${t}</h4>${body}</section>`;
   return `<div class="mem ${print ? 'mem-print' : ''}">
     <div class="mem-head">${plateHTML(pr, 56)}<div><small>ذاكرة الجهة · ${fmtDate(isoDate(today()))}</small><h3>${esc(pr ? pr.name : partnerName(list[0]))}</h3>
-      <div class="mem-pts">${list.map((p) => `<span>${esc(p.code || '')} · ${esc(p.classification || 'شراكة')} · ${st(p)} ${pulseDotHTML(p)}</span>`).join('')}</div></div></div>
+      <div class="mem-pts">${list.map((p) => `<span>${esc(p.code || '')} · ${esc(p.classification || 'شراكة')} · ${st(p)}</span>`).join('')}</div></div></div>
     <div class="mem-grid">
       ${sec('msg', 'آخر ما اتفقنا عليه', last ? `<div class="mem-last"><b>${fmtDate(last.m.date)}${last.m.title ? ' — ' + esc(last.m.title) : ''}</b>${last.m.attendees ? `<small>الحضور: ${esc(last.m.attendees)}</small>` : ''}<p>${esc(last.m.agreed || '—').replace(/\n/g, '<br>')}</p></div>` : '<p class="mem-empty">لا اجتماعات مسجّلة بعد. سجّل أول اجتماع ليبدأ بناء ذاكرة العلاقة.</p>')}
       ${sec('check', `الالتزامات المفتوحة${open.length ? ` <em>${open.length}</em>` : ''}`, open.length ? `<ul class="mem-open">${open.map((o) => `<li><label><input type="checkbox" data-memdone="${esc(o.p.id)}|${esc(o.m.id)}|${o.i}" ${print || !can('edit.partnership') ? 'disabled' : ''}><span>${esc(o.t)}</span></label>${o.m.due ? `<small class="${o.m.due < isoDate(today()) ? 'late' : ''}">حتى ${fmtDate(o.m.due)}</small>` : ''}</li>`).join('')}</ul>` : '<p class="mem-empty">لا التزامات مفتوحة.</p>')}

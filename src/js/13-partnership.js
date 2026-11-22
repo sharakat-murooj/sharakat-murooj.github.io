@@ -202,7 +202,6 @@ function pFactsHTML(p) {
       const live = ['active', 'soon'].includes(st), end = p.endDate;
       const sub = live && dl !== null ? `متبقٍ ${plural(dl, 'يوم واحد', 'يومان', 'أيام', 'يومًا')} · تنتهي ${fmtDate(end)}` : live && !end ? 'تاريخ الانتهاء غير مسجّل' : end ? (st === 'ended' ? 'انتهت ' : 'حتى ') + fmtDate(end, 'short') : '';
       return cell('flag', 'الحالة', esc(statusLabel(st)), sub, '#ov', st === 'soon' || (live && !end) ? 'warn' : ''); })()}
-    ${can('view.internal') ? pulseFactHTML(p) : ''}
     ${wf ? cell('layers', 'مسار المذكرة', `${done} من ${WF_STEPS.length}`, wf.cur ? `${wf.cur.n}. ${esc(wf.cur.t)}` : 'اكتمل المسار', '#wf') : ''}
     ${cell('star', 'آخر تقييم', P.ev && P.ev.score !== null ? `${P.ev.score} <span class="pfx-u">من 100</span>` : 'لم تُقيَّم', P.ev && P.ev.score !== null ? evalGrade(P.ev.score) : 'نموذج تقييم الشراكة', '#profile', P.ev && P.ev.score !== null ? evalTone(P.ev.score) : 'mute')}
     ${can('view.internal') ? cell('chart', 'القيمة التقديرية', P.total ? sarShort(P.total) + ' <span class="pfx-u">⃁</span>' : '—', P.ptype || 'تصنيف غير محدد', '#profile') : ''}
