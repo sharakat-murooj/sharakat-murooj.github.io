@@ -10,6 +10,7 @@
 const LIVE_CH = [
   { k: 'brief', t: 'الملخص التنفيذي', s: 18 },
   { k: 'strategy', t: 'المواءمة مع الاستراتيجية', s: 18 },
+  { k: 'pipe', t: 'مسار المعاملات', s: 16 },
   { k: 'map', t: 'الانتشار الجغرافي', s: 16 },
   { k: 'spot', t: 'شراكات في الواجهة', s: 24 },
   { k: 'sectors', t: 'تنوع الشركاء', s: 16 },
@@ -34,7 +35,46 @@ function liveData() {
   const expiring = L_.filter((p) => pStatus(p) === 'soon').map((p) => ({ p, d: daysLeft(p) })).sort((a, b) => a.d - b.d);
   const stories = publicStories().filter((a) => !a.partnershipId || L_.some((p) => p.id === a.partnershipId)).sort((a, b) => (a.date < b.date ? 1 : -1));
   const outputs = signed.reduce((t, p) => t + richItems(p.outputs).length, 0);
-  return { L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs };
+  const years = []; for (let k = 5; k >= 0; k--) years.push({ y: y - k, n: byYear(y - k) });
+  const before = signed.filter((p) => +String(signedOn(p)).slice(0, 4) < y - 5).length;
+  let run = before; const cum = years.map((x) => (run += x.n));
+  const signedAll = L_.filter((p) => p.stage === 'signed').length;
+  /* أين تقف المعاملات: المقترحات قيد الدراسة + الشراكات حسب مرحلة المسار الحالية */
+  const phase = Object.fromEntries(WF_PHASES.map((ph) => [ph.id, []]));
+  L_.forEach((p) => { try { const cur = wfStateOf('partnership', p).cur; if (cur && phase[cur.ph]) phase[cur.ph].push(p); } catch (_) { /* */ } });
+  const propsIn = visibleProposals().filter((x) => ['submitted', 'review', 'info', 'accepted'].includes(x.status) && (showDemo() || !x.demo));
+  return { L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
+}
+/* — رسوم الشاشة (SVG خفيفة تتحرك عند ظهور الفصل) — */
+const LX_SEC = { 'حكومي': '#3FA27F', 'شبه حكومي': '#7CC7AA', 'خاص': '#D9B25F', 'غير ربحي': '#6FA8D6', 'تعليمي': '#B792D6' };
+const lxSecC = (s, i) => LX_SEC[s] || ['#E08E6D', '#9FB4AA', '#C9A36B', '#8FB6C9'][i % 4];
+function lxDonut(segs, { size = 300, w = 30, gap = 0.8, inner = '' } = {}) {
+  const tot = segs.reduce((t, x) => t + x.v, 0) || 1, r = (size - w) / 2, c = size / 2; let off = 0;
+  const arcs = segs.filter((x) => x.v).map((x, i) => { const len = Math.max(0, x.v / tot * 100 - (segs.length > 1 ? gap : 0)); const el = `<circle cx="${c}" cy="${c}" r="${r}" pathLength="100" stroke="${x.c}" stroke-width="${w}" stroke-dasharray="${len.toFixed(2)} 100" stroke-dashoffset="${(-off).toFixed(2)}" style="--i:${i}" class="lx-dseg"/>`; off += x.v / tot * 100; return el; }).join('');
+  return `<svg class="lx-donut" viewBox="0 0 ${size} ${size}" aria-hidden="true"><g transform="rotate(-90 ${c} ${c})"><circle cx="${c}" cy="${c}" r="${r}" stroke="rgba(255,255,255,.07)" stroke-width="${w}" fill="none"/>${arcs}</g>${inner}</svg>`;
+}
+const lxRing = (pct, size = 120, w = 12, col = '#D9B25F') => lxDonut([{ v: pct, c: col }, { v: 100 - pct, c: 'transparent' }], { size, w, gap: 0 });
+function lxBars(rows, { W = 260, H = 110 } = {}) {
+  const max = Math.max(1, ...rows.map((r) => r.n)), bw = W / rows.length;
+  return `<svg class="lx-bars" viewBox="0 0 ${W} ${H + 22}" aria-hidden="true">${rows.map((r, i) => { const h = Math.max(3, r.n / max * (H - 18)), last = i === rows.length - 1;
+    return `<g style="--i:${i}"><rect x="${(i * bw + bw * .2).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw * .6).toFixed(1)}" height="${h.toFixed(1)}" rx="4" class="${last ? 'on' : ''}"/><text x="${(i * bw + bw / 2).toFixed(1)}" y="${(H - h - 6).toFixed(1)}" class="v">${r.n}</text><text x="${(i * bw + bw / 2).toFixed(1)}" y="${H + 18}" class="y">${String(r.y).slice(2)}</text></g>`; }).join('')}</svg>`;
+}
+function lxArea(years, cum) {
+  const W = 2000, H = 260, pad = 44, max = Math.max(1, ...cum), n = cum.length;
+  const pt = (i) => [pad + i * (W - pad * 2) / Math.max(1, n - 1), H - 34 - cum[i] / max * (H - 70)];
+  const line = cum.map((_, i) => { const [x, y] = pt(i); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join('');
+  const area = `${line}L${pt(n - 1)[0].toFixed(1)} ${H - 34}L${pad} ${H - 34}Z`;
+  return `<svg class="lx-area" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="lxAr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B25F" stop-opacity=".38"/><stop offset="1" stop-color="#D9B25F" stop-opacity="0"/></linearGradient></defs>
+    ${[0.33, 0.66].map((k) => `<line x1="${pad}" x2="${W - pad}" y1="${(H - 34 - k * (H - 70)).toFixed(1)}" y2="${(H - 34 - k * (H - 70)).toFixed(1)}" class="gr"/>`).join('')}
+    <path d="${area}" fill="url(#lxAr)" class="ar"/><path d="${line}" class="ln" pathLength="100"/>
+    ${cum.map((v, i) => { const [x, y] = pt(i); return `<g style="--i:${i}" class="pt"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i === n - 1 ? 9 : 6}"/><text x="${x.toFixed(1)}" y="${(y - 18).toFixed(1)}">${v}</text><text x="${x.toFixed(1)}" y="${H - 8}" class="y">${years[i].y}</text></g>`; }).join('')}</svg>`;
+}
+function lxRadial(goals) {
+  const size = 520, c = size / 2, max = Math.max(1, ...goals.map((g) => g.n)), w = 26, gap = 12;
+  return `<svg class="lx-radial" viewBox="0 0 ${size} ${size}" aria-hidden="true">${goals.map((g, i) => { const r = c - 20 - i * (w + gap); if (r < 40) return ''; const pct = g.n / max * 75;
+    return `<g style="--i:${i}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="${w}" pathLength="100" stroke-dasharray="75 100" transform="rotate(-90 ${c} ${c})" stroke-linecap="round"/>
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${g.c}" stroke-width="${w}" pathLength="100" stroke-dasharray="${Math.max(.5, pct).toFixed(2)} 100" transform="rotate(-90 ${c} ${c})" stroke-linecap="round" class="lx-dseg"/>
+      <text x="${c - 12}" y="${c - r + 9}" class="k">${esc(g.k)}</text></g>`; }).join('')}</svg>`;
 }
 function liveMapSVG(R) {
   const max = Math.max(1, ...KSA_REGIONS.map(([n]) => R[n] || 0));
@@ -45,7 +85,9 @@ function liveMapSVG(R) {
   const path = TALE_KSA.map(([a, b], i) => { const [x, y] = xy(a, b); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join('') + 'Z';
   const b = KSA_REGIONS.map(([n, lon, lat], i) => { const c = R[n] || 0, [x, y] = xy(lon, lat), r = c ? 12 + Math.sqrt(c / max) * 30 : 4;
     return `<g class="lx-reg ${c ? '' : 'zero'}" style="--i:${i}">${c ? `<circle class="lx-halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r + 10).toFixed(1)}"/>` : ''}<circle class="lx-b" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>${c ? `<text x="${x.toFixed(1)}" y="${(y + 8).toFixed(1)}" class="lx-n">${c}</text>` : ''}</g>`; }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" class="lx-map" aria-hidden="true"><defs><linearGradient id="lxLand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174B3F"/><stop offset="1" stop-color="#0E3830"/></linearGradient></defs><path d="${path}" class="lx-land"/>${b}</svg>`;
+  const hq = KSA_REGIONS.find(([n]) => n === 'الرياض'), [hx, hy] = hq ? xy(hq[1], hq[2]) : [W / 2, H / 2];
+  const arcs = KSA_REGIONS.filter(([n]) => n !== 'الرياض' && R[n]).map(([, lon, lat], i) => { const [x, y] = xy(lon, lat); return `<path class="lx-arc" style="--i:${i}" pathLength="100" d="M${hx.toFixed(1)} ${hy.toFixed(1)} Q${((hx + x) / 2).toFixed(1)} ${(Math.min(hy, y) - 90).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}"/>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="lx-map" aria-hidden="true"><defs><linearGradient id="lxLand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174B3F"/><stop offset="1" stop-color="#0E3830"/></linearGradient></defs><path d="${path}" class="lx-land"/>${arcs}${b}${hq ? `<circle class="lx-hq" cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="7"/>` : ''}</svg>`;
 }
 const lxHead = (n, total, t, sub) => `<div class="lx-chh"><span class="lx-chn">${String(n).padStart(2, '0')}<i>/${String(total).padStart(2, '0')}</i></span><div><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
 function liveChapterHTML(k, X, n, total) {
@@ -55,17 +97,27 @@ function liveChapterHTML(k, X, n, total) {
     const goalsOn = X.S ? X.S.goalsOn : 0, goalsN = X.S ? X.S.goals.length : 0;
     return `${lxHead(n, total, 'الملخص التنفيذي', `محفظة شراكات ${org}`)}
       <p class="lx-lead">تعمل ${org} مع <b>${lvN(X.c.partners)}</b> جهة شريكة من القطاعات الحكومية والخاصة وغير الربحية والتعليمية، منها <b>${lvN(X.c.active)}</b> شراكة سارية تُتابَع مخرجاتها.</p>
-      <div class="lx-kpis">
-        <div><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div>
-        <div><b class="lx-cu" data-v="${X.c.active}">0</b><span>شراكة سارية</span></div>
-        <div><b class="lx-cu" data-v="${X.thisYear}">0</b><span>شراكة وُقّعت في ${X.y}</span>${X.lastYear ? `<small class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d)} مقارنة بـ${X.y - 1}</small>` : ''}</div>
-        ${goalsN ? `<div><b>${goalsOn}<i>/${goalsN}</i></b><span>أهداف استراتيجية تخدمها الشراكات</span></div>` : ''}
-      </div>`;
+      <div class="lx-kpis g">
+        <div><div class="lx-kv"><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div>${lxDonut(Object.keys(X.sectors).map((sx, i) => ({ v: X.sectors[sx].size, c: lxSecC(sx, i) })), { size: 120, w: 14, gap: 2 })}</div>
+        <div><div class="lx-kv"><b class="lx-cu" data-v="${X.c.active}">0</b><span>شراكة سارية</span><small>من ${lvN(X.signedAll)} موقّعة</small></div>${lxRing(X.signedAll ? Math.round(X.c.active / X.signedAll * 100) : 0, 120, 14, '#3FA27F')}</div>
+        <div><div class="lx-kv"><b class="lx-cu" data-v="${X.thisYear}">0</b><span>وُقّعت في ${X.y}</span>${X.lastYear ? `<small class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d)} عن ${X.y - 1}</small>` : ''}</div>${lxBars(X.years, { W: 170, H: 96 })}</div>
+        ${goalsN ? `<div><div class="lx-kv"><b>${goalsOn}<i>/${goalsN}</i></b><span>أهداف استراتيجية</span><small>تخدمها الشراكات</small></div><div class="lx-pips">${X.S.goals.map((g) => `<i style="--c:${(typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E'}" class="${g.ps.length ? 'on' : ''}">${esc(g.k)}</i>`).join('')}</div></div>` : ''}
+      </div>
+      <div class="lx-grow"><h4>نمو الشراكات الموقّعة <small>العدد التراكمي حتى نهاية كل عام</small></h4>${lxArea(X.years, X.cum)}</div>`;
   }
   if (k === 'strategy' && X.S) {
     const S = X.S, pct = S.total ? Math.round(S.linked.length / S.total * 100) : 0, max = Math.max(1, ...S.goals.map((g) => g.ps.length));
     return `${lxHead(n, total, 'المواءمة مع الاستراتيجية', `${pct}% من الشراكات مرتبطة بهدف أو مبادرة استراتيجية`)}
-      <div class="lx-goals">${S.goals.map((g, i) => { const on = g.inits.filter((x) => x.ps.length).length; return `<div class="lx-g" style="--c:${(typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E'};--i:${i}"><span class="lx-gk">${esc(g.k)}</span><div class="lx-gt"><b>${esc(String(g.t).replace(/^[A-Z]+\d?\s*[:：]\s*/, ''))}</b><i><em style="width:${Math.round(g.ps.length / max * 100)}%"></em></i></div><div class="lx-gv"><b>${g.ps.length}</b><small>شراكة · ${on}/${g.inits.length} مبادرات</small></div></div>`; }).join('')}</div>`;
+      <div class="lx-stw"><div class="lx-radw">${lxRadial(S.goals.map((g) => ({ k: g.k, n: g.ps.length, c: (typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E' })))}<div class="lx-radc"><b>${pct}%</b><span>مرتبطة استراتيجيًا</span></div></div>
+      <div class="lx-goals">${S.goals.map((g, i) => { const on = g.inits.filter((x) => x.ps.length).length; return `<div class="lx-g" style="--c:${(typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E'};--i:${i}"><span class="lx-gk">${esc(g.k)}</span><div class="lx-gt"><b>${esc(String(g.t).replace(/^[A-Z]+\d?\s*[:：]\s*/, ''))}</b><i><em style="width:${Math.round(g.ps.length / max * 100)}%"></em></i></div><div class="lx-gv"><b>${g.ps.length}</b><small>شراكة · ${on}/${g.inits.length} مبادرات</small></div></div>`; }).join('')}</div></div>`;
+  }
+  if (k === 'pipe') {
+    const st = [{ t: 'مقترحات قيد الدراسة', ps: [], props: X.propsIn }, ...WF_PHASES.map((ph) => ({ t: ph.t, ps: X.phase[ph.id] || [] }))];
+    const max = Math.max(1, ...st.map((x) => x.ps.length + (x.props ? x.props.length : 0))), tot = st.reduce((t, x) => t + x.ps.length + (x.props ? x.props.length : 0), 0);
+    return `${lxHead(n, total, 'مسار المعاملات', `${plural(tot, 'معاملة واحدة', 'معاملتان', 'معاملات', 'معاملة')} في مراحل الإجراء المعتمد الآن`)}
+      <div class="lx-pipe">${st.map((x, i) => { const v = x.ps.length + (x.props ? x.props.length : 0), r = 34 + Math.sqrt(v / max) * 52;
+        const lg = x.ps.map((p) => partnerById(p.partnerId)).filter(Boolean).slice(0, 3);
+        return `<div class="lx-pn ${v ? '' : 'z'}" style="--i:${i}"><div class="lx-pnc"><span style="width:${(r * 2).toFixed(0)}px;height:${(r * 2).toFixed(0)}px"><b class="lx-cu" data-v="${v}">0</b></span></div><h5>${esc(x.t)}</h5><div class="lx-pnl">${lg.map((pr) => plateHTML(pr, 48)).join('')}${x.props && x.props.length ? `<small>${x.props.slice(0, 2).map((y) => esc(y.partnerName || '')).join('، ')}</small>` : ''}</div></div>`; }).join('<i class="lx-pa"></i>')}</div>`;
   }
   if (k === 'map') {
     const top = KSA_REGIONS.map(([r]) => [r, X.regions[r] || 0]).filter((x) => x[1]).sort((a, b) => b[1] - a[1]);
@@ -77,9 +129,10 @@ function liveChapterHTML(k, X, n, total) {
   if (k === 'spot') {
     const s = X.signed.slice(0, 3);
     return `${lxHead(n, total, 'شراكات في الواجهة', 'أحدث الشراكات الموقّعة')}
-      <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 3);
+      <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 2);
         return `<article class="lx-sp ${i === 0 ? 'on' : ''}" data-sp="${i}"><div class="lx-spm">${ph ? `<img data-file="${esc(ph.fileId)}" alt="">` : coverHTML(p.id, null, { W: 900, H: 600 })}</div>
           <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(signedOn(p))}م</small><h3>${esc(partnerName(p))}</h3>
+          ${p.startDate && p.endDate ? (() => { const t0 = new Date(p.startDate), t1 = new Date(p.endDate), k = Math.min(100, Math.max(0, (today() - t0) / Math.max(1, t1 - t0) * 100)); const left = daysLeft(p); return `<div class="lx-dur"><div class="lx-durb"><i style="width:${k.toFixed(1)}%"></i><u style="inset-inline-start:${k.toFixed(1)}%"></u></div><div class="lx-durl"><span>${fmtDate(p.startDate)}</span><b>${left > 0 ? `باقٍ ${plural(left, 'يوم', 'يومان', 'أيام', 'يومًا')}` : 'انتهت'}</b><span>${fmtDate(p.endDate)}</span></div></div>`; })() : ''}
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
         <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div></div>`;
   }
@@ -87,8 +140,9 @@ function liveChapterHTML(k, X, n, total) {
     const order = ['حكومي', 'شبه حكومي', 'خاص', 'غير ربحي', 'تعليمي'];
     const keys = [...order.filter((s) => X.sectors[s]), ...Object.keys(X.sectors).filter((s) => !order.includes(s))];
     return `${lxHead(n, total, 'تنوع الشركاء', 'الجهات الشريكة حسب القطاع')}
-      <div class="lx-secs">${keys.map((s, i) => { const ids = [...X.sectors[s]], prs = ids.map(partnerById).filter(Boolean); const lg = prs.filter((x) => x.logoFileId).slice(0, 6);
-        return `<div class="lx-sec" style="--i:${i}"><b class="lx-cu" data-v="${ids.length}">0</b><span>${esc(s)}</span><div class="lx-secl">${lg.map((pr) => plateHTML(pr, 64)).join('')}</div></div>`; }).join('')}</div>`;
+      <div class="lx-secw"><div class="lx-secd">${lxDonut(keys.map((sx, i) => ({ v: X.sectors[sx].size, c: lxSecC(sx, i) })), { size: 460, w: 54, gap: 1.2 })}<div class="lx-radc"><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div></div>
+      <div class="lx-secs">${keys.map((sx, i) => { const ids = [...X.sectors[sx]], prs = ids.map(partnerById).filter(Boolean); const lg = prs.filter((x) => x.logoFileId).slice(0, 5); const tot = keys.reduce((t, q) => t + X.sectors[q].size, 0) || 1;
+        return `<div class="lx-sec" style="--i:${i};--c:${lxSecC(sx, i)}"><div class="lx-sech"><b class="lx-cu" data-v="${ids.length}">0</b><span>${esc(sx)}</span><em>${Math.round(ids.length / tot * 100)}%</em></div><div class="lx-secl">${lg.map((pr) => plateHTML(pr, 56)).join('')}</div></div>`; }).join('')}</div></div>`;
   }
   if (k === 'attn') {
     const row = (p, tag, cls = '') => `<li class="${cls}">${plateHTML(partnerById(p.partnerId), 56)}<div><b>${esc(partnerName(p))}</b><small>${esc(p.classification || 'شراكة')}</small></div><em>${tag}</em></li>`;
@@ -97,7 +151,7 @@ function liveChapterHTML(k, X, n, total) {
       ${has ? `<div class="lx-attn">
         <section><h4><span>${X.awaitMin.length}</span>بانتظار موافقة المعالي</h4>${X.awaitMin.length ? `<ul>${X.awaitMin.slice(0, 4).map((p) => row(p, 'المعاملة لدى مكتب المعالي', 'gold')).join('')}</ul>` : '<p>لا معاملات بانتظار الموافقة.</p>'}
           ${X.preparing.length ? `<p class="lx-prep">و${plural(X.preparing.length, 'معاملة واحدة', 'معاملتان', 'معاملات', 'معاملة')} في مرحلة إعداد خطاب طلب الموافقة.</p>` : ''}</section>
-        <section><h4><span>${X.expiring.length}</span>شراكات تنتهي قريبًا</h4>${X.expiring.length ? `${X.expiring.length > 4 ? '' : ''}<ul>${X.expiring.slice(0, 4).map(({ p, d }) => row(p, `خلال ${plural(d, 'يوم واحد', 'يومين', 'أيام', 'يومًا')}`, d <= 30 ? 'red' : '')).join('')}</ul>` : '<p>لا شراكات تنتهي خلال الفترة القريبة.</p>'}</section>
+        <section><h4><span>${X.expiring.length}</span>شراكات تنتهي قريبًا</h4>${X.expiring.length ? `${X.expiring.length > 4 ? '' : ''}<ul>${X.expiring.slice(0, 4).map(({ p, d }) => row(p, `<span class="lx-cd">${lxRing(Math.max(4, Math.round(d / (D.settings.expiryDays || 90) * 100)), 64, 7, d <= 30 ? '#E5806B' : '#D9B25F')}<b>${d}</b></span>يومًا`, d <= 30 ? 'red' : '')).join('')}</ul>` : '<p>لا شراكات تنتهي خلال الفترة القريبة.</p>'}</section>
       </div>` : '<div class="lx-calm"><b>لا توجد معاملات أو قرارات معلّقة</b><span>جميع الشراكات تسير وفق المسار المعتمد.</span></div>'}`;
   }
   if (k === 'impact') {
@@ -124,7 +178,7 @@ function renderLive(el) {
   document.body.appendChild(box); document.documentElement.classList.add('live-on');
   let cfg = liveCfg(), chs = [], i = 0, T = null, spT = null, idle = null;
   const sec = () => Math.max(8, +(cfg.sec || 0) || 0);
-  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : true));
+  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : c.k === 'pipe' ? (X.propsIn.length + Object.values(X.phase).reduce((t, a) => t + a.length, 0)) > 0 : true));
   box.innerHTML = `<div class="lx-bg" aria-hidden="true"></div>
     <header class="lx-top">${logo ? `<img src="${logo}" alt="">` : ''}<div class="lx-tt"><b>${esc(D.settings.org.name)}</b><span>منظومة الشراكات · ${esc(D.settings.org.dept || 'إدارة الشراكات')}</span></div>
       <div class="lx-clock"><b id="lxTime"></b><span id="lxHijri"></span><small id="lxGreg"></small></div></header>

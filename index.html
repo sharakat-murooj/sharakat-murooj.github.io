@@ -9147,6 +9147,110 @@ html.live-on,html.live-on body{overflow:hidden}
 .tz-snd svg path:first-child{fill:currentColor;fill-opacity:.15}
 .tz-snd span{display:none}.tz-snd{padding-inline:12px!important}
 html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root){animation-duration:.32s;animation-timing-function:ease}
+
+/* ===== العرض المباشر — الرسوم ===== */
+.lx-dseg{fill:none;animation:lxDash 1.8s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*.12s + .25s)}
+@keyframes lxDash{from{stroke-dasharray:0 100}}
+.lx-donut{width:100%;height:auto;display:block}
+/* الملخص */
+.lx-kpis.g{margin:0 0 3vh;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.lx-kpis.g>div{flex-direction:row;align-items:center;justify-content:space-between;gap:1.4vw;padding:2.6vh 1.6vw}
+.lx-kpis.g .lx-kv{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lx-kpis.g b{font-size:clamp(48px,5vw,100px)}
+.lx-kpis.g small{color:#9DB8AC}
+.lx-kpis.g>div>svg{flex:none;width:clamp(84px,7vw,130px)}
+.lx-kpis.g>div>.lx-bars{width:clamp(120px,10vw,190px)}
+.lx-bars rect{fill:rgba(217,192,138,.35);transform-box:fill-box;transform-origin:bottom;animation:lxGrow 1.2s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i)*.08s + .3s)}
+.lx-bars rect.on{fill:#E3C47D}
+.lx-bars text{font-size:15px;text-anchor:middle;fill:#9DB8AC;font-family:var(--font)}.lx-bars text.v{fill:#fff;font-weight:700}
+@keyframes lxGrow{from{transform:scaleY(0)}}
+.lx-pips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:none}
+.lx-pips i{font-style:normal;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);border:1.5px solid rgba(255,255,255,.15);border-radius:8px;padding:6px 6px;text-align:center}
+.lx-pips i.on{background:var(--c);border-color:var(--c);color:#fff}
+.lx-grow{flex:1;min-height:0;display:flex;flex-direction:column;padding:2vh 1.6vw 1vh;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.01));border:1px solid rgba(217,192,138,.14)}
+.lx-grow h4{margin:0 0 1vh;font-size:clamp(16px,1.3vw,25px);color:#fff;font-weight:600}.lx-grow h4 small{font-size:.7em;color:#9DB8AC;font-weight:400;margin-inline-start:10px}
+.lx-area{flex:1;min-height:0;width:100%;height:100%}
+.lx-area .gr{stroke:rgba(255,255,255,.07);stroke-dasharray:4 6}
+.lx-area .ln{fill:none;stroke:#E3C47D;stroke-width:5;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:100;animation:lxDraw 2.2s cubic-bezier(.4,0,.2,1) both .3s}
+.lx-area .ar{animation:lxFade 1.6s both 1s}
+.lx-area .pt circle{fill:#0E2A22;stroke:#E3C47D;stroke-width:4}
+.lx-area .pt:last-of-type circle{fill:#E3C47D}
+.lx-area .pt{animation:lxFade .6s both;animation-delay:calc(var(--i)*.3s + .6s)}
+.lx-area text{fill:#fff;font-size:26px;font-weight:700;text-anchor:middle;font-family:var(--font)}.lx-area text.y{fill:#9DB8AC;font-size:18px;font-weight:400}
+@keyframes lxDraw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes lxFade{from{opacity:0}}
+/* الاستراتيجية */
+.lx-stw{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:3.5vw;align-items:center}
+.lx-radw,.lx-secd{position:relative;max-height:58vh;aspect-ratio:1;margin:auto;width:100%}
+.lx-radial{width:100%;height:100%}
+.lx-radial .k{fill:#fff;font-size:15px;font-weight:700;text-anchor:end;font-family:var(--font)}
+.lx-radc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.lx-radc b{font-size:clamp(40px,4vw,80px);font-weight:800;color:#fff;line-height:1}.lx-radc span{font-size:clamp(14px,1.1vw,21px);color:#C9D9D0;margin-top:6px}
+.lx-radw .lx-radc{inset:0 0 0 0;padding-top:4%}
+/* القطاعات */
+.lx-secw{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:3.5vw;align-items:center}
+.lx-secw .lx-secs{grid-template-columns:repeat(2,minmax(0,1fr));align-content:center;gap:1.6vw}
+.lx-secw .lx-sec{border-color:color-mix(in srgb,var(--c) 35%,transparent);border-inline-start:5px solid var(--c);padding:2.2vh 1.4vw;gap:1.6vh}
+.lx-sech{display:flex;align-items:baseline;gap:1vw}
+.lx-sech b{font-size:clamp(40px,3.6vw,72px);line-height:1;color:#fff}
+.lx-sech span{font-size:clamp(17px,1.4vw,27px);color:var(--c);font-weight:700}
+.lx-sech em{margin-inline-start:auto;font-style:normal;font-size:clamp(15px,1.15vw,22px);color:#9DB8AC}
+.lx-secw .lx-secl{grid-template-columns:repeat(5,1fr);gap:8px;margin:0}
+/* الخريطة */
+.lx-arc{fill:none;stroke:#E3C47D;stroke-width:2;stroke-opacity:.55;stroke-dasharray:4 100;animation:lxArc 2.4s cubic-bezier(.4,0,.2,1) both;animation-delay:calc(var(--i)*.15s + .4s)}
+@keyframes lxArc{from{stroke-dasharray:0 100}to{stroke-dasharray:100 0}}
+.lx-hq{fill:#fff;stroke:#E3C47D;stroke-width:4;animation:lxHalo 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+/* الواجهة: مدة الشراكة */
+.lx-dur{margin-top:.6vh;max-width:36vw}
+.lx-durb{position:relative;height:8px;border-radius:99px;background:rgba(255,255,255,.1)}
+.lx-durb i{position:absolute;inset-block:0;inset-inline-start:0;border-radius:99px;background:linear-gradient(270deg,#E3C47D,#3FA27F);animation:lxBar 1.6s both .5s}
+.lx-durb u{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #E3C47D;transform:translate(50%,-50%);box-shadow:0 0 0 6px rgba(227,196,125,.18)}
+.lx-durl{display:flex;justify-content:space-between;margin-top:8px;font-size:clamp(13px,1vw,19px);color:#9DB8AC}.lx-durl b{color:#fff;font-weight:600}
+/* يتطلب اهتمامكم: عدّاد */
+.lx-attn li em{display:inline-flex;align-items:center;gap:8px}
+.lx-cd{position:relative;width:56px;height:56px;display:inline-grid;place-items:center}
+.lx-cd svg{position:absolute;inset:0}
+.lx-cd b{position:relative;font-size:18px!important;color:#fff}
+/* مسار المعاملات */
+.lx-pipe{flex:1;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:.6vw}
+.lx-pn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1.6vh;text-align:center;animation:lxIn .8s both;animation-delay:calc(var(--i)*.14s)}
+.lx-pnc{height:190px;display:flex;align-items:center;justify-content:center}
+.lx-pnc span{border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,rgba(227,196,125,.5),rgba(176,138,62,.18) 70%);border:2px solid rgba(227,196,125,.7);box-shadow:0 0 50px -10px rgba(227,196,125,.55);animation:lxPop .9s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*.14s + .2s)}
+.lx-pnc b{font-size:clamp(30px,2.8vw,54px);font-weight:800;color:#fff}
+.lx-pn.z .lx-pnc span{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.14);box-shadow:none}.lx-pn.z .lx-pnc b{color:rgba(255,255,255,.4)}
+.lx-pn:first-child .lx-pnc span{background:radial-gradient(circle at 35% 30%,rgba(111,168,214,.5),rgba(111,168,214,.15) 70%);border-color:rgba(111,168,214,.75);box-shadow:0 0 50px -10px rgba(111,168,214,.5)}
+.lx-pn h5{margin:0;font-size:clamp(15px,1.2vw,23px);font-weight:600;color:#EEF3EF;line-height:1.4}
+.lx-pnl{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:52px}
+.lx-pnl .plate{border-radius:10px}
+.lx-pnl small{flex-basis:100%;font-size:clamp(12px,.95vw,17px);color:#9DB8AC}
+.lx-pa{flex:none;width:2.4vw;height:2px;margin-top:-12vh;background:linear-gradient(270deg,rgba(227,196,125,.7),rgba(227,196,125,.1));position:relative}
+.lx-pa::after{content:"";position:absolute;left:-2px;top:-5px;border:6px solid transparent;border-right-color:rgba(227,196,125,.7)}
+@keyframes lxPop{from{transform:scale(.3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.lx-dseg,.lx-bars rect,.lx-area .ln,.lx-arc,.lx-pnc span{animation:none!important}}
+/* ضبط المقاسات لتسع الشاشة */
+.c-brief .lx-chh{margin-bottom:2vh}
+.c-brief .lx-lead{font-size:clamp(18px,1.55vw,30px);margin:0 0 2.4vh;line-height:1.7}
+.lx-kpis.g{margin:0 0 2.2vh}
+.lx-kpis.g>div{padding:1.8vh 1.4vw}
+.lx-kpis.g b{font-size:clamp(42px,4vw,84px)}
+.lx-kpis.g span{font-size:clamp(15px,1.2vw,23px)}
+.lx-kpis.g>div>svg{width:clamp(72px,5.6vw,108px)}
+.lx-kpis.g>div>.lx-bars{width:clamp(110px,8.6vw,170px)}
+.lx-grow{min-height:24vh}
+.lx-radw,.lx-secd{width:min(100%,52vh);max-height:none}
+.lx-goals{gap:1.8vh}
+.lx-stw .lx-gt b{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:clamp(15px,1.2vw,23px);margin-bottom:.8vh}
+.lx-stw .lx-gv b{font-size:clamp(28px,2.4vw,46px)}
+.lx-stw .lx-gk{min-width:4vw;padding:.7vh .6vw;font-size:clamp(14px,1.1vw,21px)}
+.lx-pnc span{line-height:1}.lx-pnc b{line-height:1;display:block}
+.lx-grow{min-height:0!important;flex:1 1 0}
+.c-brief .lx-lead{font-size:clamp(16px,1.3vw,26px);margin:0 0 1.8vh}
+.c-brief .lx-chh h2{font-size:clamp(28px,2.7vw,52px)}
+.lx-kpis.g b{font-size:clamp(38px,3.4vw,72px)}
+.lx-kpis.g>div{padding:1.4vh 1.3vw}
+.lx-radw,.lx-secd{width:min(100%,46vh)}
+.lx-spb li{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lx-area text{font-size:22px}.lx-area text.y{font-size:17px}
 </style>
 </head>
 <body>
@@ -32750,6 +32854,7 @@ function stratGapsHTML(list) {
 const LIVE_CH = [
   { k: 'brief', t: 'الملخص التنفيذي', s: 18 },
   { k: 'strategy', t: 'المواءمة مع الاستراتيجية', s: 18 },
+  { k: 'pipe', t: 'مسار المعاملات', s: 16 },
   { k: 'map', t: 'الانتشار الجغرافي', s: 16 },
   { k: 'spot', t: 'شراكات في الواجهة', s: 24 },
   { k: 'sectors', t: 'تنوع الشركاء', s: 16 },
@@ -32774,7 +32879,46 @@ function liveData() {
   const expiring = L_.filter((p) => pStatus(p) === 'soon').map((p) => ({ p, d: daysLeft(p) })).sort((a, b) => a.d - b.d);
   const stories = publicStories().filter((a) => !a.partnershipId || L_.some((p) => p.id === a.partnershipId)).sort((a, b) => (a.date < b.date ? 1 : -1));
   const outputs = signed.reduce((t, p) => t + richItems(p.outputs).length, 0);
-  return { L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs };
+  const years = []; for (let k = 5; k >= 0; k--) years.push({ y: y - k, n: byYear(y - k) });
+  const before = signed.filter((p) => +String(signedOn(p)).slice(0, 4) < y - 5).length;
+  let run = before; const cum = years.map((x) => (run += x.n));
+  const signedAll = L_.filter((p) => p.stage === 'signed').length;
+  /* أين تقف المعاملات: المقترحات قيد الدراسة + الشراكات حسب مرحلة المسار الحالية */
+  const phase = Object.fromEntries(WF_PHASES.map((ph) => [ph.id, []]));
+  L_.forEach((p) => { try { const cur = wfStateOf('partnership', p).cur; if (cur && phase[cur.ph]) phase[cur.ph].push(p); } catch (_) { /* */ } });
+  const propsIn = visibleProposals().filter((x) => ['submitted', 'review', 'info', 'accepted'].includes(x.status) && (showDemo() || !x.demo));
+  return { L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
+}
+/* — رسوم الشاشة (SVG خفيفة تتحرك عند ظهور الفصل) — */
+const LX_SEC = { 'حكومي': '#3FA27F', 'شبه حكومي': '#7CC7AA', 'خاص': '#D9B25F', 'غير ربحي': '#6FA8D6', 'تعليمي': '#B792D6' };
+const lxSecC = (s, i) => LX_SEC[s] || ['#E08E6D', '#9FB4AA', '#C9A36B', '#8FB6C9'][i % 4];
+function lxDonut(segs, { size = 300, w = 30, gap = 0.8, inner = '' } = {}) {
+  const tot = segs.reduce((t, x) => t + x.v, 0) || 1, r = (size - w) / 2, c = size / 2; let off = 0;
+  const arcs = segs.filter((x) => x.v).map((x, i) => { const len = Math.max(0, x.v / tot * 100 - (segs.length > 1 ? gap : 0)); const el = `<circle cx="${c}" cy="${c}" r="${r}" pathLength="100" stroke="${x.c}" stroke-width="${w}" stroke-dasharray="${len.toFixed(2)} 100" stroke-dashoffset="${(-off).toFixed(2)}" style="--i:${i}" class="lx-dseg"/>`; off += x.v / tot * 100; return el; }).join('');
+  return `<svg class="lx-donut" viewBox="0 0 ${size} ${size}" aria-hidden="true"><g transform="rotate(-90 ${c} ${c})"><circle cx="${c}" cy="${c}" r="${r}" stroke="rgba(255,255,255,.07)" stroke-width="${w}" fill="none"/>${arcs}</g>${inner}</svg>`;
+}
+const lxRing = (pct, size = 120, w = 12, col = '#D9B25F') => lxDonut([{ v: pct, c: col }, { v: 100 - pct, c: 'transparent' }], { size, w, gap: 0 });
+function lxBars(rows, { W = 260, H = 110 } = {}) {
+  const max = Math.max(1, ...rows.map((r) => r.n)), bw = W / rows.length;
+  return `<svg class="lx-bars" viewBox="0 0 ${W} ${H + 22}" aria-hidden="true">${rows.map((r, i) => { const h = Math.max(3, r.n / max * (H - 18)), last = i === rows.length - 1;
+    return `<g style="--i:${i}"><rect x="${(i * bw + bw * .2).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw * .6).toFixed(1)}" height="${h.toFixed(1)}" rx="4" class="${last ? 'on' : ''}"/><text x="${(i * bw + bw / 2).toFixed(1)}" y="${(H - h - 6).toFixed(1)}" class="v">${r.n}</text><text x="${(i * bw + bw / 2).toFixed(1)}" y="${H + 18}" class="y">${String(r.y).slice(2)}</text></g>`; }).join('')}</svg>`;
+}
+function lxArea(years, cum) {
+  const W = 2000, H = 260, pad = 44, max = Math.max(1, ...cum), n = cum.length;
+  const pt = (i) => [pad + i * (W - pad * 2) / Math.max(1, n - 1), H - 34 - cum[i] / max * (H - 70)];
+  const line = cum.map((_, i) => { const [x, y] = pt(i); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join('');
+  const area = `${line}L${pt(n - 1)[0].toFixed(1)} ${H - 34}L${pad} ${H - 34}Z`;
+  return `<svg class="lx-area" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="lxAr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B25F" stop-opacity=".38"/><stop offset="1" stop-color="#D9B25F" stop-opacity="0"/></linearGradient></defs>
+    ${[0.33, 0.66].map((k) => `<line x1="${pad}" x2="${W - pad}" y1="${(H - 34 - k * (H - 70)).toFixed(1)}" y2="${(H - 34 - k * (H - 70)).toFixed(1)}" class="gr"/>`).join('')}
+    <path d="${area}" fill="url(#lxAr)" class="ar"/><path d="${line}" class="ln" pathLength="100"/>
+    ${cum.map((v, i) => { const [x, y] = pt(i); return `<g style="--i:${i}" class="pt"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i === n - 1 ? 9 : 6}"/><text x="${x.toFixed(1)}" y="${(y - 18).toFixed(1)}">${v}</text><text x="${x.toFixed(1)}" y="${H - 8}" class="y">${years[i].y}</text></g>`; }).join('')}</svg>`;
+}
+function lxRadial(goals) {
+  const size = 520, c = size / 2, max = Math.max(1, ...goals.map((g) => g.n)), w = 26, gap = 12;
+  return `<svg class="lx-radial" viewBox="0 0 ${size} ${size}" aria-hidden="true">${goals.map((g, i) => { const r = c - 20 - i * (w + gap); if (r < 40) return ''; const pct = g.n / max * 75;
+    return `<g style="--i:${i}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="${w}" pathLength="100" stroke-dasharray="75 100" transform="rotate(-90 ${c} ${c})" stroke-linecap="round"/>
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${g.c}" stroke-width="${w}" pathLength="100" stroke-dasharray="${Math.max(.5, pct).toFixed(2)} 100" transform="rotate(-90 ${c} ${c})" stroke-linecap="round" class="lx-dseg"/>
+      <text x="${c - 12}" y="${c - r + 9}" class="k">${esc(g.k)}</text></g>`; }).join('')}</svg>`;
 }
 function liveMapSVG(R) {
   const max = Math.max(1, ...KSA_REGIONS.map(([n]) => R[n] || 0));
@@ -32785,7 +32929,9 @@ function liveMapSVG(R) {
   const path = TALE_KSA.map(([a, b], i) => { const [x, y] = xy(a, b); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join('') + 'Z';
   const b = KSA_REGIONS.map(([n, lon, lat], i) => { const c = R[n] || 0, [x, y] = xy(lon, lat), r = c ? 12 + Math.sqrt(c / max) * 30 : 4;
     return `<g class="lx-reg ${c ? '' : 'zero'}" style="--i:${i}">${c ? `<circle class="lx-halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r + 10).toFixed(1)}"/>` : ''}<circle class="lx-b" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>${c ? `<text x="${x.toFixed(1)}" y="${(y + 8).toFixed(1)}" class="lx-n">${c}</text>` : ''}</g>`; }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" class="lx-map" aria-hidden="true"><defs><linearGradient id="lxLand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174B3F"/><stop offset="1" stop-color="#0E3830"/></linearGradient></defs><path d="${path}" class="lx-land"/>${b}</svg>`;
+  const hq = KSA_REGIONS.find(([n]) => n === 'الرياض'), [hx, hy] = hq ? xy(hq[1], hq[2]) : [W / 2, H / 2];
+  const arcs = KSA_REGIONS.filter(([n]) => n !== 'الرياض' && R[n]).map(([, lon, lat], i) => { const [x, y] = xy(lon, lat); return `<path class="lx-arc" style="--i:${i}" pathLength="100" d="M${hx.toFixed(1)} ${hy.toFixed(1)} Q${((hx + x) / 2).toFixed(1)} ${(Math.min(hy, y) - 90).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}"/>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="lx-map" aria-hidden="true"><defs><linearGradient id="lxLand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174B3F"/><stop offset="1" stop-color="#0E3830"/></linearGradient></defs><path d="${path}" class="lx-land"/>${arcs}${b}${hq ? `<circle class="lx-hq" cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="7"/>` : ''}</svg>`;
 }
 const lxHead = (n, total, t, sub) => `<div class="lx-chh"><span class="lx-chn">${String(n).padStart(2, '0')}<i>/${String(total).padStart(2, '0')}</i></span><div><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
 function liveChapterHTML(k, X, n, total) {
@@ -32795,17 +32941,27 @@ function liveChapterHTML(k, X, n, total) {
     const goalsOn = X.S ? X.S.goalsOn : 0, goalsN = X.S ? X.S.goals.length : 0;
     return `${lxHead(n, total, 'الملخص التنفيذي', `محفظة شراكات ${org}`)}
       <p class="lx-lead">تعمل ${org} مع <b>${lvN(X.c.partners)}</b> جهة شريكة من القطاعات الحكومية والخاصة وغير الربحية والتعليمية، منها <b>${lvN(X.c.active)}</b> شراكة سارية تُتابَع مخرجاتها.</p>
-      <div class="lx-kpis">
-        <div><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div>
-        <div><b class="lx-cu" data-v="${X.c.active}">0</b><span>شراكة سارية</span></div>
-        <div><b class="lx-cu" data-v="${X.thisYear}">0</b><span>شراكة وُقّعت في ${X.y}</span>${X.lastYear ? `<small class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d)} مقارنة بـ${X.y - 1}</small>` : ''}</div>
-        ${goalsN ? `<div><b>${goalsOn}<i>/${goalsN}</i></b><span>أهداف استراتيجية تخدمها الشراكات</span></div>` : ''}
-      </div>`;
+      <div class="lx-kpis g">
+        <div><div class="lx-kv"><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div>${lxDonut(Object.keys(X.sectors).map((sx, i) => ({ v: X.sectors[sx].size, c: lxSecC(sx, i) })), { size: 120, w: 14, gap: 2 })}</div>
+        <div><div class="lx-kv"><b class="lx-cu" data-v="${X.c.active}">0</b><span>شراكة سارية</span><small>من ${lvN(X.signedAll)} موقّعة</small></div>${lxRing(X.signedAll ? Math.round(X.c.active / X.signedAll * 100) : 0, 120, 14, '#3FA27F')}</div>
+        <div><div class="lx-kv"><b class="lx-cu" data-v="${X.thisYear}">0</b><span>وُقّعت في ${X.y}</span>${X.lastYear ? `<small class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '▲' : '▼'} ${Math.abs(d)} عن ${X.y - 1}</small>` : ''}</div>${lxBars(X.years, { W: 170, H: 96 })}</div>
+        ${goalsN ? `<div><div class="lx-kv"><b>${goalsOn}<i>/${goalsN}</i></b><span>أهداف استراتيجية</span><small>تخدمها الشراكات</small></div><div class="lx-pips">${X.S.goals.map((g) => `<i style="--c:${(typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E'}" class="${g.ps.length ? 'on' : ''}">${esc(g.k)}</i>`).join('')}</div></div>` : ''}
+      </div>
+      <div class="lx-grow"><h4>نمو الشراكات الموقّعة <small>العدد التراكمي حتى نهاية كل عام</small></h4>${lxArea(X.years, X.cum)}</div>`;
   }
   if (k === 'strategy' && X.S) {
     const S = X.S, pct = S.total ? Math.round(S.linked.length / S.total * 100) : 0, max = Math.max(1, ...S.goals.map((g) => g.ps.length));
     return `${lxHead(n, total, 'المواءمة مع الاستراتيجية', `${pct}% من الشراكات مرتبطة بهدف أو مبادرة استراتيجية`)}
-      <div class="lx-goals">${S.goals.map((g, i) => { const on = g.inits.filter((x) => x.ps.length).length; return `<div class="lx-g" style="--c:${(typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E'};--i:${i}"><span class="lx-gk">${esc(g.k)}</span><div class="lx-gt"><b>${esc(String(g.t).replace(/^[A-Z]+\d?\s*[:：]\s*/, ''))}</b><i><em style="width:${Math.round(g.ps.length / max * 100)}%"></em></i></div><div class="lx-gv"><b>${g.ps.length}</b><small>شراكة · ${on}/${g.inits.length} مبادرات</small></div></div>`; }).join('')}</div>`;
+      <div class="lx-stw"><div class="lx-radw">${lxRadial(S.goals.map((g) => ({ k: g.k, n: g.ps.length, c: (typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E' })))}<div class="lx-radc"><b>${pct}%</b><span>مرتبطة استراتيجيًا</span></div></div>
+      <div class="lx-goals">${S.goals.map((g, i) => { const on = g.inits.filter((x) => x.ps.length).length; return `<div class="lx-g" style="--c:${(typeof SG_COL !== 'undefined' && SG_COL[g.k]) || '#B08A3E'};--i:${i}"><span class="lx-gk">${esc(g.k)}</span><div class="lx-gt"><b>${esc(String(g.t).replace(/^[A-Z]+\d?\s*[:：]\s*/, ''))}</b><i><em style="width:${Math.round(g.ps.length / max * 100)}%"></em></i></div><div class="lx-gv"><b>${g.ps.length}</b><small>شراكة · ${on}/${g.inits.length} مبادرات</small></div></div>`; }).join('')}</div></div>`;
+  }
+  if (k === 'pipe') {
+    const st = [{ t: 'مقترحات قيد الدراسة', ps: [], props: X.propsIn }, ...WF_PHASES.map((ph) => ({ t: ph.t, ps: X.phase[ph.id] || [] }))];
+    const max = Math.max(1, ...st.map((x) => x.ps.length + (x.props ? x.props.length : 0))), tot = st.reduce((t, x) => t + x.ps.length + (x.props ? x.props.length : 0), 0);
+    return `${lxHead(n, total, 'مسار المعاملات', `${plural(tot, 'معاملة واحدة', 'معاملتان', 'معاملات', 'معاملة')} في مراحل الإجراء المعتمد الآن`)}
+      <div class="lx-pipe">${st.map((x, i) => { const v = x.ps.length + (x.props ? x.props.length : 0), r = 34 + Math.sqrt(v / max) * 52;
+        const lg = x.ps.map((p) => partnerById(p.partnerId)).filter(Boolean).slice(0, 3);
+        return `<div class="lx-pn ${v ? '' : 'z'}" style="--i:${i}"><div class="lx-pnc"><span style="width:${(r * 2).toFixed(0)}px;height:${(r * 2).toFixed(0)}px"><b class="lx-cu" data-v="${v}">0</b></span></div><h5>${esc(x.t)}</h5><div class="lx-pnl">${lg.map((pr) => plateHTML(pr, 48)).join('')}${x.props && x.props.length ? `<small>${x.props.slice(0, 2).map((y) => esc(y.partnerName || '')).join('، ')}</small>` : ''}</div></div>`; }).join('<i class="lx-pa"></i>')}</div>`;
   }
   if (k === 'map') {
     const top = KSA_REGIONS.map(([r]) => [r, X.regions[r] || 0]).filter((x) => x[1]).sort((a, b) => b[1] - a[1]);
@@ -32817,9 +32973,10 @@ function liveChapterHTML(k, X, n, total) {
   if (k === 'spot') {
     const s = X.signed.slice(0, 3);
     return `${lxHead(n, total, 'شراكات في الواجهة', 'أحدث الشراكات الموقّعة')}
-      <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 3);
+      <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 2);
         return `<article class="lx-sp ${i === 0 ? 'on' : ''}" data-sp="${i}"><div class="lx-spm">${ph ? `<img data-file="${esc(ph.fileId)}" alt="">` : coverHTML(p.id, null, { W: 900, H: 600 })}</div>
           <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(signedOn(p))}م</small><h3>${esc(partnerName(p))}</h3>
+          ${p.startDate && p.endDate ? (() => { const t0 = new Date(p.startDate), t1 = new Date(p.endDate), k = Math.min(100, Math.max(0, (today() - t0) / Math.max(1, t1 - t0) * 100)); const left = daysLeft(p); return `<div class="lx-dur"><div class="lx-durb"><i style="width:${k.toFixed(1)}%"></i><u style="inset-inline-start:${k.toFixed(1)}%"></u></div><div class="lx-durl"><span>${fmtDate(p.startDate)}</span><b>${left > 0 ? `باقٍ ${plural(left, 'يوم', 'يومان', 'أيام', 'يومًا')}` : 'انتهت'}</b><span>${fmtDate(p.endDate)}</span></div></div>`; })() : ''}
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
         <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div></div>`;
   }
@@ -32827,8 +32984,9 @@ function liveChapterHTML(k, X, n, total) {
     const order = ['حكومي', 'شبه حكومي', 'خاص', 'غير ربحي', 'تعليمي'];
     const keys = [...order.filter((s) => X.sectors[s]), ...Object.keys(X.sectors).filter((s) => !order.includes(s))];
     return `${lxHead(n, total, 'تنوع الشركاء', 'الجهات الشريكة حسب القطاع')}
-      <div class="lx-secs">${keys.map((s, i) => { const ids = [...X.sectors[s]], prs = ids.map(partnerById).filter(Boolean); const lg = prs.filter((x) => x.logoFileId).slice(0, 6);
-        return `<div class="lx-sec" style="--i:${i}"><b class="lx-cu" data-v="${ids.length}">0</b><span>${esc(s)}</span><div class="lx-secl">${lg.map((pr) => plateHTML(pr, 64)).join('')}</div></div>`; }).join('')}</div>`;
+      <div class="lx-secw"><div class="lx-secd">${lxDonut(keys.map((sx, i) => ({ v: X.sectors[sx].size, c: lxSecC(sx, i) })), { size: 460, w: 54, gap: 1.2 })}<div class="lx-radc"><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div></div>
+      <div class="lx-secs">${keys.map((sx, i) => { const ids = [...X.sectors[sx]], prs = ids.map(partnerById).filter(Boolean); const lg = prs.filter((x) => x.logoFileId).slice(0, 5); const tot = keys.reduce((t, q) => t + X.sectors[q].size, 0) || 1;
+        return `<div class="lx-sec" style="--i:${i};--c:${lxSecC(sx, i)}"><div class="lx-sech"><b class="lx-cu" data-v="${ids.length}">0</b><span>${esc(sx)}</span><em>${Math.round(ids.length / tot * 100)}%</em></div><div class="lx-secl">${lg.map((pr) => plateHTML(pr, 56)).join('')}</div></div>`; }).join('')}</div></div>`;
   }
   if (k === 'attn') {
     const row = (p, tag, cls = '') => `<li class="${cls}">${plateHTML(partnerById(p.partnerId), 56)}<div><b>${esc(partnerName(p))}</b><small>${esc(p.classification || 'شراكة')}</small></div><em>${tag}</em></li>`;
@@ -32837,7 +32995,7 @@ function liveChapterHTML(k, X, n, total) {
       ${has ? `<div class="lx-attn">
         <section><h4><span>${X.awaitMin.length}</span>بانتظار موافقة المعالي</h4>${X.awaitMin.length ? `<ul>${X.awaitMin.slice(0, 4).map((p) => row(p, 'المعاملة لدى مكتب المعالي', 'gold')).join('')}</ul>` : '<p>لا معاملات بانتظار الموافقة.</p>'}
           ${X.preparing.length ? `<p class="lx-prep">و${plural(X.preparing.length, 'معاملة واحدة', 'معاملتان', 'معاملات', 'معاملة')} في مرحلة إعداد خطاب طلب الموافقة.</p>` : ''}</section>
-        <section><h4><span>${X.expiring.length}</span>شراكات تنتهي قريبًا</h4>${X.expiring.length ? `${X.expiring.length > 4 ? '' : ''}<ul>${X.expiring.slice(0, 4).map(({ p, d }) => row(p, `خلال ${plural(d, 'يوم واحد', 'يومين', 'أيام', 'يومًا')}`, d <= 30 ? 'red' : '')).join('')}</ul>` : '<p>لا شراكات تنتهي خلال الفترة القريبة.</p>'}</section>
+        <section><h4><span>${X.expiring.length}</span>شراكات تنتهي قريبًا</h4>${X.expiring.length ? `${X.expiring.length > 4 ? '' : ''}<ul>${X.expiring.slice(0, 4).map(({ p, d }) => row(p, `<span class="lx-cd">${lxRing(Math.max(4, Math.round(d / (D.settings.expiryDays || 90) * 100)), 64, 7, d <= 30 ? '#E5806B' : '#D9B25F')}<b>${d}</b></span>يومًا`, d <= 30 ? 'red' : '')).join('')}</ul>` : '<p>لا شراكات تنتهي خلال الفترة القريبة.</p>'}</section>
       </div>` : '<div class="lx-calm"><b>لا توجد معاملات أو قرارات معلّقة</b><span>جميع الشراكات تسير وفق المسار المعتمد.</span></div>'}`;
   }
   if (k === 'impact') {
@@ -32864,7 +33022,7 @@ function renderLive(el) {
   document.body.appendChild(box); document.documentElement.classList.add('live-on');
   let cfg = liveCfg(), chs = [], i = 0, T = null, spT = null, idle = null;
   const sec = () => Math.max(8, +(cfg.sec || 0) || 0);
-  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : true));
+  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : c.k === 'pipe' ? (X.propsIn.length + Object.values(X.phase).reduce((t, a) => t + a.length, 0)) > 0 : true));
   box.innerHTML = `<div class="lx-bg" aria-hidden="true"></div>
     <header class="lx-top">${logo ? `<img src="${logo}" alt="">` : ''}<div class="lx-tt"><b>${esc(D.settings.org.name)}</b><span>منظومة الشراكات · ${esc(D.settings.org.dept || 'إدارة الشراكات')}</span></div>
       <div class="lx-clock"><b id="lxTime"></b><span id="lxHijri"></span><small id="lxGreg"></small></div></header>
