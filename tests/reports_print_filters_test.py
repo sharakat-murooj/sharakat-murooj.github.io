@@ -112,7 +112,7 @@ async def main():
             got = await E("getComputedStyle(document.querySelector('.rs2[data-st=overview]')).backgroundColor")
             ok(f'report theme follows design: {dz}', got == bg, got)
         await E("applyDesign('board')"); await pg.wait_for_timeout(600); await go('#/partners', 200); await go('#/reports', 1300)
-        ok('board headings use Naskh font', 'Noto Naskh' in await E("[...document.querySelectorAll('.rs2[data-st=overview] .rs2-t')].map(x=>getComputedStyle(x).fontFamily).join('|')"))
+        ok('board headings use the platform font', (lambda f: 'Expo Arabic' in f and 'Noto Naskh' not in f)(await E("[...document.querySelectorAll('.rs2[data-st=overview] .rs2-t')].map(x=>getComputedStyle(x).fontFamily).join('|')")))
         async with pg.expect_download(timeout=90000) as dl:
             await pg.click('[data-rpptx]')
         d2 = await dl.value; await d2.save_as('/tmp/rep-board.pptx')
