@@ -74,7 +74,7 @@ function lxArea(years, cum) {
   const line = cum.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(2)} ${Y(v).toFixed(2)}`).join('');
   return `<div class="lx-area"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lxAr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B25F" stop-opacity=".42"/><stop offset="1" stop-color="#D9B25F" stop-opacity="0"/></linearGradient></defs>
       ${[0.33, 0.66].map((k) => `<line x1="0" x2="100" y1="${(92 - k * 80).toFixed(1)}" y2="${(92 - k * 80).toFixed(1)}" class="gr"/>`).join('')}
-      <path d="${line}L100 100L0 100Z" fill="url(#lxAr)" class="ar"/><path d="${line}" class="ln"/></svg>
+      <path d="${line}L${X(n - 1).toFixed(2)} 100L${X(0).toFixed(2)} 100Z" fill="url(#lxAr)" class="ar"/><path d="${line}" class="ln"/></svg>
     ${cum.map((v, i) => `<span class="pt ${i === n - 1 ? 'last' : ''}" style="left:${X(i)}%;top:${Y(v)}%;--i:${i}"><i></i><b>${lvN(v)}</b></span><em class="yr" style="left:${X(i)}%">${years[i].y}</em>`).join('')}</div>`;
 }
 function lxRadial(goals) {
@@ -85,19 +85,18 @@ function lxRadial(goals) {
       <text x="${c - 12}" y="${c - r + 9}" class="k">${esc(g.k)}</text></g>`; }).join('')}</svg>`;
 }
 function liveMapSVG(R) {
-  const max = Math.max(1, ...KSA_REGIONS.map(([n]) => R[n] || 0));
-  const W = 1000, H = 760, lon0 = 34.4, lon1 = 55.8, lat0 = 16.2, lat1 = 32.3, k = Math.cos(24 * Math.PI / 180);
-  const sc = Math.min((W - 60) / ((lon1 - lon0) * k), (H - 60) / (lat1 - lat0));
-  const ox = (W - (lon1 - lon0) * k * sc) / 2, oy = (H - (lat1 - lat0) * sc) / 2;
-  const xy = (lon, lat) => [ox + (lon - lon0) * k * sc, oy + (lat1 - lat) * sc];
-  const path = TALE_KSA.map(([a, b], i) => { const [x, y] = xy(a, b); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join('') + 'Z';
-  const b = KSA_REGIONS.map(([n, lon, lat], i) => { const c = R[n] || 0, [x, y] = xy(lon, lat), r = c ? 12 + Math.sqrt(c / max) * 30 : 4;
-    return `<g class="lx-reg ${c ? '' : 'zero'}" style="--i:${i}">${c ? `<circle class="lx-halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r + 10).toFixed(1)}"/>` : ''}<circle class="lx-b" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>${c ? `<text x="${x.toFixed(1)}" y="${(y + 8).toFixed(1)}" class="lx-n">${c}</text>` : ''}</g>`; }).join('');
-  const hq = KSA_REGIONS.find(([n]) => n === 'الرياض'), [hx, hy] = hq ? xy(hq[1], hq[2]) : [W / 2, H / 2];
-  const arcs = KSA_REGIONS.filter(([n]) => n !== 'الرياض' && R[n]).map(([, lon, lat], i) => { const [x, y] = xy(lon, lat); return `<path class="lx-arc" style="--i:${i}" pathLength="100" d="M${hx.toFixed(1)} ${hy.toFixed(1)} Q${((hx + x) / 2).toFixed(1)} ${(Math.min(hy, y) - 90).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}"/>`; }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" class="lx-map" aria-hidden="true"><defs><linearGradient id="lxLand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#174B3F"/><stop offset="1" stop-color="#0E3830"/></linearGradient></defs><path d="${path}" class="lx-land"/>${arcs}${b}${hq ? `<circle class="lx-hq" cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="7"/>` : ''}</svg>`;
+  /* حدود المناطق الثلاث عشرة: تلوين كل منطقة بقدر شراكاتها، ودائرة بالعدد في مركزها، وأقواس من الرياض */
+  const G = typeof KSA_REG_SHAPES !== 'undefined' ? KSA_REG_SHAPES : null;
+  if (!G) return '';
+  const max = Math.max(1, ...G.r.map((g) => R[g.ar] || 0));
+  const hq = G.r.find((g) => g.ar === 'الرياض');
+  const regs = G.r.map((g, i) => { const c = R[g.ar] || 0, k = c / max; return `<path class="lx-rg ${c ? 'on' : ''}" d="${g.d}" style="--k:${k.toFixed(2)};--i:${i}"/>`; }).join('');
+  const arcs = hq ? G.r.filter((g) => g.ar !== 'الرياض' && R[g.ar]).map((g, i) => `<path class="lx-arc" style="--i:${i}" pathLength="100" d="M${hq.x} ${hq.y} Q${((hq.x + g.x) / 2).toFixed(1)} ${(Math.min(hq.y, g.y) - 70).toFixed(1)} ${g.x} ${g.y}"/>`).join('') : '';
+  const pins = G.r.map((g, i) => { const c = R[g.ar] || 0, r = c ? 13 + Math.sqrt(c / max) * 15 : 0;
+    return `<g class="lx-reg ${c ? '' : 'zero'}" style="--i:${i}">${c ? `<circle class="lx-halo" cx="${g.x}" cy="${g.y}" r="${(r + 7).toFixed(1)}"/><circle class="lx-b" cx="${g.x}" cy="${g.y}" r="${r.toFixed(1)}"/><text x="${g.x}" y="${g.y + 6}" class="lx-n">${c}</text>` : ''}<text x="${g.x}" y="${(g.y + (c ? r + 20 : 5)).toFixed(1)}" class="lx-rn">${esc(g.ar)}</text></g>`; }).join('');
+  return `<svg viewBox="${G.vb}" class="lx-map" aria-hidden="true">${regs}${arcs}${pins}</svg>`;
 }
-const lxHead = (n, total, t, sub) => `<div class="lx-chh"><span class="lx-chn">${String(n).padStart(2, '0')}<i>/${String(total).padStart(2, '0')}</i></span><div><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
+const lxHead = (n, total, t, sub, aside = '') => `<div class="lx-chh"><span class="lx-chn">${String(n).padStart(2, '0')}<i>/${String(total).padStart(2, '0')}</i></span><div><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div>${aside ? `<div class="lx-chx">${aside}</div>` : ''}</div>`;
 function liveChapterHTML(k, X, n, total) {
   const org = esc(D.settings.org.name);
   if (k === 'wall') {
@@ -123,8 +122,7 @@ function liveChapterHTML(k, X, n, total) {
   if (k === 'brief') {
     const d = X.thisYear - X.lastYear;
     const goalsOn = X.S ? X.S.goalsOn : 0, goalsN = X.S ? X.S.goals.length : 0;
-    return `${lxHead(n, total, 'الملخص التنفيذي', `محفظة شراكات ${org}`)}
-      <p class="lx-lead">تعمل ${org} مع <b>${lvN(X.c.partners)}</b> جهة شريكة من القطاعات الحكومية والخاصة وغير الربحية والتعليمية، منها <b>${lvN(X.c.active)}</b> شراكة سارية تُتابَع مخرجاتها.</p>
+    return `${lxHead(n, total, 'الملخص التنفيذي', `محفظة شراكات ${org}`, `<p class="lx-lead">تعمل ${org} مع <b>${lvN(X.c.partners)}</b> جهة شريكة من القطاعات الحكومية والخاصة وغير الربحية والتعليمية، منها <b>${lvN(X.c.active)}</b> شراكة سارية تُتابَع مخرجاتها.</p>`)}
       <div class="lx-kpis g">
         <div><div class="lx-kv"><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div>${lxDonut(Object.keys(X.sectors).map((sx, i) => ({ v: X.sectors[sx].size, c: lxSecC(sx, i) })), { size: 120, w: 14, gap: 2 })}</div>
         <div><div class="lx-kv"><b class="lx-cu" data-v="${X.c.active}">0</b><span>شراكة سارية</span><small>من ${lvN(X.signedAll)} موقّعة</small></div>${lxRing(X.signedAll ? Math.round(X.c.active / X.signedAll * 100) : 0, 120, 14, '#3FA27F')}</div>

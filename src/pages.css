@@ -5816,3 +5816,39 @@ html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root
 .lx-lpage .lx-lgp .plate{width:clamp(48px,3.6vw,76px)!important;height:clamp(48px,3.6vw,76px)!important;border-radius:14px!important;flex:none}
 .lx-lpage .lx-lg span{text-align:start}
 .lx-spot.fb .lx-spb li{-webkit-line-clamp:1}
+/* ===== العرض المباشر: مساحة أكبر للمحتوى ===== */
+.lx-top{padding:1.3vh 4vw 1vh!important}
+.lx-top img{height:5vh!important;max-height:56px}
+.lx-tt b{font-size:clamp(18px,1.5vw,28px)}
+.lx-tt span{font-size:clamp(12px,.85vw,16px)}
+.lx-clock b{font-size:clamp(24px,2.1vw,40px)}
+.lx-clock span{font-size:clamp(12px,.9vw,17px)}.lx-clock small{font-size:clamp(11px,.75vw,14px)}
+.lx-stage{padding:2.2vh 4.5vw 1.6vh!important}
+.lx-chh{margin-bottom:2.2vh!important;gap:1.6vw}
+.lx-chn{font-size:clamp(40px,3.6vw,72px)}
+.lx-chh h2{font-size:clamp(28px,2.6vw,52px)!important}
+.lx-chh p{font-size:clamp(14px,1.1vw,22px)}
+/* نص الملخص في المساحة الفارغة بجوار العنوان */
+.lx-chx{flex:1;min-width:0;align-self:center;padding-inline-start:2.4vw;margin-inline-start:.6vw;border-inline-start:1px solid rgba(227,196,125,.25)}
+.lx-chx .lx-lead{margin:0!important;font-size:clamp(15px,1.25vw,24px)!important;line-height:1.75;max-width:none}
+/* بلا خطوط فوق كروت المؤشرات */
+.lx-kpis>div{border-top:0!important;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))!important;border:1px solid rgba(227,196,125,.12)}
+.lx-kpis.g{margin:0 0 1.8vh!important}
+/* منحنى النمو أطول */
+.lx-grow{flex:1 1 0;min-height:0!important;padding:1.6vh 1.4vw .6vh}
+.lx-grow h4{margin:0}
+.lx-area{min-height:0;margin:.6vh 2vw 4vh}
+/* الخريطة بحدود المناطق */
+.lx-map{max-height:62vh!important}
+.lx-rg{fill:#123A31;stroke:rgba(227,196,125,.38);stroke-width:1.1;stroke-linejoin:round;transition:fill .6s;animation:lxFade .8s both;animation-delay:calc(var(--i)*.05s)}
+.lx-rg.on{fill:color-mix(in srgb,#2F7A5E calc(35% + var(--k)*55%),#123A31)}
+.lx-map .lx-b{stroke:#0B2A22;stroke-width:2.5}
+.lx-map .lx-halo{stroke-width:1}
+.lx-map .lx-n{font-size:17px}
+.lx-rn{fill:#C9D9D0;font-size:12.5px;text-anchor:middle;font-family:var(--font);paint-order:stroke;stroke:#0B2A22;stroke-width:3px;stroke-linejoin:round}
+.lx-reg.zero .lx-rn{fill:rgba(201,217,208,.55)}
+.lx-arc{stroke-width:1.6}
+.lx-geo{align-items:stretch!important}
+.lx-mapw{height:100%;min-height:0;position:relative}
+.lx-mapw .lx-map{position:absolute;inset:0;width:100%;height:100%;max-height:none!important}
+.lx-rank{align-self:center}
