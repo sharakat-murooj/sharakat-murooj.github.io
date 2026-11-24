@@ -95,6 +95,25 @@ function dossierDialog(p) {
 }
 
 /* — بناء الملف — */
+/* — غلاف قبل كل نموذج أو مستند: يعرّف بالمستند ومصدره (مرفوع أو مستخرج من المنظومة) — */
+function dsDocCover(p, o) {
+  const logo = (ASSET_IMG['murooj-logo-white'] || ASSET_IMG['murooj-logo'] || {}).src;
+  const ring = (cls) => `<svg class="dcv-ring ${cls}" viewBox="-200 -200 400 400" aria-hidden="true"><circle r="180"/><circle r="150" class="d"/>${Array.from({ length: 24 }, (_, k) => { const a = k / 24 * Math.PI * 2; return `<circle class="p" r="3" cx="${(Math.cos(a) * 180).toFixed(1)}" cy="${(Math.sin(a) * 180).toFixed(1)}"/>`; }).join('')}<rect x="-70" y="-70" width="140" height="140"/><rect x="-70" y="-70" width="140" height="140" transform="rotate(45)"/></svg>`;
+  const facts = (o.facts || []).filter((x) => x && x[1]);
+  return `<section class="ds-dcov ${o.src === 'platform' ? 'gen' : 'up'}">
+    ${ring('r')}${ring('l')}
+    <header class="dcv-top">${logo ? `<img src="${logo}" alt="">` : ''}<div><b>${esc(D.settings.org.name)}</b><span>ملف الشراكة · ${esc(partnerName(p))}</span></div><em>${esc(o.n)}</em></header>
+    <div class="dcv-mid">
+      <span class="dcv-kind">${icon(o.src === 'platform' ? 'layers' : 'upload')}${esc(o.kind)}</span>
+      <span class="dcv-q" aria-hidden="true">”</span>
+      <h2>${esc(o.title)}</h2>
+      ${o.sub ? `<p>${esc(o.sub)}</p>` : ''}
+      <dl class="dcv-facts">${facts.map(([l, v]) => `<div><dd>${v}</dd><dt>${esc(l)}</dt></div>`).join('')}</dl>
+      <span class="dcv-src">${o.src === 'platform' ? 'مستخرج من منظومة الشراكات' : 'مستند مرفوع على منظومة الشراكات'}</span>
+    </div>
+    <footer class="dcv-foot"><span>${esc(p.title || partnerName(p))}</span><b class="ds-code">${esc(p.code || '')}</b></footer>
+  </section>`;
+}
 async function dossierHTML(p, { secs = new Set(DOS_SECS.filter((x) => x[2]).map((x) => x[0])), withPdf = true, onProgress = () => {} } = {}) {
   const pr = partnerById(p.partnerId) || {};
   const o = D.settings.org, name = partnerName(p);
@@ -268,12 +287,16 @@ async function dossierHTML(p, { secs = new Set(DOS_SECS.filter((x) => x[2]).map(
     const list = forms.filter((x) => x.key !== 'partnershipEval' || !has('evals'));
     if (list.length) chap('forms', 'النماذج المعتمدة', `<p class="ds-lead">${plural(list.length, 'نموذج واحد', 'نموذجان', 'نماذج', 'نموذجًا')} مُعبّأ في المنظومة، كل نموذج في صفحة مستقلة بصيغته الرسمية.</p>
       <table class="ds-tbl"><thead><tr><th>النموذج</th><th>الرقم</th><th>الحالة</th><th>أعدّه</th></tr></thead><tbody>${list.map((x) => `<tr><td><b>${esc(x.F.title)}</b></td><td class="ds-code">${esc(x.f.no || '—')}</td><td>${x.f.status === 'done' ? 'معتمد' : 'مسودة'}</td><td class="ds-sm">${esc(x.f.by || '')}${x.f.at ? '<br>' + fmtDT(x.f.at) : ''}</td></tr>`).join('')}</tbody></table>`
-      + list.map((x) => `<div class="ds-form">${formDocHTML(x.kind, x.rec, x.key, x.idx ?? null)}</div>`).join(''));
+      + list.map((x, i) => dsDocCover(p, { n: `نموذج ${i + 1} من ${list.length}`, kind: x.f.auto ? 'نموذج أعدّته المنظومة' : 'نموذج معتمد', src: 'platform', title: x.F.title, sub: x.F.sub || '',
+          facts: [['رقم النموذج', x.f.no ? `<span class="ds-code">${esc(x.f.no)}</span>` : ''], ['الحالة', x.f.status === 'done' ? 'معتمد' : 'مسودة'], ['التاريخ', x.f.at ? fmtDate(String(x.f.at).slice(0, 10)) : ''], ['أعدّه', esc(x.f.by || '')]] })
+        + `<div class="ds-form">${formDocHTML(x.kind, x.rec, x.key, x.idx ?? null)}</div>`).join(''));
   }
   if (has('evals')) {
     const evs = (p.evals || []).map((e, i) => [e, i]).filter(([e]) => e.status === 'done');
     if (evs.length) chap('evals', 'تقييمات الشراكة', `<table class="ds-tbl"><thead><tr><th>الفترة</th><th class="c">الدرجة</th><th>التقدير</th><th>التوصية</th><th>المقيِّم</th></tr></thead><tbody>${evs.map(([e]) => { const s = evalScore(e.data); return `<tr><td>${esc(e.data.period || '')}</td><td class="c"><b>${s ?? '—'}</b></td><td>${s !== null ? evalGrade(s) : '—'}</td><td>${esc(e.data.rec || '')}</td><td class="ds-sm">${esc(e.by || '')}<br>${e.at ? fmtDT(e.at) : ''}</td></tr>`; }).join('')}</tbody></table>`
-      + evs.map(([, i]) => `<div class="ds-form">${formDocHTML('partnership', p, 'partnershipEval', i)}</div>`).join(''));
+      + evs.map(([e, i], k) => dsDocCover(p, { n: `تقييم ${k + 1} من ${evs.length}`, kind: 'تقييم الشراكة', src: 'platform', title: FORMS.partnershipEval.title, sub: e.period || '',
+          facts: [['رقم النموذج', e.no ? `<span class="ds-code">${esc(e.no)}</span>` : ''], ['التاريخ', e.at ? fmtDate(String(e.at).slice(0, 10)) : ''], ['المقيِّم', esc(e.by || '')]] })
+        + `<div class="ds-form">${formDocHTML('partnership', p, 'partnershipEval', i)}</div>`).join(''));
   }
 
   const news = D.news.filter((x) => x.partnershipId === p.id && (showDemo() || !x.demo)).sort((x, y) => (x.date < y.date ? 1 : -1));
@@ -297,14 +320,18 @@ async function dossierHTML(p, { secs = new Set(DOS_SECS.filter((x) => x[2]).map(
       k++;
       const cap = `<div class="ds-att-h"><em>مرفق ${k}</em><b>${esc(a.name)}</b><span>${esc(a.category || '')}</span></div>`;
       if (isImg(a) && galIds.has(a.fileId) && has('photos')) continue;
-      if (isImg(a)) { const u = await url(a.fileId); if (u) body += `<div class="ds-att">${cap}<img class="ds-att-img" src="${u}" alt=""></div>`; continue; }
+      const stepL = a.wf && typeof wfStep === 'function' && wfStep(a.wf) ? wfStep(a.wf) : null;
+      const docL = stepL && a.doc ? ((stepL.docs || []).find((d) => d.k === a.doc) || {}).l : '';
+      const cover = (pages) => dsDocCover(p, { n: `مرفق ${k} من ${atts.length}`, kind: 'مستند مرفوع', src: 'upload', title: docL || String(a.name || '').replace(/\.[a-z0-9]{2,5}$/i, ''), sub: docL ? a.name : (a.category || ''),
+        facts: [['التصنيف', esc(a.category || '')], stepL && ['خطوة المسار', esc(stepL.t)], ['تاريخ الرفع', a.addedAt ? fmtDate(a.addedAt.slice(0, 10)) : ''], ['رفعه', esc(a.by || '')], pages && ['الصفحات', String(pages)], a.from !== 'الشراكة' && ['المصدر', esc(a.from)]] });
+      if (isImg(a)) { const u = await url(a.fileId); if (u) body += cover(0) + `<div class="ds-att">${cap}<img class="ds-att-img" src="${u}" alt=""></div>`; continue; }
       if (isPdf(a) && withPdf) {
         onProgress(`قراءة «${a.name}»`);
         try {
           const rec = await Store.getFile(a.fileId);
           if (!rec || !rec.blob) throw new Error('الملف غير موجود في هذا المتصفح');
           const { pages, total } = await pdfPagesToImages(rec.blob);
-          body += pages.map((pg, i) => `<div class="ds-att ${pg.land ? 'land' : ''}">${cap.replace('</div>', `<i>صفحة ${i + 1} من ${total}</i></div>`)}<img class="ds-att-pg" src="${pg.src}" alt=""></div>`).join('');
+          body += cover(total) + pages.map((pg, i) => `<div class="ds-att ${pg.land ? 'land' : ''}">${cap.replace('</div>', `<i>صفحة ${i + 1} من ${total}</i></div>`)}<img class="ds-att-pg" src="${pg.src}" alt=""></div>`).join('');
           if (total > pages.length) body += `<p class="ds-lead">عُرضت أول ${pages.length} صفحة من ${total}. الملف كاملًا في الحزمة.</p>`;
         } catch (err) { body += `<div class="ds-att ds-att-miss">${cap}<p>تعذّر إدراج صفحات هذا الملف: ${esc(err.message || '')}</p></div>`; }
       }

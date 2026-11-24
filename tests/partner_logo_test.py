@@ -40,7 +40,7 @@ async def main():
         ok('board briefing network shows logo', await E("[...document.querySelectorAll('.bo-orb .orb-n img')].some(i=>(i.getAttribute('src')||'').startsWith('blob:') || (i.getAttribute('src')||'').startsWith('data:'))"))
         # dossier cover
         await go(f'#/partnerships/{pid}')
-        await pg.click('[data-dossier]'); await pg.wait_for_timeout(300); await pg.click('[data-dosgo]')
+        await pg.click('[data-pmore]'); await pg.wait_for_timeout(300); await pg.click('[data-dossier]'); await pg.wait_for_timeout(300); await pg.click('[data-dosgo]')
         await pg.wait_for_function("!document.querySelector('[data-dsprint]').disabled", timeout=60000)
         ok('dossier cover shows logo', await E("!!document.querySelector('#dossier .ds-cv-lg img')"))
         await pg.click('[data-dsclose]'); await pg.wait_for_timeout(300)
