@@ -9288,6 +9288,28 @@ html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root
   .ds-dcov{break-before:page;break-after:page;break-inside:avoid;margin:0;aspect-ratio:auto;height:262mm;max-height:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .ds-dcov+.ds-form,.ds-dcov+.ds-att{break-before:auto}
 }
+/* غلاف المستند — نسخة أهدأ */
+.ds-dcov{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23E6C786' stroke-opacity='.05' stroke-width='1'%3E%3Crect x='30' y='30' width='60' height='60'/%3E%3Crect x='30' y='30' width='60' height='60' transform='rotate(45 60 60)'/%3E%3Ccircle cx='60' cy='60' r='10'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(180deg,#134A3B,#0F4433 55%,#0D3D30);padding:44px 52px 34px}
+.ds-dcov.up{background-color:#0F4433}
+.ds-dcov::after{display:none}
+.ds-dcov::before{border-color:rgba(230,199,134,.22)}
+.dcv-ring{stroke-opacity:.07}.dcv-ring .p{fill-opacity:.18}
+.dcv-ring.l{display:none}
+.dcv-q{display:none}
+.dcv-top img{height:40px}
+.dcv-top b{color:#EDE3C8;font-weight:600}
+.dcv-top em{background:none;color:#D9C08A;border:1px solid rgba(217,192,138,.4);font-weight:600}
+.dcv-mid{gap:12px}
+.dcv-kind{font-weight:600;color:#CDB57E;border-color:rgba(217,192,138,.3);font-size:12.5px}
+.ds-dcov h2{font-size:clamp(24px,2.8vw,34px);font-weight:600;color:#F4F0E4}
+.dcv-facts{border-block-color:rgba(230,199,134,.16);margin-top:22px}
+.dcv-facts>div+div::before{background:rgba(230,199,134,.16)}
+.dcv-facts dd{font-size:15px;font-weight:600;color:#EDE3C8}
+.dcv-facts dd .ds-code{color:#EDE3C8}
+.dcv-facts dt{color:#9FB8AD}
+.dcv-src{background:none;color:#BFA874;font-weight:500;padding:0;margin-top:20px;letter-spacing:.2px}
+.dcv-foot{border-top-color:rgba(230,199,134,.14);color:#9FB8AD}
+.dcv-foot .ds-code{color:#CDB57E}
 </style>
 </head>
 <body>
