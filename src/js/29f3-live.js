@@ -68,14 +68,14 @@ function lxBars(rows, { W = 260, H = 110 } = {}) {
     return `<g style="--i:${i}"><rect x="${(i * bw + bw * .2).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw * .6).toFixed(1)}" height="${h.toFixed(1)}" rx="4" class="${last ? 'on' : ''}"/><text x="${(i * bw + bw / 2).toFixed(1)}" y="${(H - h - 6).toFixed(1)}" class="v">${r.n}</text><text x="${(i * bw + bw / 2).toFixed(1)}" y="${H + 18}" class="y">${String(r.y).slice(2)}</text></g>`; }).join('')}</svg>`;
 }
 function lxArea(years, cum) {
-  const W = 2000, H = 260, pad = 44, max = Math.max(1, ...cum), n = cum.length;
-  const pt = (i) => [pad + i * (W - pad * 2) / Math.max(1, n - 1), H - 34 - cum[i] / max * (H - 70)];
-  const line = cum.map((_, i) => { const [x, y] = pt(i); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join('');
-  const area = `${line}L${pt(n - 1)[0].toFixed(1)} ${H - 34}L${pad} ${H - 34}Z`;
-  return `<svg class="lx-area" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="lxAr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B25F" stop-opacity=".38"/><stop offset="1" stop-color="#D9B25F" stop-opacity="0"/></linearGradient></defs>
-    ${[0.33, 0.66].map((k) => `<line x1="${pad}" x2="${W - pad}" y1="${(H - 34 - k * (H - 70)).toFixed(1)}" y2="${(H - 34 - k * (H - 70)).toFixed(1)}" class="gr"/>`).join('')}
-    <path d="${area}" fill="url(#lxAr)" class="ar"/><path d="${line}" class="ln" pathLength="100"/>
-    ${cum.map((v, i) => { const [x, y] = pt(i); return `<g style="--i:${i}" class="pt"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i === n - 1 ? 9 : 6}"/><text x="${x.toFixed(1)}" y="${(y - 18).toFixed(1)}">${v}</text><text x="${x.toFixed(1)}" y="${H - 8}" class="y">${years[i].y}</text></g>`; }).join('')}</svg>`;
+  /* المنحنى يتمدد مع الصندوق (أي مقاس شاشة)، والنقاط والأرقام عناصر HTML فوقه فلا تتشوه */
+  const max = Math.max(1, ...cum), n = cum.length;
+  const X = (i) => (n > 1 ? 3 + i / (n - 1) * 94 : 50), Y = (v) => 90 - v / max * 62;
+  const line = cum.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(2)} ${Y(v).toFixed(2)}`).join('');
+  return `<div class="lx-area"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lxAr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B25F" stop-opacity=".42"/><stop offset="1" stop-color="#D9B25F" stop-opacity="0"/></linearGradient></defs>
+      ${[0.33, 0.66].map((k) => `<line x1="0" x2="100" y1="${(92 - k * 80).toFixed(1)}" y2="${(92 - k * 80).toFixed(1)}" class="gr"/>`).join('')}
+      <path d="${line}L100 100L0 100Z" fill="url(#lxAr)" class="ar"/><path d="${line}" class="ln"/></svg>
+    ${cum.map((v, i) => `<span class="pt ${i === n - 1 ? 'last' : ''}" style="left:${X(i)}%;top:${Y(v)}%;--i:${i}"><i></i><b>${lvN(v)}</b></span><em class="yr" style="left:${X(i)}%">${years[i].y}</em>`).join('')}</div>`;
 }
 function lxRadial(goals) {
   const size = 520, c = size / 2, max = Math.max(1, ...goals.map((g) => g.n)), w = 26, gap = 12;
@@ -114,9 +114,11 @@ function liveChapterHTML(k, X, n, total) {
       </div></div>`;
   }
   if (k === 'logos') {
-    const L0 = X.logos, rows = [[], [], []]; L0.forEach((pr, i) => rows[i % 3].push(pr));
+    const per = 15, pages = [];
+    for (let q = 0; q < X.logos.length; q += per) pages.push(X.logos.slice(q, q + per));
     return `${lxHead(n, total, 'شركاء يثقون بنا', `${lvN(X.c.partners)} جهة شريكة من مختلف القطاعات`)}
-      <div class="lx-logos">${rows.filter((r) => r.length).map((r, i) => { const strip = r.map((pr) => `<div class="lx-lg"><div class="lx-lgp">${plateHTML(pr, 88)}</div><span>${esc(pr.name)}</span></div>`).join(''); return `<div class="lx-lrow ${i % 2 ? 'rev' : ''}" style="--d:${50 + i * 8}s"><div class="lx-ltr">${strip}${strip}${r.length < 8 ? strip + strip : ''}</div></div>`; }).join('')}</div>`;
+      <div class="lx-lgrid">${pages.map((pg, pi) => `<div class="lx-lpage ${pi === 0 ? 'on' : ''}">${pg.map((pr, i) => `<div class="lx-lg" style="--i:${i}"><div class="lx-lgp">${plateHTML(pr, 88)}</div><span>${esc(pr.name)}</span></div>`).join('')}</div>`).join('')}
+        ${pages.length > 1 ? `<div class="lx-lpd">${pages.map((_, pi) => `<i class="${pi === 0 ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>`;
   }
   if (k === 'brief') {
     const d = X.thisYear - X.lastYear;
@@ -161,7 +163,7 @@ function liveChapterHTML(k, X, n, total) {
           ${p.startDate && p.endDate ? (() => { const t0 = new Date(p.startDate), t1 = new Date(p.endDate), k = Math.min(100, Math.max(0, (today() - t0) / Math.max(1, t1 - t0) * 100)); const left = daysLeft(p); return `<div class="lx-dur"><div class="lx-durb"><i style="width:${k.toFixed(1)}%"></i><u style="inset-inline-start:${k.toFixed(1)}%"></u></div><div class="lx-durl"><span>${fmtDate(p.startDate)}</span><b>${left > 0 ? `باقٍ ${plural(left, 'يوم', 'يومان', 'أيام', 'يومًا')}` : 'انتهت'}</b><span>${fmtDate(p.endDate)}</span></div></div>`; })() : ''}
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
         <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div>
-        <div class="lx-sth">${X.signed.slice(3, 9).map((p) => { const ph = partnershipPhotos(p)[0]; return ph ? `<figure><img data-file="${esc(ph.fileId)}" alt=""><figcaption>${esc(partnerName(p))}</figcaption></figure>` : ''; }).join('')}</div></div>`;
+        <div class="lx-sth">${X.signed.slice(3, 7).map((p) => { const ph = partnershipPhotos(p)[0]; return ph ? `<figure><img data-file="${esc(ph.fileId)}" alt=""><figcaption>${esc(partnerName(p))}</figcaption></figure>` : ''; }).join('')}</div></div>`;
   }
   if (k === 'sectors') {
     const order = ['حكومي', 'شبه حكومي', 'خاص', 'غير ربحي', 'تعليمي'];
@@ -234,6 +236,7 @@ function renderLive(el) {
     const tk = liveTicker(X), tr = box.querySelector('#lxTick');
     if (tr.dataset.v !== tk) { tr.dataset.v = tk; tr.innerHTML = tk ? `<div>${tk}<i>◆</i></div><div aria-hidden="true">${tk}<i>◆</i></div>` : ''; tr.style.setProperty('--dur', Math.max(30, tk.length / 9) + 's'); }
     clearInterval(spT);
+    if (c.k === 'logos') { let s = 0; const all = st.querySelectorAll('.lx-lpage'), dots = st.querySelectorAll('.lx-lpd i'); if (all.length > 1) spT = setInterval(() => { all[s].classList.remove('on'); dots[s] && dots[s].classList.remove('on'); s = (s + 1) % all.length; all[s].classList.add('on'); dots[s] && dots[s].classList.add('on'); }, Math.max(4000, Math.round(dur / all.length))); }
     if (c.k === 'spot') { let s = 0; const all = st.querySelectorAll('.lx-sp'), dots = st.querySelectorAll('.lx-spd i'); if (all.length > 1) spT = setInterval(() => { all[s].classList.remove('on'); dots[s].classList.remove('on'); s = (s + 1) % all.length; all[s].classList.add('on'); dots[s].classList.add('on'); }, Math.round(dur / all.length)); }
     clearTimeout(T); T = setTimeout(() => show(i + 1), dur);
   };
