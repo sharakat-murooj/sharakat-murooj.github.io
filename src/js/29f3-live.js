@@ -230,7 +230,7 @@ function renderLive(el) {
     clearInterval(box._mos);
     if (c.k === 'wall' && pool.length > 1) { let q = 14; box._mos = setInterval(() => { const figs = st.querySelectorAll('.lx-mos figure'); if (!figs.length) return; const f = figs[Math.floor(Math.random() * figs.length)]; const x = pool[q++ % pool.length]; const im = f.querySelector('img'); f.classList.add('sw'); setTimeout(() => { im.dataset.file = x.fileId; hydrateFiles(f).then(() => f.classList.remove('sw')); const cap = f.querySelector('figcaption'); if (cap) cap.textContent = x.p ? partnerName(x.p) : (x.a ? x.a.title : ''); }, 700); }, 2600); }
     const dur = (cfg.sec ? sec() : c.s) * 1000;
-    box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.n || x.t}</span></button>`).join('');
+    box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" title="${x.t}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.n || x.t}</span></button>`).join('');
     const tk = liveTicker(X), tr = box.querySelector('#lxTick');
     if (tr.dataset.v !== tk) { tr.dataset.v = tk; tr.innerHTML = tk ? `<div>${tk}<i>◆</i></div><div aria-hidden="true">${tk}<i>◆</i></div>` : ''; tr.style.setProperty('--dur', Math.max(30, tk.length / 9) + 's'); }
     clearInterval(spT);

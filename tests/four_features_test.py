@@ -60,8 +60,8 @@ async def main():
         # — شاشة العرض (مكتب المعالي) —
         await go('#/live'); await pg.wait_for_timeout(1800)
         ok('executive live screen with clock, Hijri date and chapters', await E("!!document.querySelector('#liveScreen #lxTime').textContent && /هـ/.test(document.querySelector('#lxHijri').textContent) && document.querySelectorAll('#lxNav [data-lx]').length>=5"))
-        chs = await E("[...document.querySelectorAll('#lxNav [data-lx] span')].map(x=>x.textContent)")
-        ok('chapters include executive summary, strategy, map, attention', all(c in chs for c in ['الملخص التنفيذي', 'المواءمة مع الاستراتيجية', 'الانتشار الجغرافي', 'يتطلب اهتمامكم']), chs)
+        chs = await E("[...document.querySelectorAll('#lxNav [data-lx]')].map(x=>x.title)")
+        ok('chapters include executive summary, strategy, map, attention', all(c in chs for c in ['شركاء الأثر', 'الملخص التنفيذي', 'المواءمة مع الاستراتيجية', 'الانتشار الجغرافي', 'يتطلب اهتمامكم']), chs)
         ok('news ticker has items', await E("document.querySelectorAll('#lxTick span').length") > 0)
         ok('screen fits the viewport (no horizontal overflow)', await E("document.getElementById('liveScreen').scrollWidth<=innerWidth+1"))
         for k, nm in enumerate(chs):
