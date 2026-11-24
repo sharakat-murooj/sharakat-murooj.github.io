@@ -32600,11 +32600,13 @@ function pStrat(p) {
     if (p.stratLinks) { (p.stratLinks.goals || []).forEach((k) => G.add(k)); (p.stratLinks.inits || []).forEach((t) => I.add(t)); src = 'manual'; }
     return G.size ? { goals: [...G], inits: [...I], src } : null;
   })();
-  if (legacy) { const valid = new Set(stratGoals().map((g) => g.k)); return { ...legacy, goals: legacy.goals.filter((k) => valid.has(k)), linked: true, legacy: true }; }
+  if (legacy) { const valid = new Set(stratGoals().map((g) => g.k)), gs = legacy.goals.filter((k) => valid.has(k)); if (gs.length) return { ...legacy, goals: gs, linked: true, legacy: true }; } /* هدف قديم لا يطابق الأهداف الحالية: نرجع لقائمة التحقق */
   const a = stratAssessOf(p), T = a && stratTarget(a.target);
   if (!T) return { goals: [], inits: [], src: '', linked: false };
-  const pct = stratPct(a.checks), linked = pct >= STRAT_PASS;
-  return { goals: linked ? [T.goal.k] : [], inits: linked && T.init ? [T.init.t] : [], src: a.src || 'manual', target: a.target, T, checks: a.checks, pct, linked };
+  /* المقترح الآلي يُربط دائمًا بأقرب هدف أو مبادرة حسب قائمة التحقق (بانتظار المراجعة)؛
+     أما التقييم المعتمد يدويًا فيُحتسب فقط إذا حقق حد الاجتياز */
+  const pct = stratPct(a.checks), weak = pct < STRAT_PASS, linked = !weak || (a.src || 'auto') === 'auto';
+  return { goals: linked ? [T.goal.k] : [], inits: linked && T.init ? [T.init.t] : [], src: a.src || 'manual', target: a.target, T, checks: a.checks, pct, linked, weak: linked && weak };
 }
 
 /* ملخص المحفظة */
@@ -32676,7 +32678,7 @@ function stratPop(p, anchor, onChange) {
     }
     const a = stratAssessOf(p); canEdit = canEdit0 && a.src !== 'strategy'; const T = stratTarget(a.target), items = stratItems(a.target), n = a.checks.filter(Boolean).length, pct = stratPct(a.checks), ok = pct >= STRAT_PASS;
     el.innerHTML = `<header class="sg-pop-h"><span class="sg-code">${esc(T.goal.k)}</span><div><small>${T.kind}${T.init ? ` · ${esc(T.goal.t)}` : ''}</small><b>${esc(T.label)}</b></div><button type="button" class="sg-x" aria-label="إغلاق">${icon('x')}</button></header>
-      <div class="sg-pop-st ${ok ? 'ok' : 'no'}"><span class="sg-pop-bar"><i style="width:${Math.round(pct * 100)}%"></i><em style="inset-inline-start:${STRAT_PASS * 100}%"></em></span><b>${n}/${items.length}</b><span>${ok ? 'تُحتسب تابعة' : 'دون الحد (75%)'}</span></div>
+      <div class="sg-pop-st ${ok ? 'ok' : a.src === 'auto' ? 'ok weak' : 'no'}"><span class="sg-pop-bar"><i style="width:${Math.round(pct * 100)}%"></i><em style="inset-inline-start:${STRAT_PASS * 100}%"></em></span><b>${n}/${items.length}</b><span>${ok ? 'تُحتسب تابعة' : a.src === 'auto' ? 'مرتبطة مبدئيًا بأقرب تطابق — بانتظار المراجعة' : 'دون الحد (75%)'}</span></div>
       <ul class="sg-ck">${items.map((it, i) => `<li><button type="button" class="${a.checks[i] ? 'on' : ''}" data-sgck="${i}" ${canEdit ? '' : 'disabled'} aria-pressed="${!!a.checks[i]}"><i>${icon('check')}</i><span>${esc(it.t)}</span></button></li>`).join('')}</ul>
       ${canEdit ? `<label class="sg-pop-sel"><span>الهدف أو المبادرة</span><select class="in" data-sgsel>${stratGoals().map((g) => `<optgroup label="${esc(g.k)} — ${esc(g.t.slice(0, 60))}"><option value="${g.k}" ${a.target === g.k ? 'selected' : ''}>${esc(g.k)} · الهدف كاملًا</option>${g.inits.map((i) => `<option value="${i.c}" ${a.target === i.c ? 'selected' : ''}>${esc(i.c.split('.')[1])} · ${esc(i.t)}</option>`).join('')}</optgroup>`).join('')}</select></label>` : ''}
       ${a.src === 'strategy' ? `<p class="sg-lock">${icon('lock')} حُدِّد في نموذج المواءمة الاستراتيجية، ويُعدَّل من النموذج نفسه.${canEdit0 && typeof openForm === 'function' ? ` <button type="button" class="linkbtn" data-sgform>فتح النموذج</button>` : ''}</p>` : ''}<footer class="sg-pop-f"><span class="sg-src ${a.src}">${esc(STRAT_SRC[a.src] || '')}</span>${canEdit && a.src === 'auto' ? `<button type="button" class="btn sm primary" data-sgok>${icon('check')} اعتماد</button>` : ''}${canEdit && a.src !== 'auto' ? `<button type="button" class="linkbtn" data-sgreset>المقترح الآلي</button>` : ''}<a class="linkbtn" href="#/strategy">${icon('flag')} المحفظة</a></footer>`;
