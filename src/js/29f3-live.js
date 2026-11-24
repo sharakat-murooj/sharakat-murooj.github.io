@@ -8,14 +8,16 @@
    - إعداد الشاشة (الفصول والمدة) يُحفظ في هذا الجهاز فقط.
    ===================================================================== */
 const LIVE_CH = [
-  { k: 'brief', t: 'الملخص التنفيذي', s: 18 },
-  { k: 'strategy', t: 'المواءمة مع الاستراتيجية', s: 18 },
-  { k: 'pipe', t: 'مسار المعاملات', s: 16 },
-  { k: 'map', t: 'الانتشار الجغرافي', s: 16 },
-  { k: 'spot', t: 'شراكات في الواجهة', s: 24 },
-  { k: 'sectors', t: 'تنوع الشركاء', s: 16 },
-  { k: 'attn', t: 'يتطلب اهتمامكم', s: 18 },
-  { k: 'impact', t: 'الأثر الميداني', s: 16 },
+  { k: 'wall', t: 'شركاء الأثر', n: 'الواجهة', s: 20 },
+  { k: 'brief', t: 'الملخص التنفيذي', n: 'الملخص', s: 18 },
+  { k: 'strategy', t: 'المواءمة مع الاستراتيجية', n: 'الاستراتيجية', s: 18 },
+  { k: 'pipe', t: 'مسار المعاملات', n: 'المعاملات', s: 16 },
+  { k: 'map', t: 'الانتشار الجغرافي', n: 'الخريطة', s: 16 },
+  { k: 'spot', t: 'شراكات في الواجهة', n: 'شراكات بارزة', s: 24 },
+  { k: 'sectors', t: 'تنوع الشركاء', n: 'القطاعات', s: 16 },
+  { k: 'logos', t: 'شركاء يثقون بنا', n: 'الشركاء', s: 16 },
+  { k: 'attn', t: 'يتطلب اهتمامكم', n: 'للاهتمام', s: 18 },
+  { k: 'impact', t: 'الأثر الميداني', n: 'الأثر', s: 16 },
 ];
 const liveCfg = () => { try { return JSON.parse(localStorage.getItem('shk_live_cfg') || '{}'); } catch (_) { return {}; } };
 const liveCfgSave = (c) => { try { localStorage.setItem('shk_live_cfg', JSON.stringify(c)); } catch (_) { /* */ } };
@@ -43,7 +45,13 @@ function liveData() {
   const phase = Object.fromEntries(WF_PHASES.map((ph) => [ph.id, []]));
   L_.forEach((p) => { try { const cur = wfStateOf('partnership', p).cur; if (cur && phase[cur.ph]) phase[cur.ph].push(p); } catch (_) { /* */ } });
   const propsIn = visibleProposals().filter((x) => ['submitted', 'review', 'info', 'accepted'].includes(x.status) && (showDemo() || !x.demo));
-  return { L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
+  /* صور المنصة: صور الشراكات الموقّعة أولًا ثم أغلفة القصص — مادة الخلفيات وجدار الصور */
+  const photos = [], seenPh = new Set();
+  [...signed, ...L_.filter((p) => p.stage !== 'signed')].forEach((p) => partnershipPhotos(p).forEach((ph) => { if (!seenPh.has(ph.fileId)) { seenPh.add(ph.fileId); photos.push({ fileId: ph.fileId, p }); } }));
+  stories.forEach((a) => { if (a.coverFileId && !seenPh.has(a.coverFileId)) { seenPh.add(a.coverFileId); photos.push({ fileId: a.coverFileId, a }); } });
+  const logos = [...new Set(L_.map((p) => p.partnerId))].map(partnerById).filter((pr) => pr && pr.logoFileId);
+  const regionsN = KSA_REGIONS.filter(([r]) => regions[r]).length;
+  return { photos, logos, regionsN, L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
 }
 /* — رسوم الشاشة (SVG خفيفة تتحرك عند ظهور الفصل) — */
 const LX_SEC = { 'حكومي': '#3FA27F', 'شبه حكومي': '#7CC7AA', 'خاص': '#D9B25F', 'غير ربحي': '#6FA8D6', 'تعليمي': '#B792D6' };
@@ -92,6 +100,24 @@ function liveMapSVG(R) {
 const lxHead = (n, total, t, sub) => `<div class="lx-chh"><span class="lx-chn">${String(n).padStart(2, '0')}<i>/${String(total).padStart(2, '0')}</i></span><div><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
 function liveChapterHTML(k, X, n, total) {
   const org = esc(D.settings.org.name);
+  if (k === 'wall') {
+    const ph = X.photos.length ? Array.from({ length: 14 }, (_, i) => X.photos[i % X.photos.length]) : [];
+    const sects = Object.keys(X.sectors).filter((x) => x && x !== 'أخرى').length;
+    return `<div class="lx-wall">
+      <div class="lx-mos">${ph.map((x, i) => `<figure class="t${i}" style="--i:${i}"><img data-file="${esc(x.fileId)}" alt=""><figcaption>${esc(x.p ? partnerName(x.p) : (x.a ? x.a.title : ''))}</figcaption></figure>`).join('')}</div>
+      <div class="lx-wall-veil"></div>
+      <div class="lx-wall-t">
+        <small>منظومة شراكات ${org}</small>
+        <h2>شركاء <em>يصنعون</em> الأثر</h2>
+        <p>شراكات حكومية وخاصة وغير ربحية وتعليمية تعمل معًا لبيئة مستدامة في كل مناطق المملكة.</p>
+        <div class="lx-wall-n"><div><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div><div><b class="lx-cu" data-v="${X.signedAll}">0</b><span>شراكة موقّعة</span></div><div><b class="lx-cu" data-v="${sects}">0</b><span>قطاعات</span></div>${X.regionsN ? `<div><b class="lx-cu" data-v="${X.regionsN}">0</b><span>مناطق</span></div>` : ''}</div>
+      </div></div>`;
+  }
+  if (k === 'logos') {
+    const L0 = X.logos, rows = [[], [], []]; L0.forEach((pr, i) => rows[i % 3].push(pr));
+    return `${lxHead(n, total, 'شركاء يثقون بنا', `${lvN(X.c.partners)} جهة شريكة من مختلف القطاعات`)}
+      <div class="lx-logos">${rows.filter((r) => r.length).map((r, i) => { const strip = r.map((pr) => `<div class="lx-lg"><div class="lx-lgp">${plateHTML(pr, 88)}</div><span>${esc(pr.name)}</span></div>`).join(''); return `<div class="lx-lrow ${i % 2 ? 'rev' : ''}" style="--d:${50 + i * 8}s"><div class="lx-ltr">${strip}${strip}${r.length < 8 ? strip + strip : ''}</div></div>`; }).join('')}</div>`;
+  }
   if (k === 'brief') {
     const d = X.thisYear - X.lastYear;
     const goalsOn = X.S ? X.S.goalsOn : 0, goalsN = X.S ? X.S.goals.length : 0;
@@ -127,14 +153,15 @@ function liveChapterHTML(k, X, n, total) {
         <ol class="lx-rank">${top.slice(0, 6).map(([r, c], i) => `<li style="--i:${i}"><span>${esc(r)}</span><i><em style="width:${Math.round(c / (top[0][1] || 1) * 100)}%"></em></i><b>${c}</b></li>`).join('')}${nat ? `<li class="nat"><span>على مستوى المملكة</span><i></i><b>${nat}</b></li>` : ''}</ol></div>`;
   }
   if (k === 'spot') {
-    const s = X.signed.slice(0, 3);
+    const s = X.signed.filter((p) => partnershipPhotos(p).length).slice(0, 3).concat(X.signed.filter((p) => !partnershipPhotos(p).length)).slice(0, 3);
     return `${lxHead(n, total, 'شراكات في الواجهة', 'أحدث الشراكات الموقّعة')}
-      <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 2);
+      <div class="lx-spot fb">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 2);
         return `<article class="lx-sp ${i === 0 ? 'on' : ''}" data-sp="${i}"><div class="lx-spm">${ph ? `<img data-file="${esc(ph.fileId)}" alt="">` : coverHTML(p.id, null, { W: 900, H: 600 })}</div>
           <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(signedOn(p))}م</small><h3>${esc(partnerName(p))}</h3>
           ${p.startDate && p.endDate ? (() => { const t0 = new Date(p.startDate), t1 = new Date(p.endDate), k = Math.min(100, Math.max(0, (today() - t0) / Math.max(1, t1 - t0) * 100)); const left = daysLeft(p); return `<div class="lx-dur"><div class="lx-durb"><i style="width:${k.toFixed(1)}%"></i><u style="inset-inline-start:${k.toFixed(1)}%"></u></div><div class="lx-durl"><span>${fmtDate(p.startDate)}</span><b>${left > 0 ? `باقٍ ${plural(left, 'يوم', 'يومان', 'أيام', 'يومًا')}` : 'انتهت'}</b><span>${fmtDate(p.endDate)}</span></div></div>`; })() : ''}
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
-        <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div></div>`;
+        <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="lx-sth">${X.signed.slice(3, 9).map((p) => { const ph = partnershipPhotos(p)[0]; return ph ? `<figure><img data-file="${esc(ph.fileId)}" alt=""><figcaption>${esc(partnerName(p))}</figcaption></figure>` : ''; }).join('')}</div></div>`;
   }
   if (k === 'sectors') {
     const order = ['حكومي', 'شبه حكومي', 'خاص', 'غير ربحي', 'تعليمي'];
@@ -155,9 +182,9 @@ function liveChapterHTML(k, X, n, total) {
       </div>` : '<div class="lx-calm"><b>لا توجد معاملات أو قرارات معلّقة</b><span>جميع الشراكات تسير وفق المسار المعتمد.</span></div>'}`;
   }
   if (k === 'impact') {
-    const st = X.stories.slice(0, 3);
+    const st = X.stories.slice(0, 5);
     return `${lxHead(n, total, 'الأثر الميداني', st.length ? `${plural(X.stories.length, 'قصة أثر موثّقة', 'قصتا أثر موثّقتان', 'قصص أثر موثّقة', 'قصة أثر موثّقة')} · ${lvN(X.outputs)} مخرجًا مستهدفًا في الشراكات الموقّعة` : '')}
-      <div class="lx-imp">${st.map((a, i) => `<article style="--i:${i}"><div class="lx-impm">${coverHTML('story' + a.id, a.coverFileId, { W: 700, H: 460 })}${a.metricValue ? `<span><b>${esc(a.metricValue)}</b>${esc(a.metricLabel || '')}</span>` : ''}</div><h3>${esc(a.title)}</h3><small>${(() => { const sp = storyPartner(a); const nm = sp ? sp.name : ''; return (nm ? esc(nm) + ' · ' : '') + fmtDate(a.date, 'month'); })()}</small></article>`).join('')}</div>`;
+      <div class="lx-imp bento n${st.length}">${st.map((a, i) => `<article style="--i:${i}"><div class="lx-impm">${coverHTML('story' + a.id, a.coverFileId, { W: 700, H: 460 })}${a.metricValue ? `<span><b>${esc(a.metricValue)}</b>${esc(a.metricLabel || '')}</span>` : ''}</div><h3>${esc(a.title)}</h3><small>${(() => { const sp = storyPartner(a); const nm = sp ? sp.name : ''; return (nm ? esc(nm) + ' · ' : '') + fmtDate(a.date, 'month'); })()}</small></article>`).join('')}</div>`;
   }
   return '';
 }
@@ -178,8 +205,8 @@ function renderLive(el) {
   document.body.appendChild(box); document.documentElement.classList.add('live-on');
   let cfg = liveCfg(), chs = [], i = 0, T = null, spT = null, idle = null;
   const sec = () => Math.max(8, +(cfg.sec || 0) || 0);
-  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : c.k === 'pipe' ? (X.propsIn.length + Object.values(X.phase).reduce((t, a) => t + a.length, 0)) > 0 : true));
-  box.innerHTML = `<div class="lx-bg" aria-hidden="true"></div>
+  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'wall' ? X.photos.length >= 4 : c.k === 'logos' ? X.logos.length >= 6 : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : c.k === 'pipe' ? (X.propsIn.length + Object.values(X.phase).reduce((t, a) => t + a.length, 0)) > 0 : true));
+  box.innerHTML = `<div class="lx-bg" aria-hidden="true"></div><div class="lx-bgph" id="lxBgph" aria-hidden="true"></div>
     <header class="lx-top">${logo ? `<img src="${logo}" alt="">` : ''}<div class="lx-tt"><b>${esc(D.settings.org.name)}</b><span>منظومة الشراكات · ${esc(D.settings.org.dept || 'إدارة الشراكات')}</span></div>
       <div class="lx-clock"><b id="lxTime"></b><span id="lxHijri"></span><small id="lxGreg"></small></div></header>
     <main class="lx-stage" id="lxStage"></main>
@@ -197,8 +224,13 @@ function renderLive(el) {
     i = (n + chs.length) % chs.length; const c = chs[i];
     const st = box.querySelector('#lxStage'); st.className = 'lx-stage c-' + c.k; st.innerHTML = `<div class="lx-ch">${liveChapterHTML(c.k, X, i + 1, chs.length)}</div>`;
     hydrateFiles(st); countUp(st);
+    /* خلفية مصوّرة لكل فصل (مموّهة) — عدا جدار الصور */
+    const bg = box.querySelector('#lxBgph'); const pool = X.photos;
+    if (c.k !== 'wall' && pool.length) { const ph = pool[(i * 5 + Math.floor(Math.random() * pool.length)) % pool.length]; const im = document.createElement('img'); im.dataset.file = ph.fileId; im.alt = ''; im.onload = () => { requestAnimationFrame(() => im.classList.add('in')); [...bg.children].slice(0, -1).forEach((o) => { o.classList.remove('in'); setTimeout(() => o.remove(), 1600); }); }; bg.appendChild(im); hydrateFiles(bg); bg.classList.remove('off'); } else bg.classList.add('off');
+    clearInterval(box._mos);
+    if (c.k === 'wall' && pool.length > 1) { let q = 14; box._mos = setInterval(() => { const figs = st.querySelectorAll('.lx-mos figure'); if (!figs.length) return; const f = figs[Math.floor(Math.random() * figs.length)]; const x = pool[q++ % pool.length]; const im = f.querySelector('img'); f.classList.add('sw'); setTimeout(() => { im.dataset.file = x.fileId; hydrateFiles(f).then(() => f.classList.remove('sw')); const cap = f.querySelector('figcaption'); if (cap) cap.textContent = x.p ? partnerName(x.p) : (x.a ? x.a.title : ''); }, 700); }, 2600); }
     const dur = (cfg.sec ? sec() : c.s) * 1000;
-    box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.t}</span></button>`).join('');
+    box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.n || x.t}</span></button>`).join('');
     const tk = liveTicker(X), tr = box.querySelector('#lxTick');
     if (tr.dataset.v !== tk) { tr.dataset.v = tk; tr.innerHTML = tk ? `<div>${tk}<i>◆</i></div><div aria-hidden="true">${tk}<i>◆</i></div>` : ''; tr.style.setProperty('--dur', Math.max(30, tk.length / 9) + 's'); }
     clearInterval(spT);
@@ -211,7 +243,7 @@ function renderLive(el) {
       <label class="lx-ps">مدة كل فصل <select data-lxsec><option value="">تلقائية حسب الفصل</option>${[10, 15, 20, 30, 45, 60].map((s) => `<option value="${s}" ${+cfg.sec === s ? 'selected' : ''}>${s} ثانية</option>`).join('')}</select></label>
       <button type="button" class="lx-pok" data-lxdone>تم</button>`;
   };
-  const stop = () => { clearTimeout(T); clearInterval(spT); clearInterval(box._clk); box.remove(); document.documentElement.classList.remove('live-on'); window.removeEventListener('hashchange', onHash); document.removeEventListener('keydown', onKey); try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) { /* */ } };
+  const stop = () => { clearTimeout(T); clearInterval(spT); clearInterval(box._mos); clearInterval(box._clk); box.remove(); document.documentElement.classList.remove('live-on'); window.removeEventListener('hashchange', onHash); document.removeEventListener('keydown', onKey); try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) { /* */ } };
   const leave = () => (history.length > 1 ? history.back() : go('#/'));
   const onHash = () => { if (!location.hash.startsWith('#/live')) stop(); };
   const onKey = (e) => { if (e.key === 'Escape') { const p = box.querySelector('#lxPanel'); if (!p.hidden) { p.hidden = true; return; } leave(); } else if (e.key === 'ArrowLeft') show(i + 1); else if (e.key === 'ArrowRight') show(i - 1); else if (e.key === 'f' || e.key === 'F') box.querySelector('[data-lxfs]').click(); };

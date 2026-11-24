@@ -9310,6 +9310,106 @@ html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root
 .dcv-src{background:none;color:#BFA874;font-weight:500;padding:0;margin-top:20px;letter-spacing:.2px}
 .dcv-foot{border-top-color:rgba(230,199,134,.14);color:#9FB8AD}
 .dcv-foot .ds-code{color:#CDB57E}
+
+/* ===== العرض المباشر — طابع تسويقي بالصور ===== */
+.lx-bgph{position:absolute;inset:0;z-index:0;pointer-events:none;transition:opacity 1.2s}
+.lx-bgph.off{opacity:0}
+.lx-bgph img{position:absolute;inset:-4%;width:108%;height:108%;object-fit:cover;filter:blur(14px) saturate(.9) brightness(.42);opacity:0;transform:scale(1.06);transition:opacity 1.6s ease}
+.lx-bgph img.in{opacity:.55;animation:lxBgKen 30s ease-in-out infinite alternate}
+@keyframes lxBgKen{to{transform:scale(1.14) translate(-1.5%,1%)}}
+.lx-bgph::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(6,26,21,.35),rgba(6,26,21,.88) 75%),linear-gradient(180deg,rgba(6,26,21,.55),rgba(6,26,21,.2) 30%,rgba(6,26,21,.75))}
+.lx-top,.lx-stage,.lx-tick,.lx-foot{position:relative;z-index:1}
+
+/* جدار الصور الافتتاحي */
+.lx-stage.c-wall{padding:0}
+.lx-wall{position:relative;flex:1;min-height:0;overflow:hidden}
+.lx-mos{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(3,1fr);gap:6px;padding:6px}
+.lx-mos figure{position:relative;margin:0;overflow:hidden;border-radius:6px;background:#0B2A22;animation:lxTile 1.1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*.09s)}
+.lx-mos .t0{grid-column:span 2;grid-row:span 2}
+.lx-mos .t5{grid-column:span 2}
+.lx-mos img{width:100%;height:100%;object-fit:cover;display:block;animation:lxKen2 18s ease-in-out infinite alternate;animation-delay:calc(var(--i)*-1.7s);transition:opacity .7s,filter .7s}
+.lx-mos figure.sw img{opacity:0;filter:blur(6px)}
+@keyframes lxKen2{from{transform:scale(1.02)}to{transform:scale(1.14) translate(1.5%,-1.5%)}}
+@keyframes lxTile{from{opacity:0;transform:scale(.9);filter:brightness(2)}}
+.lx-mos figcaption{position:absolute;inset-inline:0;bottom:0;padding:22px 14px 10px;font-size:clamp(12px,.85vw,16px);color:#EEF3EF;background:linear-gradient(0deg,rgba(0,0,0,.65),transparent);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lx-wall-veil{position:absolute;inset:0;background:linear-gradient(270deg,rgba(6,26,21,.94) 0,rgba(6,26,21,.86) 34%,rgba(6,26,21,.25) 62%,rgba(6,26,21,.05)),linear-gradient(0deg,rgba(6,26,21,.7),transparent 35%);pointer-events:none}
+.lx-wall-t{position:absolute;inset-block:0;inset-inline-start:0;width:46%;padding:0 4.5vw;display:flex;flex-direction:column;justify-content:center;gap:2.2vh}
+.lx-wall-t small{font-size:clamp(15px,1.15vw,22px);color:#E3C47D;letter-spacing:.4px;animation:lxIn .9s both .2s}
+.lx-wall-t h2{margin:0;font-family:var(--font);font-weight:800;font-size:clamp(52px,5.6vw,108px);line-height:1.12;color:#fff;animation:lxIn 1s both .35s}
+.lx-wall-t h2 em{font-style:normal;background:linear-gradient(90deg,#F3DFA9,#C9A055,#F3DFA9);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lxShine 6s linear infinite}
+@keyframes lxShine{to{background-position:-200% 0}}
+.lx-wall-t p{margin:0;font-size:clamp(17px,1.4vw,27px);line-height:1.75;color:#D5E1DA;max-width:32ch;animation:lxIn 1s both .5s}
+.lx-wall-n{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0;margin-top:2vh;border-block:1px solid rgba(227,196,125,.28);animation:lxIn 1s both .7s}
+.lx-wall-n>div{padding:2vh .8vw;text-align:center;position:relative}
+.lx-wall-n>div+div::before{content:"";position:absolute;inset-inline-start:0;top:24%;bottom:24%;width:1px;background:rgba(227,196,125,.28)}
+.lx-wall-n b{display:block;font-size:clamp(40px,3.6vw,72px);line-height:1;color:#F3DFA9;font-variant-numeric:tabular-nums}
+.lx-wall-n span{font-size:clamp(14px,1.05vw,20px);color:#C9D9D0}
+
+/* شراكة في الواجهة: صورة بكامل المساحة */
+.lx-spot.fb .lx-sp{grid-template-columns:1fr;gap:0}
+.lx-spot.fb .lx-spm{position:absolute;inset:0;border-radius:18px}
+.lx-spot.fb .lx-spm::after{content:"";position:absolute;inset:0;background:linear-gradient(270deg,rgba(6,26,21,.95) 0,rgba(6,26,21,.82) 36%,rgba(6,26,21,.15) 70%,transparent),linear-gradient(0deg,rgba(6,26,21,.55),transparent 40%)}
+.lx-spot.fb .lx-spb{position:relative;z-index:1;width:44%;padding:4vh 3vw;height:100%;box-sizing:border-box}
+.lx-spot.fb .lx-spb h3{font-size:clamp(34px,3.3vw,64px);font-weight:800}
+.lx-spot.fb .lx-spl .plate{box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}
+.lx-spot.fb .lx-spd{inset-inline-start:3vw;bottom:3vh;z-index:2}
+.lx-spot.fb .lx-sp.on .lx-spb>*{animation:lxIn .9s both}
+.lx-spot.fb .lx-sp.on .lx-spb>*:nth-child(2){animation-delay:.15s}.lx-spot.fb .lx-sp.on .lx-spb>*:nth-child(3){animation-delay:.3s}.lx-spot.fb .lx-sp.on .lx-spb>*:nth-child(4){animation-delay:.45s}.lx-spot.fb .lx-sp.on .lx-spb>*:nth-child(5){animation-delay:.6s}
+.lx-sth{position:absolute;inset-inline-end:2vw;bottom:2.6vh;z-index:2;display:flex;gap:10px}
+.lx-sth figure{margin:0;width:clamp(110px,8.4vw,170px);aspect-ratio:4/3;border-radius:10px;overflow:hidden;position:relative;border:1.5px solid rgba(255,255,255,.35);box-shadow:0 10px 24px -10px rgba(0,0,0,.6);animation:lxIn .8s both;animation-delay:calc(.6s + var(--i,0)*.1s)}
+.lx-sth img{width:100%;height:100%;object-fit:cover}
+.lx-sth figcaption{position:absolute;inset-inline:0;bottom:0;padding:14px 6px 4px;font-size:11px;color:#fff;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* شركاء يثقون بنا */
+.lx-logos{flex:1;display:flex;flex-direction:column;justify-content:center;gap:3vh;min-height:0;margin-inline:-4.5vw;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.lx-lrow{overflow:hidden}
+.lx-ltr{display:flex;gap:1.6vw;width:max-content;animation:lxMarq var(--d) linear infinite}
+.lx-lrow.rev .lx-ltr{animation-direction:reverse}
+@keyframes lxMarq{from{transform:translateX(0)}to{transform:translateX(50%)}}
+.lx-lg{display:flex;align-items:center;gap:14px;padding:12px 22px 12px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(227,196,125,.2);backdrop-filter:blur(6px)}
+.lx-lgp .plate{border-radius:50%!important;width:clamp(64px,4.8vw,92px)!important;height:clamp(64px,4.8vw,92px)!important}
+.lx-lg span{font-size:clamp(16px,1.25vw,24px);color:#EEF3EF;white-space:nowrap;font-weight:500}
+
+/* الأثر الميداني: تخطيط متفاوت */
+.lx-imp.bento{grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:1.4vw}
+.lx-imp.bento article{position:relative;border-radius:16px;overflow:hidden;gap:0;background:#0B2A22}
+.lx-imp.bento article:first-child{grid-row:span 2}
+.lx-imp.bento.n2 article{grid-row:span 2}
+.lx-imp.bento.n3 article:nth-child(2),.lx-imp.bento.n3 article:nth-child(3){grid-row:span 2}
+.lx-imp.bento .lx-impm{position:absolute;inset:0;height:auto!important;border-radius:0}
+.lx-imp.bento .lx-impm img,.lx-imp.bento .lx-impm .cover{width:100%;height:100%;object-fit:cover;animation:lxKen2 20s ease-in-out infinite alternate}
+.lx-imp.bento article::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,26,21,.92),rgba(6,26,21,.25) 55%,transparent);pointer-events:none}
+.lx-imp.bento h3,.lx-imp.bento small{position:relative;z-index:1;padding-inline:1.4vw}
+.lx-imp.bento h3{margin-top:auto;font-size:clamp(17px,1.4vw,27px)}
+.lx-imp.bento small{padding-bottom:1.8vh}
+.lx-imp.bento article:first-child h3{font-size:clamp(24px,2.1vw,40px)}
+.lx-imp.bento .lx-impm span{position:absolute;top:1.6vh;inset-inline-start:1.2vw;z-index:2}
+.lx-imp.bento article:first-child .lx-impm span b{font-size:clamp(40px,3.6vw,70px)}
+.lx-mos{grid-auto-flow:dense}
+.lx-mos .t0{grid-column:5/7;grid-row:1/3}
+.lx-mos .t5{grid-column:span 2}
+.lx-imp.bento .lx-impm span{bottom:auto;display:inline-flex;align-items:baseline;gap:8px;padding:.9vh 1.1vw;background:rgba(6,26,21,.72);border:1px solid rgba(227,196,125,.35);backdrop-filter:blur(6px);color:#E3D3A8}
+.lx-imp.bento .lx-impm span b{color:#F3DFA9;margin:0}
+.lx-nav button{white-space:nowrap}
+.lx-nav i{width:5.6vw}
+.lx-upd{white-space:nowrap}
+.lx-spot.fb .lx-spb{justify-content:center;gap:1.4vh}
+.lx-spot.fb .lx-spb ul{display:none}
+.lx-spot.fb .lx-sp.on .lx-spb ul{display:flex}
+.lx-spot.fb .lx-spb li:nth-child(n+2){display:none}
+.lx-spot.fb .lx-spb h3{font-size:clamp(30px,2.8vw,56px)}
+.lx-imp.bento .lx-impm{aspect-ratio:auto!important;height:100%!important}
+.lx-imp.bento .lx-impm span.illus{display:none!important}
+.lx-imp.bento .lx-impm .cover{position:absolute;inset:0}
+.lx-imp.bento.n4{grid-template-columns:1.4fr 1fr 1fr}
+.lx-imp.bento.n4 article:nth-child(4){grid-column:span 2}
+.lx-imp.bento.n3{grid-template-columns:1.4fr 1fr}
+.lx-imp.bento.n3 article:nth-child(2),.lx-imp.bento.n3 article:nth-child(3){grid-row:auto}
+.lx-imp.bento.n2{grid-template-columns:1fr 1fr}
+.lx-imp.bento.n1{grid-template-columns:1fr}
+.lx-bgph img{filter:blur(7px) saturate(1) brightness(.55)}
+.lx-bgph img.in{opacity:.85}
+.lx-bgph::after{background:radial-gradient(ellipse at 55% 45%,rgba(6,26,21,.25),rgba(6,26,21,.82) 80%),linear-gradient(180deg,rgba(6,26,21,.5),rgba(6,26,21,.15) 30%,rgba(6,26,21,.7))}
 </style>
 </head>
 <body>
@@ -32938,14 +33038,16 @@ function stratGapsHTML(list) {
    - إعداد الشاشة (الفصول والمدة) يُحفظ في هذا الجهاز فقط.
    ===================================================================== */
 const LIVE_CH = [
-  { k: 'brief', t: 'الملخص التنفيذي', s: 18 },
-  { k: 'strategy', t: 'المواءمة مع الاستراتيجية', s: 18 },
-  { k: 'pipe', t: 'مسار المعاملات', s: 16 },
-  { k: 'map', t: 'الانتشار الجغرافي', s: 16 },
-  { k: 'spot', t: 'شراكات في الواجهة', s: 24 },
-  { k: 'sectors', t: 'تنوع الشركاء', s: 16 },
-  { k: 'attn', t: 'يتطلب اهتمامكم', s: 18 },
-  { k: 'impact', t: 'الأثر الميداني', s: 16 },
+  { k: 'wall', t: 'شركاء الأثر', n: 'الواجهة', s: 20 },
+  { k: 'brief', t: 'الملخص التنفيذي', n: 'الملخص', s: 18 },
+  { k: 'strategy', t: 'المواءمة مع الاستراتيجية', n: 'الاستراتيجية', s: 18 },
+  { k: 'pipe', t: 'مسار المعاملات', n: 'المعاملات', s: 16 },
+  { k: 'map', t: 'الانتشار الجغرافي', n: 'الخريطة', s: 16 },
+  { k: 'spot', t: 'شراكات في الواجهة', n: 'شراكات بارزة', s: 24 },
+  { k: 'sectors', t: 'تنوع الشركاء', n: 'القطاعات', s: 16 },
+  { k: 'logos', t: 'شركاء يثقون بنا', n: 'الشركاء', s: 16 },
+  { k: 'attn', t: 'يتطلب اهتمامكم', n: 'للاهتمام', s: 18 },
+  { k: 'impact', t: 'الأثر الميداني', n: 'الأثر', s: 16 },
 ];
 const liveCfg = () => { try { return JSON.parse(localStorage.getItem('shk_live_cfg') || '{}'); } catch (_) { return {}; } };
 const liveCfgSave = (c) => { try { localStorage.setItem('shk_live_cfg', JSON.stringify(c)); } catch (_) { /* */ } };
@@ -32973,7 +33075,13 @@ function liveData() {
   const phase = Object.fromEntries(WF_PHASES.map((ph) => [ph.id, []]));
   L_.forEach((p) => { try { const cur = wfStateOf('partnership', p).cur; if (cur && phase[cur.ph]) phase[cur.ph].push(p); } catch (_) { /* */ } });
   const propsIn = visibleProposals().filter((x) => ['submitted', 'review', 'info', 'accepted'].includes(x.status) && (showDemo() || !x.demo));
-  return { L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
+  /* صور المنصة: صور الشراكات الموقّعة أولًا ثم أغلفة القصص — مادة الخلفيات وجدار الصور */
+  const photos = [], seenPh = new Set();
+  [...signed, ...L_.filter((p) => p.stage !== 'signed')].forEach((p) => partnershipPhotos(p).forEach((ph) => { if (!seenPh.has(ph.fileId)) { seenPh.add(ph.fileId); photos.push({ fileId: ph.fileId, p }); } }));
+  stories.forEach((a) => { if (a.coverFileId && !seenPh.has(a.coverFileId)) { seenPh.add(a.coverFileId); photos.push({ fileId: a.coverFileId, a }); } });
+  const logos = [...new Set(L_.map((p) => p.partnerId))].map(partnerById).filter((pr) => pr && pr.logoFileId);
+  const regionsN = KSA_REGIONS.filter(([r]) => regions[r]).length;
+  return { photos, logos, regionsN, L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
 }
 /* — رسوم الشاشة (SVG خفيفة تتحرك عند ظهور الفصل) — */
 const LX_SEC = { 'حكومي': '#3FA27F', 'شبه حكومي': '#7CC7AA', 'خاص': '#D9B25F', 'غير ربحي': '#6FA8D6', 'تعليمي': '#B792D6' };
@@ -33022,6 +33130,24 @@ function liveMapSVG(R) {
 const lxHead = (n, total, t, sub) => `<div class="lx-chh"><span class="lx-chn">${String(n).padStart(2, '0')}<i>/${String(total).padStart(2, '0')}</i></span><div><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div></div>`;
 function liveChapterHTML(k, X, n, total) {
   const org = esc(D.settings.org.name);
+  if (k === 'wall') {
+    const ph = X.photos.length ? Array.from({ length: 14 }, (_, i) => X.photos[i % X.photos.length]) : [];
+    const sects = Object.keys(X.sectors).filter((x) => x && x !== 'أخرى').length;
+    return `<div class="lx-wall">
+      <div class="lx-mos">${ph.map((x, i) => `<figure class="t${i}" style="--i:${i}"><img data-file="${esc(x.fileId)}" alt=""><figcaption>${esc(x.p ? partnerName(x.p) : (x.a ? x.a.title : ''))}</figcaption></figure>`).join('')}</div>
+      <div class="lx-wall-veil"></div>
+      <div class="lx-wall-t">
+        <small>منظومة شراكات ${org}</small>
+        <h2>شركاء <em>يصنعون</em> الأثر</h2>
+        <p>شراكات حكومية وخاصة وغير ربحية وتعليمية تعمل معًا لبيئة مستدامة في كل مناطق المملكة.</p>
+        <div class="lx-wall-n"><div><b class="lx-cu" data-v="${X.c.partners}">0</b><span>جهة شريكة</span></div><div><b class="lx-cu" data-v="${X.signedAll}">0</b><span>شراكة موقّعة</span></div><div><b class="lx-cu" data-v="${sects}">0</b><span>قطاعات</span></div>${X.regionsN ? `<div><b class="lx-cu" data-v="${X.regionsN}">0</b><span>مناطق</span></div>` : ''}</div>
+      </div></div>`;
+  }
+  if (k === 'logos') {
+    const L0 = X.logos, rows = [[], [], []]; L0.forEach((pr, i) => rows[i % 3].push(pr));
+    return `${lxHead(n, total, 'شركاء يثقون بنا', `${lvN(X.c.partners)} جهة شريكة من مختلف القطاعات`)}
+      <div class="lx-logos">${rows.filter((r) => r.length).map((r, i) => { const strip = r.map((pr) => `<div class="lx-lg"><div class="lx-lgp">${plateHTML(pr, 88)}</div><span>${esc(pr.name)}</span></div>`).join(''); return `<div class="lx-lrow ${i % 2 ? 'rev' : ''}" style="--d:${50 + i * 8}s"><div class="lx-ltr">${strip}${strip}${r.length < 8 ? strip + strip : ''}</div></div>`; }).join('')}</div>`;
+  }
   if (k === 'brief') {
     const d = X.thisYear - X.lastYear;
     const goalsOn = X.S ? X.S.goalsOn : 0, goalsN = X.S ? X.S.goals.length : 0;
@@ -33057,14 +33183,15 @@ function liveChapterHTML(k, X, n, total) {
         <ol class="lx-rank">${top.slice(0, 6).map(([r, c], i) => `<li style="--i:${i}"><span>${esc(r)}</span><i><em style="width:${Math.round(c / (top[0][1] || 1) * 100)}%"></em></i><b>${c}</b></li>`).join('')}${nat ? `<li class="nat"><span>على مستوى المملكة</span><i></i><b>${nat}</b></li>` : ''}</ol></div>`;
   }
   if (k === 'spot') {
-    const s = X.signed.slice(0, 3);
+    const s = X.signed.filter((p) => partnershipPhotos(p).length).slice(0, 3).concat(X.signed.filter((p) => !partnershipPhotos(p).length)).slice(0, 3);
     return `${lxHead(n, total, 'شراكات في الواجهة', 'أحدث الشراكات الموقّعة')}
-      <div class="lx-spot">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 2);
+      <div class="lx-spot fb">${s.map((p, i) => { const ph = partnershipPhotos(p)[0], pr = partnerById(p.partnerId), areas = richItems(p.cooperationAreas).slice(0, 2);
         return `<article class="lx-sp ${i === 0 ? 'on' : ''}" data-sp="${i}"><div class="lx-spm">${ph ? `<img data-file="${esc(ph.fileId)}" alt="">` : coverHTML(p.id, null, { W: 900, H: 600 })}</div>
           <div class="lx-spb"><div class="lx-spl">${plateHTML(pr, 96)}</div><small>${esc(p.classification || 'شراكة')} · وُقّعت ${fmtDate(signedOn(p))}م</small><h3>${esc(partnerName(p))}</h3>
           ${p.startDate && p.endDate ? (() => { const t0 = new Date(p.startDate), t1 = new Date(p.endDate), k = Math.min(100, Math.max(0, (today() - t0) / Math.max(1, t1 - t0) * 100)); const left = daysLeft(p); return `<div class="lx-dur"><div class="lx-durb"><i style="width:${k.toFixed(1)}%"></i><u style="inset-inline-start:${k.toFixed(1)}%"></u></div><div class="lx-durl"><span>${fmtDate(p.startDate)}</span><b>${left > 0 ? `باقٍ ${plural(left, 'يوم', 'يومان', 'أيام', 'يومًا')}` : 'انتهت'}</b><span>${fmtDate(p.endDate)}</span></div></div>`; })() : ''}
           ${areas.length ? `<ul>${areas.map((a) => `<li>${esc(trimP(a.title || String(a.text || '').split(/[:،.]/)[0]).slice(0, 90))}</li>`).join('')}</ul>` : ''}</div></article>`; }).join('')}
-        <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div></div>`;
+        <div class="lx-spd">${s.map((_, i) => `<i class="${i === 0 ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="lx-sth">${X.signed.slice(3, 9).map((p) => { const ph = partnershipPhotos(p)[0]; return ph ? `<figure><img data-file="${esc(ph.fileId)}" alt=""><figcaption>${esc(partnerName(p))}</figcaption></figure>` : ''; }).join('')}</div></div>`;
   }
   if (k === 'sectors') {
     const order = ['حكومي', 'شبه حكومي', 'خاص', 'غير ربحي', 'تعليمي'];
@@ -33085,9 +33212,9 @@ function liveChapterHTML(k, X, n, total) {
       </div>` : '<div class="lx-calm"><b>لا توجد معاملات أو قرارات معلّقة</b><span>جميع الشراكات تسير وفق المسار المعتمد.</span></div>'}`;
   }
   if (k === 'impact') {
-    const st = X.stories.slice(0, 3);
+    const st = X.stories.slice(0, 5);
     return `${lxHead(n, total, 'الأثر الميداني', st.length ? `${plural(X.stories.length, 'قصة أثر موثّقة', 'قصتا أثر موثّقتان', 'قصص أثر موثّقة', 'قصة أثر موثّقة')} · ${lvN(X.outputs)} مخرجًا مستهدفًا في الشراكات الموقّعة` : '')}
-      <div class="lx-imp">${st.map((a, i) => `<article style="--i:${i}"><div class="lx-impm">${coverHTML('story' + a.id, a.coverFileId, { W: 700, H: 460 })}${a.metricValue ? `<span><b>${esc(a.metricValue)}</b>${esc(a.metricLabel || '')}</span>` : ''}</div><h3>${esc(a.title)}</h3><small>${(() => { const sp = storyPartner(a); const nm = sp ? sp.name : ''; return (nm ? esc(nm) + ' · ' : '') + fmtDate(a.date, 'month'); })()}</small></article>`).join('')}</div>`;
+      <div class="lx-imp bento n${st.length}">${st.map((a, i) => `<article style="--i:${i}"><div class="lx-impm">${coverHTML('story' + a.id, a.coverFileId, { W: 700, H: 460 })}${a.metricValue ? `<span><b>${esc(a.metricValue)}</b>${esc(a.metricLabel || '')}</span>` : ''}</div><h3>${esc(a.title)}</h3><small>${(() => { const sp = storyPartner(a); const nm = sp ? sp.name : ''; return (nm ? esc(nm) + ' · ' : '') + fmtDate(a.date, 'month'); })()}</small></article>`).join('')}</div>`;
   }
   return '';
 }
@@ -33108,8 +33235,8 @@ function renderLive(el) {
   document.body.appendChild(box); document.documentElement.classList.add('live-on');
   let cfg = liveCfg(), chs = [], i = 0, T = null, spT = null, idle = null;
   const sec = () => Math.max(8, +(cfg.sec || 0) || 0);
-  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : c.k === 'pipe' ? (X.propsIn.length + Object.values(X.phase).reduce((t, a) => t + a.length, 0)) > 0 : true));
-  box.innerHTML = `<div class="lx-bg" aria-hidden="true"></div>
+  const pick = (X) => LIVE_CH.filter((c) => !(cfg.off || []).includes(c.k)).filter((c) => (c.k === 'impact' ? X.stories.length : c.k === 'wall' ? X.photos.length >= 4 : c.k === 'logos' ? X.logos.length >= 6 : c.k === 'spot' ? X.signed.length : c.k === 'strategy' ? !!X.S : c.k === 'pipe' ? (X.propsIn.length + Object.values(X.phase).reduce((t, a) => t + a.length, 0)) > 0 : true));
+  box.innerHTML = `<div class="lx-bg" aria-hidden="true"></div><div class="lx-bgph" id="lxBgph" aria-hidden="true"></div>
     <header class="lx-top">${logo ? `<img src="${logo}" alt="">` : ''}<div class="lx-tt"><b>${esc(D.settings.org.name)}</b><span>منظومة الشراكات · ${esc(D.settings.org.dept || 'إدارة الشراكات')}</span></div>
       <div class="lx-clock"><b id="lxTime"></b><span id="lxHijri"></span><small id="lxGreg"></small></div></header>
     <main class="lx-stage" id="lxStage"></main>
@@ -33127,8 +33254,13 @@ function renderLive(el) {
     i = (n + chs.length) % chs.length; const c = chs[i];
     const st = box.querySelector('#lxStage'); st.className = 'lx-stage c-' + c.k; st.innerHTML = `<div class="lx-ch">${liveChapterHTML(c.k, X, i + 1, chs.length)}</div>`;
     hydrateFiles(st); countUp(st);
+    /* خلفية مصوّرة لكل فصل (مموّهة) — عدا جدار الصور */
+    const bg = box.querySelector('#lxBgph'); const pool = X.photos;
+    if (c.k !== 'wall' && pool.length) { const ph = pool[(i * 5 + Math.floor(Math.random() * pool.length)) % pool.length]; const im = document.createElement('img'); im.dataset.file = ph.fileId; im.alt = ''; im.onload = () => { requestAnimationFrame(() => im.classList.add('in')); [...bg.children].slice(0, -1).forEach((o) => { o.classList.remove('in'); setTimeout(() => o.remove(), 1600); }); }; bg.appendChild(im); hydrateFiles(bg); bg.classList.remove('off'); } else bg.classList.add('off');
+    clearInterval(box._mos);
+    if (c.k === 'wall' && pool.length > 1) { let q = 14; box._mos = setInterval(() => { const figs = st.querySelectorAll('.lx-mos figure'); if (!figs.length) return; const f = figs[Math.floor(Math.random() * figs.length)]; const x = pool[q++ % pool.length]; const im = f.querySelector('img'); f.classList.add('sw'); setTimeout(() => { im.dataset.file = x.fileId; hydrateFiles(f).then(() => f.classList.remove('sw')); const cap = f.querySelector('figcaption'); if (cap) cap.textContent = x.p ? partnerName(x.p) : (x.a ? x.a.title : ''); }, 700); }, 2600); }
     const dur = (cfg.sec ? sec() : c.s) * 1000;
-    box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.t}</span></button>`).join('');
+    box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.n || x.t}</span></button>`).join('');
     const tk = liveTicker(X), tr = box.querySelector('#lxTick');
     if (tr.dataset.v !== tk) { tr.dataset.v = tk; tr.innerHTML = tk ? `<div>${tk}<i>◆</i></div><div aria-hidden="true">${tk}<i>◆</i></div>` : ''; tr.style.setProperty('--dur', Math.max(30, tk.length / 9) + 's'); }
     clearInterval(spT);
@@ -33141,7 +33273,7 @@ function renderLive(el) {
       <label class="lx-ps">مدة كل فصل <select data-lxsec><option value="">تلقائية حسب الفصل</option>${[10, 15, 20, 30, 45, 60].map((s) => `<option value="${s}" ${+cfg.sec === s ? 'selected' : ''}>${s} ثانية</option>`).join('')}</select></label>
       <button type="button" class="lx-pok" data-lxdone>تم</button>`;
   };
-  const stop = () => { clearTimeout(T); clearInterval(spT); clearInterval(box._clk); box.remove(); document.documentElement.classList.remove('live-on'); window.removeEventListener('hashchange', onHash); document.removeEventListener('keydown', onKey); try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) { /* */ } };
+  const stop = () => { clearTimeout(T); clearInterval(spT); clearInterval(box._mos); clearInterval(box._clk); box.remove(); document.documentElement.classList.remove('live-on'); window.removeEventListener('hashchange', onHash); document.removeEventListener('keydown', onKey); try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) { /* */ } };
   const leave = () => (history.length > 1 ? history.back() : go('#/'));
   const onHash = () => { if (!location.hash.startsWith('#/live')) stop(); };
   const onKey = (e) => { if (e.key === 'Escape') { const p = box.querySelector('#lxPanel'); if (!p.hidden) { p.hidden = true; return; } leave(); } else if (e.key === 'ArrowLeft') show(i + 1); else if (e.key === 'ArrowRight') show(i - 1); else if (e.key === 'f' || e.key === 'F') box.querySelector('[data-lxfs]').click(); };
