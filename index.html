@@ -9502,6 +9502,9 @@ html.theme-vt::view-transition-old(root),html.theme-vt::view-transition-new(root
 .lx-mapw{height:100%;min-height:0;position:relative}
 .lx-mapw .lx-map{position:absolute;inset:0;width:100%;height:100%;max-height:none!important}
 .lx-rank{align-self:center}
+.lx-lpage{grid-template-rows:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(0,1fr)}
+.lx-ini{width:clamp(48px,3.6vw,76px);height:clamp(48px,3.6vw,76px);flex:none;border-radius:14px;display:grid;place-items:center;font-size:clamp(22px,1.8vw,36px);font-weight:700;color:#F3DFA9;background:linear-gradient(150deg,rgba(227,196,125,.22),rgba(227,196,125,.06));border:1px solid rgba(227,196,125,.4)}
+.lx-lpage .lx-lg .lx-ini{display:grid!important;place-items:center;text-align:center!important;-webkit-line-clamp:unset;line-height:1;font-size:clamp(22px,1.8vw,36px)!important;font-weight:700;color:#F3DFA9!important;overflow:visible}
 </style>
 </head>
 <body>
@@ -33177,13 +33180,15 @@ function liveData() {
   const photos = [], seenPh = new Set();
   [...signed, ...L_.filter((p) => p.stage !== 'signed')].forEach((p) => partnershipPhotos(p).forEach((ph) => { if (!seenPh.has(ph.fileId)) { seenPh.add(ph.fileId); photos.push({ fileId: ph.fileId, p }); } }));
   stories.forEach((a) => { if (a.coverFileId && !seenPh.has(a.coverFileId)) { seenPh.add(a.coverFileId); photos.push({ fileId: a.coverFileId, a }); } });
-  const logos = [...new Set(L_.map((p) => p.partnerId))].map(partnerById).filter((pr) => pr && pr.logoFileId);
+  const allPr = [...new Set(L_.map((p) => p.partnerId))].map(partnerById).filter(Boolean); const logos = allPr.filter((pr) => pr.logoFileId); const partnersAll = [...logos, ...allPr.filter((pr) => !pr.logoFileId)];
   const regionsN = KSA_REGIONS.filter(([r]) => regions[r]).length;
-  return { photos, logos, regionsN, L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
+  return { photos, logos, partnersAll, regionsN, L: L_, c, signed, thisYear: byYear(y), lastYear: byYear(y - 1), y, S, regions, sectors, awaitMin, preparing, expiring, stories, outputs, years, cum, signedAll, phase, propsIn };
 }
 /* — رسوم الشاشة (SVG خفيفة تتحرك عند ظهور الفصل) — */
 const LX_SEC = { 'حكومي': '#3FA27F', 'شبه حكومي': '#7CC7AA', 'خاص': '#D9B25F', 'غير ربحي': '#6FA8D6', 'تعليمي': '#B792D6' };
 const lxSecC = (s, i) => LX_SEC[s] || ['#E08E6D', '#9FB4AA', '#C9A36B', '#8FB6C9'][i % 4];
+/* الحرف الأول من اسم الجهة (بعد الكلمات العامة مثل شركة وجمعية وهيئة) لشارة الجهات بلا شعار */
+const lxInitial = (name) => { const w = String(name || '').replace(/[()«»"]/g, ' ').split(/\s+/).filter(Boolean); const skip = /^(شركة|الشركة|جمعية|الجمعية|مؤسسة|المؤسسة|هيئة|الهيئة|المركز|مركز|وزارة|أمانة|جامعة|مجموعة|بنك|نادي)$/; const k = w.find((x) => !skip.test(x)) || w[0] || '؟'; return k.replace(/^ال(?=..)/, '').charAt(0); };
 function lxDonut(segs, { size = 300, w = 30, gap = 0.8, inner = '' } = {}) {
   const tot = segs.reduce((t, x) => t + x.v, 0) || 1, r = (size - w) / 2, c = size / 2; let off = 0;
   const arcs = segs.filter((x) => x.v).map((x, i) => { const len = Math.max(0, x.v / tot * 100 - (segs.length > 1 ? gap : 0)); const el = `<circle cx="${c}" cy="${c}" r="${r}" pathLength="100" stroke="${x.c}" stroke-width="${w}" stroke-dasharray="${len.toFixed(2)} 100" stroke-dashoffset="${(-off).toFixed(2)}" style="--i:${i}" class="lx-dseg"/>`; off += x.v / tot * 100; return el; }).join('');
@@ -33241,10 +33246,10 @@ function liveChapterHTML(k, X, n, total) {
       </div></div>`;
   }
   if (k === 'logos') {
-    const per = 15, pages = [];
-    for (let q = 0; q < X.logos.length; q += per) pages.push(X.logos.slice(q, q + per));
+    const N = X.partnersAll.length, per = Math.ceil(N / Math.max(1, Math.ceil(N / 15))), pages = []; /* توزيع متساوٍ على الصفحات */
+    for (let q = 0; q < X.partnersAll.length; q += per) pages.push(X.partnersAll.slice(q, q + per));
     return `${lxHead(n, total, 'شركاء يثقون بنا', `${lvN(X.c.partners)} جهة شريكة من مختلف القطاعات`)}
-      <div class="lx-lgrid">${pages.map((pg, pi) => `<div class="lx-lpage ${pi === 0 ? 'on' : ''}">${pg.map((pr, i) => `<div class="lx-lg" style="--i:${i}"><div class="lx-lgp">${plateHTML(pr, 88)}</div><span>${esc(pr.name)}</span></div>`).join('')}</div>`).join('')}
+      <div class="lx-lgrid">${pages.map((pg, pi) => `<div class="lx-lpage ${pi === 0 ? 'on' : ''}">${pg.map((pr, i) => `<div class="lx-lg" style="--i:${i}"><div class="lx-lgp ${pr.logoFileId ? '' : 'nl'}">${pr.logoFileId ? plateHTML(pr, 88) : `<span class="lx-ini">${esc(lxInitial(pr.name))}</span>`}</div><span>${esc(pr.name)}</span></div>`).join('')}</div>`).join('')}
         ${pages.length > 1 ? `<div class="lx-lpd">${pages.map((_, pi) => `<i class="${pi === 0 ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>`;
   }
   if (k === 'brief') {
@@ -33357,12 +33362,14 @@ function renderLive(el) {
     if (c.k !== 'wall' && pool.length) { const ph = pool[(i * 5 + Math.floor(Math.random() * pool.length)) % pool.length]; const im = document.createElement('img'); im.dataset.file = ph.fileId; im.alt = ''; im.onload = () => { requestAnimationFrame(() => im.classList.add('in')); [...bg.children].slice(0, -1).forEach((o) => { o.classList.remove('in'); setTimeout(() => o.remove(), 1600); }); }; bg.appendChild(im); hydrateFiles(bg); bg.classList.remove('off'); } else bg.classList.add('off');
     clearInterval(box._mos);
     if (c.k === 'wall' && pool.length > 1) { let q = 14; box._mos = setInterval(() => { const figs = st.querySelectorAll('.lx-mos figure'); if (!figs.length) return; const f = figs[Math.floor(Math.random() * figs.length)]; const x = pool[q++ % pool.length]; const im = f.querySelector('img'); f.classList.add('sw'); setTimeout(() => { im.dataset.file = x.fileId; hydrateFiles(f).then(() => f.classList.remove('sw')); const cap = f.querySelector('figcaption'); if (cap) cap.textContent = x.p ? partnerName(x.p) : (x.a ? x.a.title : ''); }, 700); }, 2600); }
-    const dur = (cfg.sec ? sec() : c.s) * 1000;
+    let dur = (cfg.sec ? sec() : c.s) * 1000;
+    /* الشركاء: المدة على قدر الصفحات (7 ثوانٍ لكل 15 جهة) حتى تظهر الجهات كلها مهما زاد عددها */
+    if (c.k === 'logos') { const np = st.querySelectorAll('.lx-lpage').length; dur = Math.max(dur, np * 7000); }
     box.querySelector('#lxNav').innerHTML = chs.map((x, k) => `<button type="button" data-lx="${k}" title="${x.t}" class="${k === i ? 'on' : ''}" style="--ms:${k === i ? dur : 0}ms"><i></i><span>${x.n || x.t}</span></button>`).join('');
     const tk = liveTicker(X), tr = box.querySelector('#lxTick');
     if (tr.dataset.v !== tk) { tr.dataset.v = tk; tr.innerHTML = tk ? `<div>${tk}<i>◆</i></div><div aria-hidden="true">${tk}<i>◆</i></div>` : ''; tr.style.setProperty('--dur', Math.max(30, tk.length / 9) + 's'); }
     clearInterval(spT);
-    if (c.k === 'logos') { let s = 0; const all = st.querySelectorAll('.lx-lpage'), dots = st.querySelectorAll('.lx-lpd i'); if (all.length > 1) spT = setInterval(() => { all[s].classList.remove('on'); dots[s] && dots[s].classList.remove('on'); s = (s + 1) % all.length; all[s].classList.add('on'); dots[s] && dots[s].classList.add('on'); }, Math.max(4000, Math.round(dur / all.length))); }
+    if (c.k === 'logos') { let s = 0; const all = st.querySelectorAll('.lx-lpage'), dots = st.querySelectorAll('.lx-lpd i'); if (all.length > 1) spT = setInterval(() => { all[s].classList.remove('on'); dots[s] && dots[s].classList.remove('on'); s = (s + 1) % all.length; all[s].classList.add('on'); dots[s] && dots[s].classList.add('on'); }, Math.round(dur / all.length)); }
     if (c.k === 'spot') { let s = 0; const all = st.querySelectorAll('.lx-sp'), dots = st.querySelectorAll('.lx-spd i'); if (all.length > 1) spT = setInterval(() => { all[s].classList.remove('on'); dots[s].classList.remove('on'); s = (s + 1) % all.length; all[s].classList.add('on'); dots[s].classList.add('on'); }, Math.round(dur / all.length)); }
     clearTimeout(T); T = setTimeout(() => show(i + 1), dur);
   };
